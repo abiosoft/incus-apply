@@ -32,20 +32,27 @@ func IsTerminal(f *os.File) bool {
 // No-op when stdout is not a real terminal.
 func ClearLine() {
 	if IsTerminal(os.Stdout) {
-		fmt.Fprint(os.Stdout, "\033[1A\033[2K\r")
+		print("\033[1A\033[2K\r")
 	}
 }
 
 // ConfirmPrompt prompts the user for confirmation. Returns true if accepted.
 func ConfirmPrompt(prompt string) bool {
-	fmt.Printf("\n%s? [y/N]: ", prompt)
-	var response string
-	fmt.Scanln(&response)
-	response = strings.ToLower(strings.TrimSpace(response))
+	fmt.Println()
+	print(prompt + "? [y/N]: ")
+	response := strings.ToLower(strings.TrimSpace(scanln()))
 
 	fmt.Println() // Add a newline after the prompt for cleaner output.
 
 	return response == "y" || response == "yes"
+}
+
+func print(text string) { _, _ = fmt.Print(text) }
+
+func scanln() string {
+	var line string
+	_, _ = fmt.Scanln(&line)
+	return line
 }
 
 // Width returns the current terminal width for the given writer when available.

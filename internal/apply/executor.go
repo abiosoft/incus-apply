@@ -62,7 +62,9 @@ func (a *defaultExecutor) Upsert() error {
 	sorted := resource.SortForApply(resources)
 	output, preview, plans := computeUpsertDiff(&a.opts, a.client, sorted)
 
-	a.renderer.Render(output) //nolint:errcheck
+	if err := a.renderer.Render(output); err != nil {
+		return err
+	}
 
 	if a.opts.IsDiffOnly() {
 		return preview.errorResult()
@@ -109,7 +111,9 @@ func (a *defaultExecutor) Delete() error {
 	sorted := resource.SortForDelete(resources)
 	output, preview, plans := computeDeleteDiff(&a.opts, a.client, sorted)
 
-	a.renderer.Render(output) //nolint:errcheck
+	if err := a.renderer.Render(output); err != nil {
+		return err
+	}
 
 	if a.opts.IsDiffOnly() {
 		return preview.errorResult()

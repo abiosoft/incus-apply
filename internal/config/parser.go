@@ -56,7 +56,9 @@ func (p Parser) ParseURL(rawURL string) (*FileResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fetching %s: %w", rawURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("fetching %s: HTTP %d", rawURL, resp.StatusCode)

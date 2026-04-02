@@ -57,13 +57,13 @@ func (r TextRenderer) Render(output apply.Output) error {
 		return nil
 	}
 
-	fmt.Fprintln(r.Writer)
-	fmt.Fprintf(r.Writer, "Found %d %s in %d %s.\n",
+	r.println()
+	r.printf("Found %d %s in %d %s.\n",
 		output.ResourceCount, plural("resource", output.ResourceCount),
 		output.FileCount, plural("file", output.FileCount))
 
 	if len(output.Groups) > 0 {
-		fmt.Fprintln(r.Writer)
+		r.println()
 		hasActions := false
 		for _, g := range output.Groups {
 			if g.Action != apply.ActionUnchange {
@@ -72,35 +72,47 @@ func (r TextRenderer) Render(output apply.Output) error {
 			}
 		}
 		if hasActions {
-			fmt.Fprintln(r.Writer, "The following actions would be performed:")
+			r.println("The following actions would be performed:")
 		} else {
-			fmt.Fprintln(r.Writer, "No actions would be performed.")
+			r.println("No actions would be performed.")
 		}
 
 		for _, group := range output.Groups {
-			fmt.Fprintln(r.Writer)
-			fmt.Fprintf(r.Writer, "  %s (%d):\n", group.Action, len(group.Items))
+			r.println()
+			r.printf("  %s (%d):\n", group.Action, len(group.Items))
 			color := actionColors[group.Action]
 			prefix := actionPrefixes[group.Action]
 			maxWidth := terminal.Width(r.Writer, 100)
 			for _, item := range group.Items {
-				fmt.Fprintf(r.Writer, "%s    %s %s%s\n", color, prefix, item.ResourceID, colorReset)
+				r.printf("%s    %s %s%s\n", color, prefix, item.ResourceID, colorReset)
 				if len(item.Changes) > 0 {
-					fmt.Fprint(r.Writer, incus.FormatDiffChangesWithWidth(item.Changes, "      ", maxWidth))
+					r.print(incus.FormatDiffChangesWithWidth(item.Changes, "      ", maxWidth))
 				}
 				if item.Note != "" {
-					fmt.Fprintf(r.Writer, "      └─ %s\n", item.Note)
+					r.printf("      └─ %s\n", item.Note)
 				}
 			}
 		}
 	}
 
 	if output.Summary != "" {
-		fmt.Fprintln(r.Writer)
-		fmt.Fprintln(r.Writer, output.Summary)
+		r.println()
+		r.println(output.Summary)
 	}
 
 	return nil
+}
+
+func (r *TextRenderer) print(text string) {
+	_, _ = fmt.Fprint(r.Writer, text)
+}
+
+func (r *TextRenderer) printf(format string, args ...any) {
+	_, _ = fmt.Fprintf(r.Writer, format, args...)
+}
+
+func (r *TextRenderer) println(args ...any) {
+	_, _ = fmt.Fprintln(r.Writer, args...)
 }
 
 // JSONRenderer renders output as JSON.

@@ -222,18 +222,6 @@ func resolveDeclaredExpr(expr string, env map[string]string) (string, bool, erro
 	return "", false, fmt.Errorf("unsupported variable expression: ${%s}", expr)
 }
 
-func isValidVarName(name string) bool {
-	if !isVarStart(name[0]) {
-		return false
-	}
-	for i := 1; i < len(name); i++ {
-		if !isVarChar(name[i]) {
-			return false
-		}
-	}
-	return true
-}
-
 func isVarStart(c byte) bool {
 	return c == '_' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
 }
