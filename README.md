@@ -6,16 +6,14 @@ Declarative configuration management for [Incus](https://linuxcontainers.org/inc
 
 ## Installation
 
-```bash
-go install github.com/abiosoft/incus-apply/cmd/incus-apply@latest
-```
+Download a prebuilt binary from the [latest release](https://github.com/abiosoft/incus-apply/releases/latest).
 
-Or build from source:
+Or build from source (requires Go):
 
 ```bash
 git clone https://github.com/abiosoft/incus-apply
 cd incus-apply
-go build -o incus-apply ./cmd/incus-apply
+make && sudo make install
 ```
 
 ## Quick Start
