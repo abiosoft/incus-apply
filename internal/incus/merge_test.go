@@ -118,7 +118,7 @@ profiles:
 			Type: "instance",
 			Name: "test",
 		},
-		Profiles: []string{"default", "custom"},
+		InstanceFields: config.InstanceFields{Profiles: []string{"default", "custom"}},
 	}
 
 	merged, err := mergeConfigs(current, desired)
@@ -151,11 +151,13 @@ ingress:
 			Type: "network-acl",
 			Name: "test-acl",
 		},
-		Ingress: []map[string]any{
-			{"action": "allow", "source": "192.168.0.0/16"},
-		},
-		Egress: []map[string]any{
-			{"action": "drop"},
+		NetworkACLFields: config.NetworkACLFields{
+			Ingress: []map[string]any{
+				{"action": "allow", "source": "192.168.0.0/16"},
+			},
+			Egress: []map[string]any{
+				{"action": "drop"},
+			},
 		},
 	}
 
