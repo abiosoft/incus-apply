@@ -7,55 +7,27 @@ type Base struct {
 	Name        string                    `yaml:"name" json:"name"`                                   // Resource name (unique within type)
 	Project     string                    `yaml:"project,omitempty" json:"project,omitempty"`         // --project flag (can be overridden by CLI)
 	Config      map[string]string         `yaml:"config,omitempty" json:"config,omitempty"`           // Key-value config options
-	Devices     map[string]map[string]any `yaml:"devices,omitempty" json:"devices,omitempty"`         // Device configurations
+	Devices     map[string]map[string]any `yaml:"devices,omitempty" json:"devices,omitempty"`         // Device configurations. Kept here for simplicity, only instances and profiles support devices.
 	Description string                    `yaml:"description,omitempty" json:"description,omitempty"` // Resource description
 	SourceFile  string                    `yaml:"-" json:"-"`                                         // Path to source file (set during parsing)
 }
 
 // Resource represents a single resource configuration from a .incus.yaml file.
-// It embeds BaseConfig for common fields and includes type-specific fields
-// used based on the resource Type.
+// It embeds common fields plus the resource-specific field groups used
+// based on the resource Type.
 type Resource struct {
-	Base `yaml:",inline"`
+	Base                  `yaml:",inline"`
+	InstanceFields        `yaml:",inline"`
+	StoragePoolFields     `yaml:",inline"`
+	StorageResourceFields `yaml:",inline"`
+	NetworkFields         `yaml:",inline"`
+	NetworkACLFields      `yaml:",inline"`
 
 	PreviewRedactPrefixes []string `yaml:"-" json:"-"`
-
-	// --- Instance-Specific Fields ---
-
-	Image string `yaml:"image,omitempty" json:"image,omitempty"` // Image for instances (e.g., images:debian/12)
-	VM    bool   `yaml:"vm,omitempty" json:"vm,omitempty"`       // Create VM instead of container
-	Empty bool   `yaml:"empty,omitempty" json:"empty,omitempty"` // Create empty instance (no image)
-
-	// --- Instance Create Flags ---
-
-	Profiles []string `yaml:"profiles,omitempty" json:"profiles,omitempty"` // --profile flags
-	Storage  string   `yaml:"storage,omitempty" json:"storage,omitempty"`   // --storage flag
-	Network  string   `yaml:"network,omitempty" json:"network,omitempty"`   // --network flag
-	Target   string   `yaml:"target,omitempty" json:"target,omitempty"`     // --target flag (cluster member)
-
-	// --- Storage Volume/Bucket Specific ---
-
-	Pool string `yaml:"pool,omitempty" json:"pool,omitempty"` // Pool name for storage volumes/buckets
-
-	// --- Network Specific ---
-
-	NetworkType string `yaml:"networkType,omitempty" json:"networkType,omitempty"` // Network type (bridge, macvlan, etc.)
-
-	// --- Storage Pool Specific ---
-
-	Driver string `yaml:"driver,omitempty" json:"driver,omitempty"` // Storage driver (dir, zfs, btrfs, etc.)
-	Source string `yaml:"source,omitempty" json:"source,omitempty"` // Source path/device for storage pool
-
-	// --- Network ACL Specific ---
-
-	Ingress []map[string]any `yaml:"ingress,omitempty" json:"ingress,omitempty"` // Ingress firewall rules
-	Egress  []map[string]any `yaml:"egress,omitempty" json:"egress,omitempty"`   // Egress firewall rules
 }
 
-// Instance represents configuration specific to Incus instances.
-type Instance struct {
-	Base `yaml:",inline"`
-
+// InstanceFields captures the fields specific to Incus instances.
+type InstanceFields struct {
 	Image    string   `yaml:"image,omitempty" json:"image,omitempty"`
 	VM       bool     `yaml:"vm,omitempty" json:"vm,omitempty"`
 	Empty    bool     `yaml:"empty,omitempty" json:"empty,omitempty"`
@@ -65,32 +37,24 @@ type Instance struct {
 	Target   string   `yaml:"target,omitempty" json:"target,omitempty"`
 }
 
-// StoragePool represents configuration specific to storage pools.
-type StoragePool struct {
-	Base `yaml:",inline"`
-
+// StoragePoolFields captures the fields specific to storage pools.
+type StoragePoolFields struct {
 	Driver string `yaml:"driver,omitempty" json:"driver,omitempty"`
 	Source string `yaml:"source,omitempty" json:"source,omitempty"`
 }
 
-// StorageResource represents configuration for storage volumes and buckets.
-type StorageResource struct {
-	Base `yaml:",inline"`
-
+// StorageResourceFields captures the fields specific to storage volumes and buckets.
+type StorageResourceFields struct {
 	Pool string `yaml:"pool,omitempty" json:"pool,omitempty"`
 }
 
-// Network represents configuration specific to networks.
-type Network struct {
-	Base `yaml:",inline"`
-
+// NetworkFields captures the fields specific to networks.
+type NetworkFields struct {
 	NetworkType string `yaml:"networkType,omitempty" json:"networkType,omitempty"`
 }
 
-// NetworkACL represents configuration specific to network ACLs.
-type NetworkACL struct {
-	Base `yaml:",inline"`
-
+// NetworkACLFields captures the fields specific to network ACLs.
+type NetworkACLFields struct {
 	Ingress []map[string]any `yaml:"ingress,omitempty" json:"ingress,omitempty"`
 	Egress  []map[string]any `yaml:"egress,omitempty" json:"egress,omitempty"`
 }

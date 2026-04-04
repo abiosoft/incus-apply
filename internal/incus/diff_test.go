@@ -115,7 +115,7 @@ config:
 				"user.key": "value",
 			},
 		},
-		Image: "images:alpine/3.20",
+		InstanceFields: config.InstanceFields{Image: "images:alpine/3.20"},
 	}
 
 	changes, status, err := DiffResource(current, desired)

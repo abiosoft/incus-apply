@@ -134,7 +134,7 @@ func TestFormatResourceID_GlobalResourceOmitsProject(t *testing.T) {
 }
 
 func TestFormatResourceID_StorageVolumeIncludesProjectAndPool(t *testing.T) {
-	res := &config.Resource{Base: config.Base{Type: "storage-volume", Name: "data"}, Pool: "pool1"}
+	res := &config.Resource{Base: config.Base{Type: "storage-volume", Name: "data"}, StorageResourceFields: config.StorageResourceFields{Pool: "pool1"}}
 	if got := formatResourceID(res); got != "default:storage-volume/pool1/data" {
 		t.Fatalf("formatResourceID() = %q, want %q", got, "default:storage-volume/pool1/data")
 	}
