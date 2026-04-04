@@ -44,6 +44,38 @@ This page contains the full field reference for `incus-apply` resource documents
 | ------------- | ------ | ---------------------------------------------------- |
 | `networkType` | string | Network type (bridge, ovn, macvlan, sriov, physical) |
 
+## Network Forward Fields
+
+For `type: network-forward`, `listen_address` is the external address and `network` selects the parent network.
+
+| Field            | Type   | Description                                                                      |
+| ---------------- | ------ | -------------------------------------------------------------------------------- |
+| `listen_address` | string | **Required.** External listen address                                            |
+| `network`        | string | **Required.** Parent network name                                                |
+| `ports`          | list   | Optional port forwarding rules in the same shape as `incus network forward edit` |
+
+Use `config.target_address` to set the default target address for unmatched traffic.
+
+### Example
+
+```yaml
+type: network-forward
+listen_address: 198.51.100.10
+network: public
+description: Shared external IP for web services
+config:
+  target_address: 10.42.0.10
+ports:
+  - protocol: tcp
+    listen_port: "80"
+    target_address: 10.42.0.11
+    target_port: "8080"
+  - protocol: tcp
+    listen_port: "443"
+    target_address: 10.42.0.12
+    target_port: "8443"
+```
+
 ## Network ACL Fields
 
 | Field     | Type | Description            |
