@@ -139,6 +139,46 @@ config:
 	}
 }
 
+func TestDiffResource_NetworkForwardNetworkChangeRequiresRecreate(t *testing.T) {
+	current := "config:\n" +
+		"  user.incus-apply.created: \"true\"\n" +
+		"  user.incus-apply.current: |\n" +
+		"    listen_address: 198.51.100.10\n" +
+		"    network: uplink-a\n" +
+		"    config:\n" +
+		"      target_address: 10.0.0.2\n"
+	desired := &config.Resource{
+		Base: config.Base{
+			Type: "network-forward",
+			Config: map[string]string{
+				"target_address": "10.0.0.2",
+			},
+		},
+		InstanceFields:       config.InstanceFields{Network: "uplink-b"},
+		NetworkForwardFields: config.NetworkForwardFields{ListenAddress: "198.51.100.10"},
+	}
+
+	changes, status, err := DiffResource(current, desired)
+	if err != nil {
+		t.Fatalf("DiffResource() error = %v", err)
+	}
+	if !status.Managed {
+		t.Fatalf("expected managed status, got %#v", status)
+	}
+	if status.Warning != ManagementWarningRecreate {
+		t.Fatalf("warning = %q, want %q", status.Warning, ManagementWarningRecreate)
+	}
+	if len(status.UnsupportedChanges) != 1 {
+		t.Fatalf("unsupported changes = %#v, want one change", status.UnsupportedChanges)
+	}
+	if status.UnsupportedChanges[0].Path != "network" {
+		t.Fatalf("unsupported change path = %q, want network", status.UnsupportedChanges[0].Path)
+	}
+	if len(changes) == 0 {
+		t.Fatal("expected diff to contain changes")
+	}
+}
+
 func TestDiff(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -239,7 +279,19 @@ func TestDiff(t *testing.T) {
 			name:         "array change",
 			current:      "profiles:\n  - default\n",
 			desired:      "profiles:\n  - default\n  - custom\n",
-			wantContains: []string{"profiles:"},
+			wantContains: []string{"profiles[1]: \"custom\""},
+		},
+		{
+			name: "array of maps change",
+			current: "ports:\n" +
+				"  - protocol: tcp\n" +
+				"    listen_port: \"443\"\n" +
+				"    target_address: 10.0.0.2\n",
+			desired: "ports:\n" +
+				"  - protocol: tcp\n" +
+				"    listen_port: \"443\"\n" +
+				"    target_address: 10.0.0.3\n",
+			wantContains: []string{"ports[0].target_address: \"10.0.0.2\"", "→", "\"10.0.0.3\""},
 		},
 		{
 			name:           "unchanged nested structure",
@@ -625,6 +677,26 @@ func TestJoinPath(t *testing.T) {
 			got := joinPath(tt.prefix, tt.key)
 			if got != tt.want {
 				t.Errorf("joinPath(%q, %q) = %q, want %q", tt.prefix, tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJoinIndexPath(t *testing.T) {
+	tests := []struct {
+		prefix string
+		index  int
+		want   string
+	}{
+		{"profiles", 1, "profiles[1]"},
+		{"ports[0].targets", 2, "ports[0].targets[2]"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			got := joinIndexPath(tt.prefix, tt.index)
+			if got != tt.want {
+				t.Errorf("joinIndexPath(%q, %d) = %q, want %q", tt.prefix, tt.index, got, tt.want)
 			}
 		})
 	}
