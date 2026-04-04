@@ -88,6 +88,19 @@ func (c client) Create(res *config.Resource) *Result {
 		return &Result{Error: err}
 	}
 	args, stdin := c.buildCreateCommand(meta, prepared)
+	// Network forwards are created first, then updated with full YAML state.
+	if resource.Type(prepared.Type) == resource.TypeNetworkForward {
+		result := c.runQuiet(args, nil)
+		if result.Error != nil {
+			return result
+		}
+		// Reuse Update to apply config, ports, and managed-state markers.
+		updateResult := c.Update(prepared)
+		if updateResult.Error != nil {
+			return &Result{Error: fmt.Errorf("updating network forward after create: %w", updateResult.Error)}
+		}
+		return result
+	}
 	// Forward stdout for instance creation to show real-time launch progress.
 	if resource.Type(prepared.Type) == resource.TypeInstance {
 		result := c.run(args, stdin)

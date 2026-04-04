@@ -186,6 +186,51 @@ ingress:
 	}
 }
 
+func TestMergeConfigs_NetworkForwardPorts(t *testing.T) {
+	current := `
+description: old
+ports:
+  - protocol: tcp
+    listen_port: "80"
+    target_address: 10.0.0.2
+`
+	desired := &config.Resource{
+		Base: config.Base{
+			Type:        "network-forward",
+			Description: "updated",
+		},
+		InstanceFields: config.InstanceFields{Network: "uplink"},
+		NetworkForwardFields: config.NetworkForwardFields{
+			ListenAddress: "198.51.100.10",
+			Ports: []map[string]any{
+				{"protocol": "tcp", "listen_port": "443", "target_address": "10.0.0.3"},
+			},
+		},
+	}
+
+	merged, err := mergeConfigs(current, desired)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var result map[string]any
+	if err := yaml.Unmarshal(merged, &result); err != nil {
+		t.Fatalf("failed to unmarshal merged: %v", err)
+	}
+
+	if result["description"] != "updated" {
+		t.Fatalf("description = %v, want updated", result["description"])
+	}
+	ports := result["ports"].([]any)
+	if len(ports) != 1 {
+		t.Fatalf("expected 1 port rule, got %d", len(ports))
+	}
+	port := ports[0].(map[string]any)
+	if port["listen_port"] != "443" {
+		t.Fatalf("listen_port = %v, want 443", port["listen_port"])
+	}
+}
+
 func TestMergeConfigs_PreservesUnmanagedFields(t *testing.T) {
 	current := `
 architecture: x86_64

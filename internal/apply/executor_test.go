@@ -140,6 +140,13 @@ func TestFormatResourceID_StorageVolumeIncludesProjectAndPool(t *testing.T) {
 	}
 }
 
+func TestFormatResourceID_NetworkForwardIncludesProjectAndNetwork(t *testing.T) {
+	res := &config.Resource{Base: config.Base{Type: "network-forward"}, InstanceFields: config.InstanceFields{Network: "uplink"}, NetworkForwardFields: config.NetworkForwardFields{ListenAddress: "198.51.100.10"}}
+	if got := formatResourceID(res); got != "default:network-forward/uplink/198.51.100.10" {
+		t.Fatalf("formatResourceID() = %q, want %q", got, "default:network-forward/uplink/198.51.100.10")
+	}
+}
+
 func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
 	resources := []*config.Resource{
 		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "one.incus.yaml"}},

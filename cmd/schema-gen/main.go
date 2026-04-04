@@ -65,6 +65,7 @@ func collectResourceTypes() []string {
 		resource.TypeInstance,
 		resource.TypeProfile,
 		resource.TypeNetwork,
+		resource.TypeNetworkForward,
 		resource.TypeNetworkACL,
 		resource.TypeNetworkZone,
 		resource.TypeStoragePool,
@@ -80,18 +81,41 @@ func collectResourceTypes() []string {
 
 func generateResourceSchema(resourceTypes []string) Schema {
 	properties := structProperties(reflect.TypeOf(config.Resource{}))
-	properties["type"] = &Schema{
-		Type:        "string",
-		Description: "Resource type",
-		Enum:        resourceTypes,
+
+	var variants []Schema
+	for _, resourceType := range resourceTypes {
+		required := []string{"type", "name"}
+		if resourceType == string(resource.TypeNetworkForward) {
+			required = []string{"type", "listen_address", "network"}
+		}
+
+		variantProperties := cloneProperties(properties)
+		variantProperties["type"] = &Schema{
+			Type:        "string",
+			Description: "Resource type",
+			Enum:        []string{resourceType},
+		}
+
+		variants = append(variants, Schema{
+			Type:        "object",
+			Description: "An Incus resource definition.",
+			Properties:  variantProperties,
+			Required:    required,
+		})
 	}
 
 	return Schema{
-		Type:        "object",
-		Description: "An Incus resource definition.",
-		Properties:  properties,
-		Required:    []string{"type", "name"},
+		OneOf: variants,
 	}
+}
+
+func cloneProperties(properties map[string]*Schema) map[string]*Schema {
+	cloned := make(map[string]*Schema, len(properties))
+	for key, value := range properties {
+		copy := *value
+		cloned[key] = &copy
+	}
+	return cloned
 }
 
 func generateVarsSchema() Schema {
@@ -186,25 +210,27 @@ func goTypeToSchema(t reflect.Type, description string) *Schema {
 
 func fieldDescription(f reflect.StructField) string {
 	descriptions := map[string]string{
-		"Type":        "Resource type",
-		"Name":        "Resource name (unique within type)",
-		"Project":     "Incus project (can be overridden by --project flag)",
-		"Config":      "Key-value configuration options",
-		"Devices":     "Device configurations",
-		"Description": "Resource description",
-		"Image":       "Image source for instances (e.g., images:debian/12, docker:caddy)",
-		"VM":          "Create a virtual machine instead of a container",
-		"Empty":       "Create an empty instance (no image)",
-		"Profiles":    "Profiles to apply to the instance",
-		"Storage":     "Storage pool for the instance root disk",
-		"Network":     "Network to attach to the instance",
-		"Target":      "Cluster member target",
-		"Pool":        "Storage pool name (required for storage volumes/buckets)",
-		"NetworkType": "Network type (bridge, ovn, macvlan, sriov, physical)",
-		"Driver":      "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-		"Source":      "Source path or device for storage pool",
-		"Ingress":     "Ingress firewall rules",
-		"Egress":      "Egress firewall rules",
+		"Type":          "Resource type",
+		"Name":          "Resource name (unique within type)",
+		"ListenAddress": "External listen address for a network forward",
+		"Project":       "Incus project (can be overridden by --project flag)",
+		"Config":        "Key-value configuration options",
+		"Devices":       "Device configurations",
+		"Description":   "Resource description",
+		"Image":         "Image source for instances (e.g., images:debian/12, docker:caddy)",
+		"VM":            "Create a virtual machine instead of a container",
+		"Empty":         "Create an empty instance (no image)",
+		"Profiles":      "Profiles to apply to the instance",
+		"Storage":       "Storage pool for the instance root disk",
+		"Network":       "Network name (for instances or the parent network of a network forward)",
+		"Target":        "Cluster member target",
+		"Pool":          "Storage pool name (required for storage volumes/buckets)",
+		"Ports":         "Optional network forward port rules in the same shape as incus network forward edit",
+		"NetworkType":   "Network type (bridge, ovn, macvlan, sriov, physical)",
+		"Driver":        "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+		"Source":        "Source path or device for storage pool",
+		"Ingress":       "Ingress firewall rules",
+		"Egress":        "Egress firewall rules",
 	}
 	if desc, ok := descriptions[f.Name]; ok {
 		return desc

@@ -64,3 +64,34 @@ func TestParseURLTimeout(t *testing.T) {
 		t.Fatal("ParseURL() error = nil, want timeout error")
 	}
 }
+
+func TestParseNetworkForwardFields(t *testing.T) {
+	input := `type: network-forward
+listen_address: 198.51.100.10
+network: uplink
+config:
+  target_address: 10.0.0.2
+ports:
+  - protocol: tcp
+    listen_port: "443"
+    target_address: 10.0.0.3
+`
+
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v", err)
+	}
+	if len(result.Resources) != 1 {
+		t.Fatalf("resources = %d, want 1", len(result.Resources))
+	}
+	res := result.Resources[0]
+	if res.Network != "uplink" {
+		t.Fatalf("network = %q, want uplink", res.Network)
+	}
+	if res.ListenAddress != "198.51.100.10" {
+		t.Fatalf("listen_address = %q, want 198.51.100.10", res.ListenAddress)
+	}
+	if len(res.Ports) != 1 {
+		t.Fatalf("ports = %#v, want one rule", res.Ports)
+	}
+}

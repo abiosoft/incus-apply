@@ -13,12 +13,16 @@ func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *con
 	args := make([]string, len(cmdParts))
 	copy(args, cmdParts)
 
+	if meta.PrependNetwork && res.Network != "" {
+		args = append(args, res.Network)
+	}
+
 	// Storage resources require pool name before the resource name
 	if meta.PrependPool && res.Pool != "" {
 		args = append(args, res.Pool)
 	}
 
-	args = append(args, res.Name)
+	args = append(args, resourceIdentifier(res))
 
 	if force {
 		args = append(args, "--force")
@@ -47,10 +51,12 @@ func (c client) buildCreateCommand(meta resource.TypeMeta, res *config.Resource)
 		args = c.buildStoragePoolCreateArgs(args, res)
 	case resource.TypeStorageVolume, resource.TypeStorageBucket:
 		args = c.buildStorageResourceCreateArgs(args, res)
+	case resource.TypeNetworkForward:
+		args = c.buildNetworkForwardCreateArgs(args, res)
 	case resource.TypeNetwork:
 		args = c.buildNetworkCreateArgs(args, res)
 	default:
-		args = append(args, res.Name)
+		args = append(args, resourceIdentifier(res))
 	}
 
 	args = append(args, c.globalFlags...)
@@ -115,6 +121,21 @@ func (c client) buildNetworkCreateArgs(args []string, res *config.Resource) []st
 	return args
 }
 
+func (c client) buildNetworkForwardCreateArgs(args []string, res *config.Resource) []string {
+	if res.Network != "" {
+		args = append(args, res.Network)
+	}
+	args = append(args, res.ListenAddress)
+	return args
+}
+
+func resourceIdentifier(res *config.Resource) string {
+	if resource.Type(res.Type) == resource.TypeNetworkForward {
+		return res.ListenAddress
+	}
+	return res.Name
+}
+
 // --- Helper Methods ---
 
 // getTypeMeta retrieves type metadata or returns an error for unknown types.
@@ -153,6 +174,8 @@ func (c client) buildStdinConfig(meta resource.TypeMeta, res *config.Resource) [
 			stdin.Ingress = res.Ingress
 		case "egress":
 			stdin.Egress = res.Egress
+		case "ports":
+			stdin.Ports = res.Ports
 		}
 	}
 
