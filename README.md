@@ -4,6 +4,8 @@
 
 Declarative configuration management for [Incus](https://linuxcontainers.org/incus/).
 
+![incus-apply demo](./demo.gif)
+
 ## Installation
 
 Download a prebuilt binary from the [latest release](https://github.com/abiosoft/incus-apply/releases/latest).
