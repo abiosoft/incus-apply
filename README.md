@@ -8,7 +8,12 @@ Declarative configuration management for [Incus](https://linuxcontainers.org/inc
 
 ## Installation
 
-Download a prebuilt binary from the [latest release](https://github.com/abiosoft/incus-apply/releases/latest).
+Install the latest release binary:
+
+```bash
+curl -LO https://github.com/abiosoft/incus-apply/releases/latest/download/incus-apply-$(uname)-$(uname -m)
+sudo install incus-apply-$(uname)-$(uname -m) /usr/local/bin/incus-apply
+```
 
 Or build from source (requires Go):
 
