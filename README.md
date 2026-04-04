@@ -280,17 +280,6 @@ Preview output identifies resources by effective scope:
 </details>
 
 <details>
-<summary>Managed state and unmanaged resources</summary>
-
-On resources created or updated by `incus-apply`, the tool stores managed state in the resource config under `user.incus-apply.created=true` and `user.incus-apply.current=<yaml snapshot>`.
-
-For managed resources, diffs are computed from that stored snapshot instead of raw live state.
-
-If the tracking keys are missing or invalid, the resource is treated as unmanaged, a warning is shown, and diff/update falls back to live-state behavior.
-
-</details>
-
-<details>
 <summary>Recreate-required changes</summary>
 
 Some fields are create-only, such as an instance image, storage pool driver, or network type.
