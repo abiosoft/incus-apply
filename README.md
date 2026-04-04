@@ -312,3 +312,11 @@ See [docs/faq.md](./docs/faq.md) for common questions and operational notes.
 ## License
 
 Apache 2.0
+
+## Sponsoring the Project
+
+If you (or your company) are benefiting from the project and would like to support the contributors, kindly sponsor.
+
+- [Github Sponsors](https://github.com/sponsors/abiosoft)
+- [Buy me a coffee](https://www.buymeacoffee.com/abiosoft)
+
