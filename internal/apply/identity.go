@@ -11,15 +11,25 @@ import (
 // formatResourceID creates a scope-aware display identifier for a resource.
 func formatResourceID(res *config.Resource) string {
 	resourcePath := res.Type
+	if usesNetworkScope(resource.Type(res.Type)) && res.Network != "" {
+		resourcePath += "/" + res.Network
+	}
 	if usesPoolScope(resource.Type(res.Type)) && res.Pool != "" {
 		resourcePath += "/" + res.Pool
 	}
-	resourcePath += "/" + res.Name
+	resourcePath += "/" + resourceIdentifier(res)
 
 	if project := displayProject(res); project != "" {
 		return project + ":" + resourcePath
 	}
 	return resourcePath
+}
+
+func resourceIdentifier(res *config.Resource) string {
+	if resource.Type(res.Type) == resource.TypeNetworkForward {
+		return res.ListenAddress
+	}
+	return res.Name
 }
 
 func displayProject(res *config.Resource) string {
@@ -44,6 +54,15 @@ func usesProjectScope(resourceType resource.Type) bool {
 func usesPoolScope(resourceType resource.Type) bool {
 	switch resourceType {
 	case resource.TypeStorageVolume, resource.TypeStorageBucket:
+		return true
+	default:
+		return false
+	}
+}
+
+func usesNetworkScope(resourceType resource.Type) bool {
+	switch resourceType {
+	case resource.TypeNetworkForward:
 		return true
 	default:
 		return false

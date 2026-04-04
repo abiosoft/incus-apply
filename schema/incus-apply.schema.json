@@ -5,129 +5,1449 @@
   "description": "Schema for incus-apply .incus.yaml configuration files. Each YAML document in the file is either a resource definition or a vars declaration.",
   "oneOf": [
     {
-      "description": "An Incus resource definition.",
-      "type": "object",
-      "properties": {
-        "config": {
-          "description": "Key-value configuration options",
+      "oneOf": [
+        {
+          "description": "An Incus resource definition.",
           "type": "object",
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
-          }
-        },
-        "description": {
-          "description": "Resource description",
-          "type": "string"
-        },
-        "devices": {
-          "description": "Device configurations",
-          "type": "object",
-          "patternProperties": {
-            ".*": {
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
               "type": "object",
               "patternProperties": {
-                ".*": {}
+                ".*": {
+                  "type": "string"
+                }
               }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "instance"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
             }
-          }
-        },
-        "driver": {
-          "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-          "type": "string"
-        },
-        "egress": {
-          "description": "Egress firewall rules",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "patternProperties": {
-              ".*": {}
-            }
-          }
-        },
-        "empty": {
-          "description": "Create an empty instance (no image)",
-          "type": "boolean"
-        },
-        "image": {
-          "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-          "type": "string"
-        },
-        "ingress": {
-          "description": "Ingress firewall rules",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "patternProperties": {
-              ".*": {}
-            }
-          }
-        },
-        "name": {
-          "description": "Resource name (unique within type)",
-          "type": "string"
-        },
-        "network": {
-          "description": "Network to attach to the instance",
-          "type": "string"
-        },
-        "networkType": {
-          "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-          "type": "string"
-        },
-        "pool": {
-          "description": "Storage pool name (required for storage volumes/buckets)",
-          "type": "string"
-        },
-        "profiles": {
-          "description": "Profiles to apply to the instance",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "project": {
-          "description": "Incus project (can be overridden by --project flag)",
-          "type": "string"
-        },
-        "source": {
-          "description": "Source path or device for storage pool",
-          "type": "string"
-        },
-        "storage": {
-          "description": "Storage pool for the instance root disk",
-          "type": "string"
-        },
-        "target": {
-          "description": "Cluster member target",
-          "type": "string"
-        },
-        "type": {
-          "description": "Resource type",
-          "type": "string",
-          "enum": [
-            "instance",
-            "profile",
-            "network",
-            "network-acl",
-            "network-zone",
-            "storage-pool",
-            "storage-volume",
-            "storage-bucket",
-            "project",
-            "cluster-group"
+          },
+          "required": [
+            "type",
+            "name"
           ]
         },
-        "vm": {
-          "description": "Create a virtual machine instead of a container",
-          "type": "boolean"
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "profile"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "network"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "network-forward"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "listen_address",
+            "network"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "network-acl"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "network-zone"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "storage-pool"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "storage-volume"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "storage-bucket"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "project"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "description": "An Incus resource definition.",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Key-value configuration options",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": {
+              "description": "Resource description",
+              "type": "string"
+            },
+            "devices": {
+              "description": "Device configurations",
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              }
+            },
+            "driver": {
+              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+              "type": "string"
+            },
+            "egress": {
+              "description": "Egress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "empty": {
+              "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "image": {
+              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+              "type": "string"
+            },
+            "ingress": {
+              "description": "Ingress firewall rules",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "listen_address": {
+              "description": "External listen address for a network forward",
+              "type": "string"
+            },
+            "name": {
+              "description": "Resource name (unique within type)",
+              "type": "string"
+            },
+            "network": {
+              "description": "Network name (for instances or the parent network of a network forward)",
+              "type": "string"
+            },
+            "networkType": {
+              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+              "type": "string"
+            },
+            "pool": {
+              "description": "Storage pool name (required for storage volumes/buckets)",
+              "type": "string"
+            },
+            "ports": {
+              "description": "Optional network forward port rules in the same shape as incus network forward edit",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "patternProperties": {
+                  ".*": {}
+                }
+              }
+            },
+            "profiles": {
+              "description": "Profiles to apply to the instance",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "project": {
+              "description": "Incus project (can be overridden by --project flag)",
+              "type": "string"
+            },
+            "source": {
+              "description": "Source path or device for storage pool",
+              "type": "string"
+            },
+            "storage": {
+              "description": "Storage pool for the instance root disk",
+              "type": "string"
+            },
+            "target": {
+              "description": "Cluster member target",
+              "type": "string"
+            },
+            "type": {
+              "description": "Resource type",
+              "type": "string",
+              "enum": [
+                "cluster-group"
+              ]
+            },
+            "vm": {
+              "description": "Create a virtual machine instead of a container",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "name"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "name"
       ]
     },
     {

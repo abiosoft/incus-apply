@@ -69,6 +69,10 @@ func legacyMergeConfigs(currentYAML string, desired *config.Resource) ([]byte, e
 		}
 	}
 
+	if resource.Type(desired.Type) == resource.TypeNetworkForward && desired.Ports != nil {
+		merged["ports"] = desired.Ports
+	}
+
 	cleanMap(merged)
 	return yaml.Marshal(merged)
 }

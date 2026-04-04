@@ -1,0 +1,17 @@
+type: network-forward
+listen_address: 198.51.100.10
+network: public
+description: Shared external IP for web services
+config:
+  target_address: 10.42.0.10
+ports:
+  - protocol: tcp
+    listen_port: "80"
+    target_address: 10.42.0.11
+    target_port: "8080"
+    description: Web app HTTP
+  - protocol: tcp
+    listen_port: "443"
+    target_address: 10.42.0.12
+    target_port: "8443"
+    description: Web app HTTPS

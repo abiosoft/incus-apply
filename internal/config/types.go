@@ -22,6 +22,7 @@ type Resource struct {
 	StorageResourceFields `yaml:",inline"`
 	NetworkFields         `yaml:",inline"`
 	NetworkACLFields      `yaml:",inline"`
+	NetworkForwardFields  `yaml:",inline"`
 
 	PreviewRedactPrefixes []string `yaml:"-" json:"-"`
 }
@@ -59,6 +60,12 @@ type NetworkACLFields struct {
 	Egress  []map[string]any `yaml:"egress,omitempty" json:"egress,omitempty"`
 }
 
+// NetworkForwardFields captures the fields specific to network forwards.
+type NetworkForwardFields struct {
+	ListenAddress string           `yaml:"listen_address,omitempty" json:"listen_address,omitempty"`
+	Ports         []map[string]any `yaml:"ports,omitempty" json:"ports,omitempty"`
+}
+
 // Stdin represents configuration data passed to incus commands via stdin.
 // Incus edit commands accept YAML on stdin to modify resource configuration.
 type Stdin struct {
@@ -68,12 +75,19 @@ type Stdin struct {
 	Profiles    []string                  `yaml:"profiles,omitempty"`
 	Ingress     []map[string]any          `yaml:"ingress,omitempty"` // Network ACL ingress rules
 	Egress      []map[string]any          `yaml:"egress,omitempty"`  // Network ACL egress rules
+	Ports       []map[string]any          `yaml:"ports,omitempty"`   // Network forward port rules
 }
 
 // Validate checks if required fields are present in the resource configuration.
 func (r Resource) Validate() error {
 	if r.Type == "" {
 		return &ValidationError{Field: "type", Message: "type is required"}
+	}
+	if r.Type == "network-forward" {
+		if r.ListenAddress == "" {
+			return &ValidationError{Field: "listen_address", Message: "listen_address is required"}
+		}
+		return nil
 	}
 	if r.Type != "vars" && r.Name == "" {
 		return &ValidationError{Field: "name", Message: "name is required"}
