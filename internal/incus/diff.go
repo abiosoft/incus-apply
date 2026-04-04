@@ -189,6 +189,12 @@ func compareValues(path string, current, desired any) []change {
 		return findChanges(currentMap, desiredMap, path)
 	}
 
+	currentSlice, currentIsSlice := current.([]any)
+	desiredSlice, desiredIsSlice := desired.([]any)
+	if currentIsSlice && desiredIsSlice {
+		return compareSlices(path, currentSlice, desiredSlice)
+	}
+
 	// If values are equal, no change
 	if fmt.Sprintf("%v", current) == fmt.Sprintf("%v", desired) {
 		return nil
@@ -198,10 +204,38 @@ func compareValues(path string, current, desired any) []change {
 	return []change{{path: path, oldValue: current, newValue: desired}}
 }
 
+func compareSlices(path string, current, desired []any) []change {
+	var changes []change
+
+	maxLen := len(current)
+	if len(desired) > maxLen {
+		maxLen = len(desired)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		indexPath := joinIndexPath(path, i)
+
+		switch {
+		case i >= len(current):
+			changes = append(changes, change{path: indexPath, newValue: desired[i], isAdd: true})
+		case i >= len(desired):
+			changes = append(changes, change{path: indexPath, oldValue: current[i], isRemove: true})
+		default:
+			changes = append(changes, compareValues(indexPath, current[i], desired[i])...)
+		}
+	}
+
+	return changes
+}
+
 // joinPath joins path segments with a dot.
 func joinPath(prefix, key string) string {
 	if prefix == "" {
 		return key
 	}
 	return prefix + "." + key
+}
+
+func joinIndexPath(prefix string, index int) string {
+	return fmt.Sprintf("%s[%d]", prefix, index)
 }
