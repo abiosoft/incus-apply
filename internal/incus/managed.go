@@ -1,6 +1,7 @@
 package incus
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"strings"
@@ -131,7 +132,7 @@ func managedSnapshot(res *config.Resource) (string, error) {
 		state["ports"] = res.Ports
 	}
 
-	data, err := yaml.Marshal(state)
+	data, err := json.Marshal(state)
 	if err != nil {
 		return "", fmt.Errorf("encoding managed state: %w", err)
 	}

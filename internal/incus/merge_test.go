@@ -32,6 +32,16 @@ func TestDesiredForApply_AddsTrackingState(t *testing.T) {
 	if strings.Contains(snapshot, createdByKey) || strings.Contains(snapshot, currentStateKey) {
 		t.Fatalf("snapshot should not include tracking keys, got %q", snapshot)
 	}
+	if strings.Contains(snapshot, "\n") {
+		t.Fatalf("snapshot should be compact, got %q", snapshot)
+	}
+	if !strings.HasPrefix(snapshot, "{") {
+		t.Fatalf("snapshot = %q, want compact json", snapshot)
+	}
+	var parsed map[string]any
+	if err := yaml.Unmarshal([]byte(snapshot), &parsed); err != nil {
+		t.Fatalf("snapshot should remain parseable as yaml/json, got error %v", err)
+	}
 }
 
 func TestMergeConfigs_OverlaysUserConfig(t *testing.T) {
