@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: build-${{ matrix.goos }}-${{ matrix.goarch }}
+    name: build-${{ matrix.asset_os }}-${{ matrix.asset_arch }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -18,12 +18,20 @@ jobs:
         include:
           - goos: linux
             goarch: amd64
+            asset_os: Linux
+            asset_arch: x86_64
           - goos: linux
             goarch: arm64
+            asset_os: Linux
+            asset_arch: aarch64
           - goos: darwin
             goarch: amd64
+            asset_os: Darwin
+            asset_arch: x86_64
           - goos: darwin
             goarch: arm64
+            asset_os: Darwin
+            asset_arch: arm64
 
     steps:
       - name: Check out repository
@@ -39,13 +47,15 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          ASSET_OS: ${{ matrix.asset_os }}
+          ASSET_ARCH: ${{ matrix.asset_arch }}
           CGO_ENABLED: 0
           VERSION: ${{ github.ref_name }}
           COMMIT: ${{ github.sha }}
         run: |
           set -eu
           mkdir -p dist
-          binary="incus-apply-${GOOS}-${GOARCH}"
+          binary="incus-apply-${ASSET_OS}-${ASSET_ARCH}"
           date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           go build \
             -trimpath \
@@ -57,10 +67,10 @@ jobs:
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: release-${{ matrix.asset_os }}-${{ matrix.asset_arch }}
           path: |
-            dist/incus-apply-${{ matrix.goos }}-${{ matrix.goarch }}
-            dist/incus-apply-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+            dist/incus-apply-${{ matrix.asset_os }}-${{ matrix.asset_arch }}
+            dist/incus-apply-${{ matrix.asset_os }}-${{ matrix.asset_arch }}.sha256
           if-no-files-found: error
 
   release:
@@ -81,11 +91,11 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/incus-apply-linux-amd64
-            dist/incus-apply-linux-amd64.sha256
-            dist/incus-apply-linux-arm64
-            dist/incus-apply-linux-arm64.sha256
-            dist/incus-apply-darwin-amd64
-            dist/incus-apply-darwin-amd64.sha256
-            dist/incus-apply-darwin-arm64
-            dist/incus-apply-darwin-arm64.sha256
+            dist/incus-apply-Linux-x86_64
+            dist/incus-apply-Linux-x86_64.sha256
+            dist/incus-apply-Linux-aarch64
+            dist/incus-apply-Linux-aarch64.sha256
+            dist/incus-apply-Darwin-x86_64
+            dist/incus-apply-Darwin-x86_64.sha256
+            dist/incus-apply-Darwin-arm64
+            dist/incus-apply-Darwin-arm64.sha256
