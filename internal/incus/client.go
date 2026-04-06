@@ -246,7 +246,7 @@ func (c client) WaitInstanceAgent(res *config.Resource) *Result {
 	}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
-	return c.runQuiet(args, nil)
+	return c.runWithProgress(args, nil, waitForAgentProgressLabel())
 }
 
 func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result {
