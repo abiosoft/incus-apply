@@ -64,8 +64,9 @@ const (
 type SetupAction struct {
 	Action    SetupActionType `yaml:"action" json:"action"`
 	When      SetupWhen       `yaml:"when" json:"when"`
+	Required  *bool           `yaml:"required,omitempty" json:"required,omitempty"`
 	Skip      bool            `yaml:"skip,omitempty" json:"skip,omitempty"`
-	Command   string          `yaml:"command,omitempty" json:"command,omitempty"`
+	Script    string          `yaml:"script,omitempty" json:"script,omitempty"`
 	CWD       string          `yaml:"cwd,omitempty" json:"cwd,omitempty"`
 	Path      string          `yaml:"path,omitempty" json:"path,omitempty"`
 	Content   string          `yaml:"content,omitempty" json:"content,omitempty"`
@@ -74,6 +75,11 @@ type SetupAction struct {
 	UID       *int            `yaml:"uid,omitempty" json:"uid,omitempty"`
 	GID       *int            `yaml:"gid,omitempty" json:"gid,omitempty"`
 	Mode      string          `yaml:"mode,omitempty" json:"mode,omitempty"`
+}
+
+// IsRequired reports whether setup failure should stop apply.
+func (a SetupAction) IsRequired() bool {
+	return a.Required == nil || *a.Required
 }
 
 // StoragePoolFields captures the fields specific to storage pools.
@@ -154,8 +160,8 @@ func (a SetupAction) Validate(index int) error {
 
 	switch a.Action {
 	case SetupActionExec:
-		if a.Command == "" {
-			return &ValidationError{Field: field("command"), Message: "command is required for exec actions"}
+		if a.Script == "" {
+			return &ValidationError{Field: field("script"), Message: "script is required for exec actions"}
 		}
 	case SetupActionPushFile:
 		if a.Path == "" {

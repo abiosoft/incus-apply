@@ -43,7 +43,7 @@ func TestRunSetupActionExecUsesShellAndNonInteractive(t *testing.T) {
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 
 	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
-	action := config.SetupAction{Action: config.SetupActionExec, When: config.SetupWhenAlways, CWD: "/srv/app", Command: "echo hello"}
+	action := config.SetupAction{Action: config.SetupActionExec, When: config.SetupWhenAlways, CWD: "/srv/app", Script: "echo hello"}
 	result := client{}.RunSetupAction(res, action, 1, 1)
 	if result.Error != nil {
 		t.Fatalf("RunSetupAction() error = %v", result.Error)
@@ -113,5 +113,24 @@ func TestProgressWriterShowsLastLineAndClears(t *testing.T) {
 func TestSetupProgressLabelIncludesPosition(t *testing.T) {
 	if got := setupProgressLabel(1, 3); got != "  └─ running setup 1 of 3... " {
 		t.Fatalf("setupProgressLabel() = %q, want %q", got, "  └─ running setup 1 of 3... ")
+	}
+}
+
+func TestWaitInstanceAgentUsesTimeoutAndProject(t *testing.T) {
+	dir := t.TempDir()
+	scriptPath := filepath.Join(dir, "incus")
+	script := "#!/bin/sh\nexit 0\n"
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "vm1", Project: "prod"}, InstanceFields: config.InstanceFields{VM: true}}
+	result := client{timeout: 6 * time.Second}.WaitInstanceAgent(res)
+	if result.Error != nil {
+		t.Fatalf("WaitInstanceAgent() error = %v", result.Error)
+	}
+	if !strings.Contains(result.Command, "wait vm1 agent --interval 1 --timeout 6 --project prod") {
+		t.Fatalf("command = %q, want wait agent command with timeout and project", result.Command)
 	}
 }

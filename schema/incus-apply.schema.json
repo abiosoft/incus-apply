@@ -118,10 +118,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -145,6 +141,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -306,10 +310,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -333,6 +333,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -494,10 +502,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -521,6 +525,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -682,10 +694,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -709,6 +717,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -871,10 +887,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -898,6 +910,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1059,10 +1079,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -1086,6 +1102,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1247,10 +1271,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -1274,6 +1294,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1435,10 +1463,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -1462,6 +1486,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1623,10 +1655,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -1650,6 +1678,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1811,10 +1847,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -1838,6 +1870,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",
@@ -1999,10 +2039,6 @@
                     "description": "Setup action type",
                     "type": "string"
                   },
-                  "command": {
-                    "description": "Shell command to execute inside the instance",
-                    "type": "string"
-                  },
                   "content": {
                     "description": "Inline file content to push into the instance",
                     "type": "string"
@@ -2026,6 +2062,14 @@
                   "recursive": {
                     "description": "Pass --recursive to incus file push for a file_push setup action",
                     "type": "boolean"
+                  },
+                  "required": {
+                    "description": "If false, setup failures are reported and apply continues with later setup actions",
+                    "type": "boolean"
+                  },
+                  "script": {
+                    "description": "Shell script to execute inside the instance",
+                    "type": "string"
                   },
                   "skip": {
                     "description": "If true, the setup action is skipped",

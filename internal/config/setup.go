@@ -41,13 +41,16 @@ func SetupActionSnapshot(action SetupAction, sourceFile string) (map[string]any,
 		"action": action.Action,
 		"when":   action.When,
 	}
+	if !action.IsRequired() {
+		state["required"] = false
+	}
 	if action.Skip {
 		state["skip"] = true
 	}
 
 	switch action.Action {
 	case SetupActionExec:
-		state["command"] = setupHashValue(action.Command)
+		state["script"] = setupHashValue(action.Script)
 		if action.CWD != "" {
 			state["cwd"] = action.CWD
 		}

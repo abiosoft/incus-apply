@@ -2,6 +2,7 @@ package incus
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -37,6 +38,8 @@ type Client interface {
 	Stop(res *config.Resource) *Result
 	// Running checks if an instance is currently running.
 	Running(res *config.Resource) bool
+	// WaitInstanceAgent waits for a VM instance agent to become available.
+	WaitInstanceAgent(res *config.Resource) *Result
 
 	// RunSetupAction executes an instance setup action.
 	RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result
@@ -236,6 +239,16 @@ func (c client) Running(res *config.Resource) bool {
 	return strings.ToLower(strings.TrimSpace(result.Stdout)) == "running"
 }
 
+func (c client) WaitInstanceAgent(res *config.Resource) *Result {
+	args := []string{"wait", res.Name, "agent", "--interval", "1"}
+	if c.timeout > 0 {
+		args = append(args, "--timeout", strconv.Itoa(int(math.Ceil(c.timeout.Seconds()))))
+	}
+	args = append(args, c.globalFlags...)
+	args = c.appendProjectFlag(args, res.Project)
+	return c.runQuiet(args, nil)
+}
+
 func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result {
 	progressLabel := setupProgressLabel(current, total)
 	switch action.Action {
@@ -246,7 +259,7 @@ func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, 
 		}
 		args = append(args, c.globalFlags...)
 		args = c.appendProjectFlag(args, res.Project)
-		args = append(args, "--", "sh", "-c", action.Command)
+		args = append(args, "--", "sh", "-c", action.Script)
 		return c.runWithProgress(args, nil, progressLabel)
 	case config.SetupActionPushFile:
 		return c.pushSetupFile(res, action, progressLabel)

@@ -33,7 +33,7 @@ devices:
 setup:
   - action: exec
     when: create
-    command: |
+    script: |
       set -e
       export DEBIAN_FRONTEND=noninteractive
 
@@ -100,6 +100,6 @@ setup:
   # Reload Caddy after its config has been written.
   - action: exec
     when: update
-    command: systemctl restart caddy
+    script: systemctl restart caddy
 
 description: WordPress with Caddy and MySQL on a single Ubuntu container
