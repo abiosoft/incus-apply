@@ -1,6 +1,10 @@
 // Package config handles parsing and validation of incus-apply configuration files.
 package config
 
+import (
+	"fmt"
+)
+
 // Base contains fields common to all Incus resource types.
 type Base struct {
 	Type        string                    `yaml:"type" json:"type"`                                   // Resource type: instance, profile, network, etc.
@@ -29,13 +33,47 @@ type Resource struct {
 
 // InstanceFields captures the fields specific to Incus instances.
 type InstanceFields struct {
-	Image    string   `yaml:"image,omitempty" json:"image,omitempty"`
-	VM       bool     `yaml:"vm,omitempty" json:"vm,omitempty"`
-	Empty    bool     `yaml:"empty,omitempty" json:"empty,omitempty"`
-	Profiles []string `yaml:"profiles,omitempty" json:"profiles,omitempty"`
-	Storage  string   `yaml:"storage,omitempty" json:"storage,omitempty"`
-	Network  string   `yaml:"network,omitempty" json:"network,omitempty"`
-	Target   string   `yaml:"target,omitempty" json:"target,omitempty"`
+	Image    string        `yaml:"image,omitempty" json:"image,omitempty"`
+	VM       bool          `yaml:"vm,omitempty" json:"vm,omitempty"`
+	Empty    bool          `yaml:"empty,omitempty" json:"empty,omitempty"`
+	Profiles []string      `yaml:"profiles,omitempty" json:"profiles,omitempty"`
+	Storage  string        `yaml:"storage,omitempty" json:"storage,omitempty"`
+	Network  string        `yaml:"network,omitempty" json:"network,omitempty"`
+	Target   string        `yaml:"target,omitempty" json:"target,omitempty"`
+	Setup    []SetupAction `yaml:"setup,omitempty" json:"setup,omitempty"`
+}
+
+// SetupActionType identifies the supported setup action kinds.
+type SetupActionType string
+
+const (
+	SetupActionExec     SetupActionType = "exec"
+	SetupActionPushFile SetupActionType = "file_push"
+)
+
+// SetupWhen controls when a setup action runs during apply.
+type SetupWhen string
+
+const (
+	SetupWhenCreate SetupWhen = "create"
+	SetupWhenUpdate SetupWhen = "update"
+	SetupWhenAlways SetupWhen = "always"
+)
+
+// SetupAction defines an imperative action to run against an instance.
+type SetupAction struct {
+	Action    SetupActionType `yaml:"action" json:"action"`
+	When      SetupWhen       `yaml:"when" json:"when"`
+	Skip      bool            `yaml:"skip,omitempty" json:"skip,omitempty"`
+	Command   string          `yaml:"command,omitempty" json:"command,omitempty"`
+	CWD       string          `yaml:"cwd,omitempty" json:"cwd,omitempty"`
+	Path      string          `yaml:"path,omitempty" json:"path,omitempty"`
+	Content   string          `yaml:"content,omitempty" json:"content,omitempty"`
+	Source    string          `yaml:"source,omitempty" json:"source,omitempty"`
+	Recursive bool            `yaml:"recursive,omitempty" json:"recursive,omitempty"`
+	UID       *int            `yaml:"uid,omitempty" json:"uid,omitempty"`
+	GID       *int            `yaml:"gid,omitempty" json:"gid,omitempty"`
+	Mode      string          `yaml:"mode,omitempty" json:"mode,omitempty"`
 }
 
 // StoragePoolFields captures the fields specific to storage pools.
@@ -83,15 +121,59 @@ func (r Resource) Validate() error {
 	if r.Type == "" {
 		return &ValidationError{Field: "type", Message: "type is required"}
 	}
+	if len(r.Setup) > 0 && r.Type != "instance" {
+		return &ValidationError{Field: "setup", Message: "setup is only supported for instances"}
+	}
 	if r.Type == "network-forward" {
 		if r.ListenAddress == "" {
 			return &ValidationError{Field: "listen_address", Message: "listen_address is required"}
 		}
-		return nil
-	}
-	if r.Type != "vars" && r.Name == "" {
+	} else if r.Type != "vars" && r.Name == "" {
 		return &ValidationError{Field: "name", Message: "name is required"}
 	}
+	for i, action := range r.Setup {
+		if err := action.Validate(i); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a SetupAction) Validate(index int) error {
+	field := func(name string) string {
+		return fmt.Sprintf("setup[%d].%s", index, name)
+	}
+
+	switch a.When {
+	case SetupWhenCreate, SetupWhenUpdate, SetupWhenAlways:
+	case "":
+		return &ValidationError{Field: field("when"), Message: "when is required"}
+	default:
+		return &ValidationError{Field: field("when"), Message: "when must be one of create, update, always"}
+	}
+
+	switch a.Action {
+	case SetupActionExec:
+		if a.Command == "" {
+			return &ValidationError{Field: field("command"), Message: "command is required for exec actions"}
+		}
+	case SetupActionPushFile:
+		if a.Path == "" {
+			return &ValidationError{Field: field("path"), Message: "path is required for file_push actions"}
+		}
+		if a.Path[0] != '/' {
+			return &ValidationError{Field: field("path"), Message: "path must be absolute"}
+		}
+		if (a.Content == "" && a.Source == "") || (a.Content != "" && a.Source != "") {
+			return &ValidationError{Field: field("content"), Message: "exactly one of content or source must be set for file_push actions"}
+		}
+		if a.Recursive && a.Source == "" {
+			return &ValidationError{Field: field("recursive"), Message: "recursive is only supported when source is set"}
+		}
+	default:
+		return &ValidationError{Field: field("action"), Message: "action must be one of exec, file_push"}
+	}
+
 	return nil
 }
 

@@ -2,12 +2,12 @@ package incus
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/abiosoft/incus-apply/internal/config"
 	"github.com/abiosoft/incus-apply/internal/resource"
-	"github.com/abiosoft/incus-apply/internal/terminal"
 )
 
 const DefaultCommandTimeout = 5 * time.Minute
@@ -37,6 +37,9 @@ type Client interface {
 	Stop(res *config.Resource) *Result
 	// Running checks if an instance is currently running.
 	Running(res *config.Resource) bool
+
+	// RunSetupAction executes an instance setup action.
+	RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result
 }
 
 type client struct {
@@ -101,14 +104,8 @@ func (c client) Create(res *config.Resource) *Result {
 		}
 		return result
 	}
-	// Forward stdout for instance creation to show real-time launch progress.
 	if resource.Type(prepared.Type) == resource.TypeInstance {
-		result := c.run(args, stdin)
-		// Erase the "Creating <name>" status line Incus leaves on the terminal.
-		if strings.Contains(result.Stdout, "Creating "+prepared.Name) {
-			terminal.ClearLine()
-		}
-		return result
+		return c.run(args, stdin)
 	}
 	return c.runQuiet(args, stdin)
 }
@@ -237,4 +234,60 @@ func (c client) Running(res *config.Resource) bool {
 		return false
 	}
 	return strings.ToLower(strings.TrimSpace(result.Stdout)) == "running"
+}
+
+func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result {
+	progressLabel := setupProgressLabel(current, total)
+	switch action.Action {
+	case config.SetupActionExec:
+		args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
+		if action.CWD != "" {
+			args = append(args, "--cwd", action.CWD)
+		}
+		args = append(args, c.globalFlags...)
+		args = c.appendProjectFlag(args, res.Project)
+		args = append(args, "--", "sh", "-c", action.Command)
+		return c.runWithProgress(args, nil, progressLabel)
+	case config.SetupActionPushFile:
+		return c.pushSetupFile(res, action, progressLabel)
+	default:
+		return &Result{Error: fmt.Errorf("unsupported setup action: %s", action.Action)}
+	}
+}
+
+func (c client) pushSetupFile(res *config.Resource, action config.SetupAction, progressLabel string) *Result {
+	args := []string{"file", "push"}
+	args = append(args, c.globalFlags...)
+	args = c.appendProjectFlag(args, res.Project)
+	args = append(args, "--create-dirs")
+	if action.UID != nil {
+		args = append(args, "--uid", strconv.Itoa(*action.UID))
+	}
+	if action.GID != nil {
+		args = append(args, "--gid", strconv.Itoa(*action.GID))
+	}
+	if action.Mode != "" {
+		args = append(args, "--mode", string(action.Mode))
+	}
+
+	var stdin []byte
+	if action.Content != "" {
+		args = append(args, "-")
+		stdin = []byte(action.Content)
+	} else {
+		if err := config.ValidateSetupSource(action, res.SourceFile); err != nil {
+			return &Result{Error: err}
+		}
+		resolved, err := config.ResolveSetupSourcePath(action.Source, res.SourceFile)
+		if err != nil {
+			return &Result{Error: err}
+		}
+		if action.Recursive {
+			args = append(args, "--recursive")
+		}
+		args = append(args, resolved)
+	}
+
+	args = append(args, res.Name+action.Path)
+	return c.runWithProgress(args, stdin, progressLabel)
 }

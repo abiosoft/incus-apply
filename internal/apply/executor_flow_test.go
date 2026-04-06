@@ -27,6 +27,7 @@ type fakeClient struct {
 	startCalls  []string
 	stopCalls   []string
 	updateCalls []string
+	setupCalls  []string
 }
 
 func newFakeClient() *fakeClient {
@@ -96,6 +97,12 @@ func (c *fakeClient) Running(res *config.Resource) bool {
 	return c.running[formatResourceID(res)]
 }
 
+func (c *fakeClient) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *incus.Result {
+	key := formatResourceID(res)
+	c.setupCalls = append(c.setupCalls, key+":"+string(action.Action)+":"+string(action.When))
+	return &incus.Result{}
+}
+
 type captureRenderer struct {
 	outputs []Output
 }
@@ -139,6 +146,69 @@ func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 	}
 	if got := renderer.outputs[0].Groups[0].Items[0].Note; got != "launch" {
 		t.Fatalf("note = %q, want %q", got, "launch")
+	}
+}
+
+func TestExecutorUpsertCreateRunsSetupActions(t *testing.T) {
+	dir := t.TempDir()
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    command: echo create\n  - action: file_push\n    when: update\n    path: /etc/app.conf\n    content: hi\n  - action: exec\n    when: always\n    command: echo always\n  - action: exec\n    when: always\n    skip: true\n    command: echo skip\n")
+
+	client := newFakeClient()
+	renderer := &captureRenderer{}
+	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
+
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
+	}
+	if len(client.createCalls) != 1 || client.createCalls[0] != "default:instance/web" {
+		t.Fatalf("create calls = %v, want [default:instance/web]", client.createCalls)
+	}
+	if len(client.startCalls) != 1 || client.startCalls[0] != "default:instance/web" {
+		t.Fatalf("start calls = %v, want [default:instance/web]", client.startCalls)
+	}
+	if len(client.stopCalls) != 1 || client.stopCalls[0] != "default:instance/web" {
+		t.Fatalf("stop calls = %v, want [default:instance/web]", client.stopCalls)
+	}
+	wantSetup := []string{
+		"default:instance/web:exec:create",
+		"default:instance/web:file_push:update",
+		"default:instance/web:exec:always",
+	}
+	if strings.Join(client.setupCalls, ",") != strings.Join(wantSetup, ",") {
+		t.Fatalf("setup calls = %v, want %v", client.setupCalls, wantSetup)
+	}
+	if got := renderer.outputs[0].Groups[0].Items[0].Note; got != "setup" {
+		t.Fatalf("note = %q, want %q", got, "setup")
+	}
+	if len(client.startCalls) != 1 {
+		t.Fatalf("unexpected launch start calls = %v", client.startCalls)
+	}
+}
+
+func TestExecutorUpsertAlwaysSetupRunsWithoutConfigUpdate(t *testing.T) {
+	dir := t.TempDir()
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: always\n    command: echo always\n")
+
+	client := newFakeClient()
+	client.exists["default:instance/web"] = true
+	client.current["default:instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: '{\"image\":\"images:alpine/3.19\",\"setup\":[{\"action\":\"exec\",\"when\":\"always\",\"command\":\"hash: 9e4ad387b7ad3a5d1a10fb6211\"}]}'\n"
+	renderer := &captureRenderer{}
+	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
+
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
+	}
+	if len(client.updateCalls) != 0 {
+		t.Fatalf("update calls = %v, want none", client.updateCalls)
+	}
+	if len(client.startCalls) != 1 || len(client.stopCalls) != 1 {
+		t.Fatalf("start/stop calls = %v/%v, want one temporary cycle", client.startCalls, client.stopCalls)
+	}
+	if len(client.setupCalls) != 1 || client.setupCalls[0] != "default:instance/web:exec:always" {
+		t.Fatalf("setup calls = %v, want one always exec", client.setupCalls)
+	}
+	if got := renderer.outputs[0].Summary; got != "Summary: 1 to update." {
+		t.Fatalf("summary = %q, want %q", got, "Summary: 1 to update.")
 	}
 }
 

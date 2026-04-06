@@ -85,6 +85,41 @@ func TestTextRenderer_Render(t *testing.T) {
 	}
 }
 
+func TestTextRenderer_RenderNoteAfterChangesUsesTreeBranch(t *testing.T) {
+	var buf bytes.Buffer
+	r := &TextRenderer{Writer: &buf}
+
+	output := apply.Output{
+		FileCount:     1,
+		ResourceCount: 1,
+		Groups: []apply.OutputGroup{{
+			Action: apply.ActionReplace,
+			Items: []apply.OutputItem{{
+				ResourceID: "default:instance/wordpress",
+				Changes: []incus.DiffChange{{
+					Path:   "setup",
+					Old:    []any{map[string]any{"action": "exec"}},
+					New:    []any{map[string]any{"action": "exec"}, map[string]any{"action": "file_push"}},
+					Action: "modify",
+				}},
+				Note: "setup, recreate required",
+			}},
+		}},
+	}
+
+	if err := r.Render(output); err != nil {
+		t.Fatal(err)
+	}
+
+	result := buf.String()
+	if !strings.Contains(result, "      ├─ setup:") {
+		t.Fatalf("expected change line to use branch connector when note follows, got %q", result)
+	}
+	if !strings.Contains(result, "      └─ setup, recreate required") {
+		t.Fatalf("expected note line to use last connector, got %q", result)
+	}
+}
+
 func TestTextRenderer_Quiet(t *testing.T) {
 	var buf bytes.Buffer
 	r := &TextRenderer{Writer: &buf, Quiet: true}

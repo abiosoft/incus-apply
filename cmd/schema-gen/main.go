@@ -180,6 +180,10 @@ func structProperties(t reflect.Type) map[string]*Schema {
 }
 
 func goTypeToSchema(t reflect.Type, description string) *Schema {
+	if t.Kind() == reflect.Pointer {
+		return goTypeToSchema(t.Elem(), description)
+	}
+
 	switch t.Kind() {
 	case reflect.String:
 		return &Schema{Type: "string", Description: description}
@@ -201,6 +205,8 @@ func goTypeToSchema(t reflect.Type, description string) *Schema {
 			}
 		}
 		return s
+	case reflect.Struct:
+		return &Schema{Type: "object", Description: description, Properties: structProperties(t)}
 	case reflect.Interface:
 		return &Schema{Description: description}
 	default:
@@ -218,6 +224,17 @@ func fieldDescription(f reflect.StructField) string {
 		"Devices":       "Device configurations",
 		"Description":   "Resource description",
 		"Image":         "Image source for instances (e.g., images:debian/12, docker:caddy)",
+		"Setup":         "Setup actions to run against an instance after create, update, or on every apply",
+		"Action":        "Setup action type",
+		"When":          "When to run the setup action: create, update, or always",
+		"Skip":          "If true, the setup action is skipped",
+		"Command":       "Shell command to execute inside the instance",
+		"CWD":           "Working directory to use for an exec setup action",
+		"Path":          "Absolute destination path inside the instance for a file_push action",
+		"Content":       "Inline file content to push into the instance",
+		"UID":           "File owner uid to set when pushing a file",
+		"GID":           "File owner gid to set when pushing a file",
+		"Mode":          "File mode to set when pushing a file",
 		"VM":            "Create a virtual machine instead of a container",
 		"Empty":         "Create an empty instance (no image)",
 		"Profiles":      "Profiles to apply to the instance",
@@ -228,7 +245,8 @@ func fieldDescription(f reflect.StructField) string {
 		"Ports":         "Optional network forward port rules in the same shape as incus network forward edit",
 		"NetworkType":   "Network type (bridge, ovn, macvlan, sriov, physical)",
 		"Driver":        "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-		"Source":        "Source path or device for storage pool",
+		"Source":        "Source path or device for a storage pool, or a local file path for file_push setup actions",
+		"Recursive":     "Pass --recursive to incus file push for a file_push setup action",
 		"Ingress":       "Ingress firewall rules",
 		"Egress":        "Egress firewall rules",
 	}

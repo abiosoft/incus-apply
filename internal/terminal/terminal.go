@@ -36,6 +36,28 @@ func ClearLine() {
 	}
 }
 
+// ClearCurrentLine erases the active line without moving the cursor vertically.
+// No-op when stdout is not a real terminal.
+func ClearCurrentLine() {
+	if IsTerminal(os.Stdout) {
+		print("\r\033[2K")
+	}
+}
+
+// RewriteLine replaces the current line with text.
+// No-op when stdout is not a real terminal.
+func RewriteLine(text string) {
+	if !IsTerminal(os.Stdout) {
+		return
+	}
+
+	width := Width(os.Stdout, 0)
+	if width > 4 && len(text) > width-1 {
+		text = text[:width-4] + "..."
+	}
+	print("\r\033[2K" + text)
+}
+
 // ConfirmPrompt prompts the user for confirmation. Returns true if accepted.
 func ConfirmPrompt(prompt string) bool {
 	fmt.Println()

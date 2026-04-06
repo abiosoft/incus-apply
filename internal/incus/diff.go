@@ -86,7 +86,7 @@ func DiffWithIndent(current, desired, indent string) (string, error) {
 		return "", nil
 	}
 
-	return formatChanges(changes, indent, defaultMaxInlineDiffWidth), nil
+	return formatChanges(changes, indent, defaultMaxInlineDiffWidth, false), nil
 }
 
 // HasChanges checks if there are any differences between current and desired config.
