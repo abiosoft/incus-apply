@@ -77,26 +77,26 @@ func TestSetupActionSnapshotHashesInlineContent(t *testing.T) {
 	}
 }
 
-func TestSetupActionSnapshotHashesExecCommand(t *testing.T) {
+func TestSetupActionSnapshotHashesExecScript(t *testing.T) {
 	action := SetupAction{
-		Action:  SetupActionExec,
-		When:    SetupWhenAlways,
-		Command: "echo hello world",
+		Action: SetupActionExec,
+		When:   SetupWhenAlways,
+		Script: "echo hello world",
 	}
 
 	snapshot, err := SetupActionSnapshot(action, "")
 	if err != nil {
 		t.Fatalf("SetupActionSnapshot() error = %v", err)
 	}
-	if _, ok := snapshot["command"]; ok {
-		if snapshot["command"] == "echo hello world" {
-			t.Fatalf("snapshot = %#v, want raw command omitted", snapshot)
+	if _, ok := snapshot["script"]; ok {
+		if snapshot["script"] == "echo hello world" {
+			t.Fatalf("snapshot = %#v, want raw script omitted", snapshot)
 		}
 	}
 	sum := sha256.Sum256([]byte("echo hello world"))
 	want := setupHashPrefix + hex.EncodeToString(sum[:])[:setupHashLength-2] + "16"
-	if snapshot["command"] != want {
-		t.Fatalf("command = %v, want %q", snapshot["command"], want)
+	if snapshot["script"] != want {
+		t.Fatalf("script = %v, want %q", snapshot["script"], want)
 	}
 }
 
@@ -106,5 +106,18 @@ func TestSetupHashValueEmbedsOriginalLength(t *testing.T) {
 	want := setupHashPrefix + hex.EncodeToString(hash[:])[:setupHashLength-3] + "103"
 	if got := setupHashValue(value); got != want {
 		t.Fatalf("setupHashValue() = %q, want %q", got, want)
+	}
+}
+
+func TestSetupActionSnapshotIncludesRequiredWhenFalse(t *testing.T) {
+	required := false
+	action := SetupAction{Action: SetupActionExec, When: SetupWhenAlways, Required: &required, Script: "echo hi"}
+
+	snapshot, err := SetupActionSnapshot(action, "")
+	if err != nil {
+		t.Fatalf("SetupActionSnapshot() error = %v", err)
+	}
+	if snapshot["required"] != false {
+		t.Fatalf("required = %v, want false", snapshot["required"])
 	}
 }

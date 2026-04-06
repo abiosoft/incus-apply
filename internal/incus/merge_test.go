@@ -99,15 +99,15 @@ func TestDesiredForApply_HashesInlineSetupContent(t *testing.T) {
 	}
 }
 
-func TestDesiredForApply_HashesSetupCommand(t *testing.T) {
+func TestDesiredForApply_HashesSetupScript(t *testing.T) {
 	res := &config.Resource{
 		Base: config.Base{Type: "instance", Name: "test"},
 		InstanceFields: config.InstanceFields{
 			Image: "images:alpine/3.19",
 			Setup: []config.SetupAction{{
-				Action:  config.SetupActionExec,
-				When:    config.SetupWhenAlways,
-				Command: "echo hello world",
+				Action: config.SetupActionExec,
+				When:   config.SetupWhenAlways,
+				Script: "echo hello world",
 			}},
 		},
 	}
@@ -117,23 +117,47 @@ func TestDesiredForApply_HashesSetupCommand(t *testing.T) {
 		t.Fatalf("desiredForApply() error = %v", err)
 	}
 	if strings.Contains(snapshot, "echo hello world") {
-		t.Fatalf("snapshot = %q, want raw command omitted", snapshot)
+		t.Fatalf("snapshot = %q, want raw script omitted", snapshot)
 	}
-	if !strings.Contains(snapshot, "\"command\":\"hash: 5e9f1ed0cbd05609e29817be16\"") {
-		t.Fatalf("snapshot = %q, want command hash recorded", snapshot)
+	if !strings.Contains(snapshot, "\"script\":\"hash: 5e9f1ed0cbd05609e29817be16\"") {
+		t.Fatalf("snapshot = %q, want script hash recorded", snapshot)
+	}
+}
+
+func TestDesiredForApply_PreservesOptionalSetupState(t *testing.T) {
+	required := false
+	res := &config.Resource{
+		Base: config.Base{Type: "instance", Name: "test"},
+		InstanceFields: config.InstanceFields{
+			Image: "images:alpine/3.19",
+			Setup: []config.SetupAction{{
+				Action:   config.SetupActionExec,
+				When:     config.SetupWhenAlways,
+				Required: &required,
+				Script:   "echo hello world",
+			}},
+		},
+	}
+
+	_, snapshot, err := desiredForApply(res)
+	if err != nil {
+		t.Fatalf("desiredForApply() error = %v", err)
+	}
+	if !strings.Contains(snapshot, "\"required\":false") {
+		t.Fatalf("snapshot = %q, want optional setup state preserved", snapshot)
 	}
 }
 
 func TestDiffResource_CreateSetupChangeRequiresRecreate(t *testing.T) {
-	current := "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: '{\"image\":\"images:alpine/3.19\",\"setup\":[{\"action\":\"exec\",\"when\":\"create\",\"command\":\"hash: 819b561be4b01d042acf9c1528\"}]}'\n"
+	current := "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: '{\"image\":\"images:alpine/3.19\",\"setup\":[{\"action\":\"exec\",\"when\":\"create\",\"script\":\"hash: 819b561be4b01d042acf9c1528\"}]}'\n"
 	desired := &config.Resource{
 		Base: config.Base{Type: "instance", Name: "web"},
 		InstanceFields: config.InstanceFields{
 			Image: "images:alpine/3.19",
 			Setup: []config.SetupAction{{
-				Action:  config.SetupActionExec,
-				When:    config.SetupWhenCreate,
-				Command: "echo new",
+				Action: config.SetupActionExec,
+				When:   config.SetupWhenCreate,
+				Script: "echo new",
 			}},
 		},
 	}

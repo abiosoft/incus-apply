@@ -103,8 +103,9 @@ func TestParseInstanceSetupFields(t *testing.T) {
 		"setup:\n" +
 		"  - action: exec\n" +
 		"    when: create\n" +
+		"    required: false\n" +
 		"    cwd: /root\n" +
-		"    command: echo hi\n" +
+		"    script: echo hi\n" +
 		"  - action: file_push\n" +
 		"    when: update\n" +
 		"    path: /etc/app.conf\n" +
@@ -128,10 +129,16 @@ func TestParseInstanceSetupFields(t *testing.T) {
 	if res.Setup[0].CWD != "/root" {
 		t.Fatalf("cwd = %q, want /root", res.Setup[0].CWD)
 	}
+	if res.Setup[0].IsRequired() {
+		t.Fatal("required = true, want false")
+	}
 	if res.Setup[1].Mode != "0644" {
 		t.Fatalf("mode = %q, want 0644", res.Setup[1].Mode)
 	}
 	if !res.Setup[1].Recursive {
 		t.Fatal("recursive = false, want true")
+	}
+	if !res.Setup[1].IsRequired() {
+		t.Fatal("required = false, want default true")
 	}
 }

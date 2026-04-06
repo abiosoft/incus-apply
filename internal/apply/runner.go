@@ -177,6 +177,15 @@ func (r *runner) runSetupActions(res *config.Resource, resourceID string, action
 			total++
 		}
 	}
+	if total == 0 {
+		return nil
+	}
+	if res.VM {
+		result := r.client.WaitInstanceAgent(res)
+		if result.Error != nil {
+			return r.result.recordError(r.opts.FailFast, resourceID, "waiting for VM agent failed", result.Error)
+		}
+	}
 
 	current := 0
 	for index, setup := range res.Setup {
@@ -186,6 +195,10 @@ func (r *runner) runSetupActions(res *config.Resource, resourceID string, action
 		current++
 		result := r.client.RunSetupAction(res, setup, current, total)
 		if result.Error != nil {
+			if !setup.IsRequired() {
+				printWarning(r.opts.Quiet, "Warning: %s setup[%d] %s failed but required=false; continuing.", resourceID, index, setup.Action)
+				continue
+			}
 			return r.result.recordError(r.opts.FailFast, resourceID, "setup["+strconv.Itoa(index)+"] "+string(setup.Action)+" failed", result.Error)
 		}
 	}

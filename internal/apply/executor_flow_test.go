@@ -22,10 +22,13 @@ type fakeClient struct {
 	deleteErr   map[string]error
 	startErr    map[string]error
 	stopErr     map[string]error
+	setupErr    map[string]error
+	waitErr     map[string]error
 	createCalls []string
 	deleteCalls []string
 	startCalls  []string
 	stopCalls   []string
+	waitCalls   []string
 	updateCalls []string
 	setupCalls  []string
 }
@@ -42,6 +45,8 @@ func newFakeClient() *fakeClient {
 		deleteErr: map[string]error{},
 		startErr:  map[string]error{},
 		stopErr:   map[string]error{},
+		setupErr:  map[string]error{},
+		waitErr:   map[string]error{},
 	}
 }
 
@@ -97,10 +102,21 @@ func (c *fakeClient) Running(res *config.Resource) bool {
 	return c.running[formatResourceID(res)]
 }
 
+func (c *fakeClient) WaitInstanceAgent(res *config.Resource) *incus.Result {
+	key := formatResourceID(res)
+	c.waitCalls = append(c.waitCalls, key)
+	return &incus.Result{Error: c.waitErr[key]}
+}
+
 func (c *fakeClient) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *incus.Result {
 	key := formatResourceID(res)
-	c.setupCalls = append(c.setupCalls, key+":"+string(action.Action)+":"+string(action.When))
-	return &incus.Result{}
+	call := key + ":" + string(action.Action) + ":" + string(action.When)
+	c.setupCalls = append(c.setupCalls, call)
+	err := c.setupErr[call+":"+action.Script]
+	if err == nil {
+		err = c.setupErr[call]
+	}
+	return &incus.Result{Error: err}
 }
 
 type captureRenderer struct {
@@ -151,7 +167,7 @@ func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 
 func TestExecutorUpsertCreateRunsSetupActions(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    command: echo create\n  - action: file_push\n    when: update\n    path: /etc/app.conf\n    content: hi\n  - action: exec\n    when: always\n    command: echo always\n  - action: exec\n    when: always\n    skip: true\n    command: echo skip\n")
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n  - action: file_push\n    when: update\n    path: /etc/app.conf\n    content: hi\n  - action: exec\n    when: always\n    script: echo always\n  - action: exec\n    when: always\n    skip: true\n    script: echo skip\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}
@@ -187,11 +203,11 @@ func TestExecutorUpsertCreateRunsSetupActions(t *testing.T) {
 
 func TestExecutorUpsertAlwaysSetupRunsWithoutConfigUpdate(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: always\n    command: echo always\n")
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: always\n    script: echo always\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: '{\"image\":\"images:alpine/3.19\",\"setup\":[{\"action\":\"exec\",\"when\":\"always\",\"command\":\"hash: 9e4ad387b7ad3a5d1a10fb6211\"}]}'\n"
+	client.current["default:instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: '{\"image\":\"images:alpine/3.19\",\"setup\":[{\"action\":\"exec\",\"when\":\"always\",\"script\":\"hash: 9e4ad387b7ad3a5d1a10fb6211\"}]}'\n"
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
 
@@ -209,6 +225,45 @@ func TestExecutorUpsertAlwaysSetupRunsWithoutConfigUpdate(t *testing.T) {
 	}
 	if got := renderer.outputs[0].Summary; got != "Summary: 1 to update." {
 		t.Fatalf("summary = %q, want %q", got, "Summary: 1 to update.")
+	}
+}
+
+func TestExecutorUpsertOptionalSetupFailureContinues(t *testing.T) {
+	dir := t.TempDir()
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    required: false\n    script: echo optional\n  - action: exec\n    when: create\n    script: echo required\n")
+
+	client := newFakeClient()
+	client.setupErr["default:instance/web:exec:create:echo optional"] = errors.New("optional failed")
+	renderer := &captureRenderer{}
+	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
+
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
+	}
+	if len(client.setupCalls) != 2 {
+		t.Fatalf("setup calls = %v, want both setup actions to run", client.setupCalls)
+	}
+	if got := renderer.outputs[0].Summary; got != "Summary: 1 to create." {
+		t.Fatalf("summary = %q, want %q", got, "Summary: 1 to create.")
+	}
+}
+
+func TestExecutorUpsertVMWaitsForAgentBeforeSetup(t *testing.T) {
+	dir := t.TempDir()
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: vm1\nvm: true\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n")
+
+	client := newFakeClient()
+	renderer := &captureRenderer{}
+	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
+
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
+	}
+	if len(client.waitCalls) != 1 || client.waitCalls[0] != "default:instance/vm1" {
+		t.Fatalf("wait calls = %v, want one VM agent wait", client.waitCalls)
+	}
+	if len(client.setupCalls) != 1 {
+		t.Fatalf("setup calls = %v, want setup to run after wait", client.setupCalls)
 	}
 }
 
