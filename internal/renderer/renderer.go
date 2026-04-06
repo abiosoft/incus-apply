@@ -57,6 +57,7 @@ func (r TextRenderer) Render(output apply.Output) error {
 		return nil
 	}
 
+	terminal.ClearCurrentLine()
 	r.println()
 	r.printf("Found %d %s in %d %s.\n",
 		output.ResourceCount, plural("resource", output.ResourceCount),
@@ -86,7 +87,7 @@ func (r TextRenderer) Render(output apply.Output) error {
 			for _, item := range group.Items {
 				r.printf("%s    %s %s%s\n", color, prefix, item.ResourceID, colorReset)
 				if len(item.Changes) > 0 {
-					r.print(incus.FormatDiffChangesWithWidth(item.Changes, "      ", maxWidth))
+					r.print(incus.FormatDiffChangesWithWidthAndTrailing(item.Changes, "      ", maxWidth, item.Note != ""))
 				}
 				if item.Note != "" {
 					r.printf("      └─ %s\n", item.Note)
@@ -127,6 +128,7 @@ func NewJSONRenderer() *JSONRenderer {
 
 // Render outputs the preview results as JSON.
 func (r JSONRenderer) Render(output apply.Output) error {
+	terminal.ClearCurrentLine()
 	encoder := json.NewEncoder(r.Writer)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(output)

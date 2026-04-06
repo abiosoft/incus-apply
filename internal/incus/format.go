@@ -28,6 +28,12 @@ func FormatDiffChanges(changes []DiffChange, indent string) string {
 
 // FormatDiffChangesWithWidth renders a []DiffChange to a human-readable string with the given indent and max inline width.
 func FormatDiffChangesWithWidth(changes []DiffChange, indent string, maxWidth int) string {
+	return FormatDiffChangesWithWidthAndTrailing(changes, indent, maxWidth, false)
+}
+
+// FormatDiffChangesWithWidthAndTrailing renders a []DiffChange to a human-readable string with the given indent and max inline width.
+// When hasTrailingLine is true, the final diff entry uses a branch connector because another sibling line will follow.
+func FormatDiffChangesWithWidthAndTrailing(changes []DiffChange, indent string, maxWidth int, hasTrailingLine bool) string {
 	if maxWidth <= 0 {
 		maxWidth = defaultMaxInlineDiffWidth
 	}
@@ -41,17 +47,17 @@ func FormatDiffChangesWithWidth(changes []DiffChange, indent string, maxWidth in
 			isRemove: dc.Action == "remove",
 		}
 	}
-	return formatChanges(raw, indent, maxWidth)
+	return formatChanges(raw, indent, maxWidth, hasTrailingLine)
 }
 
 // formatChanges formats the list of changes for display with tree structure.
 // The indent prefix is prepended to each line.
-func formatChanges(changes []change, indent string, maxWidth int) string {
+func formatChanges(changes []change, indent string, maxWidth int, hasTrailingLine bool) string {
 	var result strings.Builder
 
 	for i, c := range changes {
 		tree := treeBranch
-		if i == len(changes)-1 {
+		if i == len(changes)-1 && !hasTrailingLine {
 			tree = treeLast
 		}
 

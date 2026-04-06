@@ -1,6 +1,6 @@
-# WordPress on a single container with cloud-init
+# WordPress on a single container with setup actions
 #
-# Sets up MySQL, Caddy, and WordPress on an Ubuntu container using cloud-init.
+# Sets up MySQL, Caddy, and WordPress on an Ubuntu container using setup actions.
 # WordPress will be available on port 80 of the container.
 ---
 type: vars
@@ -19,90 +19,87 @@ description: Persistent storage for MySQL data
 ---
 type: instance
 name: wordpress
-image: images:ubuntu/24.04/cloud
+image: images:ubuntu/24.04
 config:
   limits.cpu: "2"
   limits.memory: 2GiB
-  cloud-init.user-data: |
-    #cloud-config
-    package_update: true
-    packages:
-      - mysql-server
-      - php-fpm
-      - php-mysql
-      - php-curl
-      - php-gd
-      - php-xml
-      - php-mbstring
-      - curl
-      - debian-keyring
-      - debian-archive-keyring
-      - apt-transport-https
-
-    write_files:
-      - path: /tmp/Caddyfile
-        permissions: "0644"
-        content: |
-          :80 {
-            root * /var/www/html
-            php_fastcgi unix//run/php/php-fpm.sock
-            file_server
-            log {
-              output file /var/log/caddy/access.log
-            }
-          }
-
-      - path: /tmp/setup-wordpress.sh
-        permissions: "0755"
-        content: |
-          #!/bin/bash
-          set -e
-
-          # Install Caddy
-          curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-          curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
-          apt-get update
-          apt-get install -y caddy
-
-          # Replace default Caddyfile
-          cp /tmp/Caddyfile /etc/caddy/Caddyfile
-
-          # Configure MySQL
-          mysql -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-          mysql -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
-          mysql -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'localhost';"
-          mysql -e "FLUSH PRIVILEGES;"
-
-          # Install WordPress
-          mkdir -p /var/www/html
-          curl -sL https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
-
-          # Configure WordPress
-          cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-          sed -i "s/database_name_here/$MYSQL_DATABASE/" /var/www/html/wp-config.php
-          sed -i "s/username_here/$MYSQL_USER/" /var/www/html/wp-config.php
-          sed -i "s/password_here/$MYSQL_PASSWORD/" /var/www/html/wp-config.php
-
-          # Generate unique salts
-          curl -sL https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts.php
-          sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php
-          sed -i "/That's all, stop editing/r /tmp/wp-salts.php" /var/www/html/wp-config.php
-
-          # Set ownership and permissions
-          chown -R www-data:www-data /var/www/html
-
-          systemctl restart php*-fpm
-          systemctl enable caddy
-          systemctl restart caddy
-
-    runcmd:
-      - systemctl enable mysql
-      - systemctl start mysql
-      - /tmp/setup-wordpress.sh
 devices:
   mysql-data:
     type: disk
     pool: default
     source: mysql-data
     path: /var/lib/mysql
+
+setup:
+  - action: exec
+    when: create
+    command: |
+      set -e
+      export DEBIAN_FRONTEND=noninteractive
+
+      apt-get update
+      apt-get install -y \
+        mysql-server \
+        php-fpm \
+        php-mysql \
+        php-curl \
+        php-gd \
+        php-xml \
+        php-mbstring \
+        curl \
+        gpg \
+        debian-keyring \
+        debian-archive-keyring \
+        apt-transport-https
+
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      apt-get update
+      apt-get install -y caddy
+
+      systemctl enable mysql
+      systemctl start mysql
+
+      mysql -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+      mysql -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
+      mysql -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'localhost';"
+      mysql -e "FLUSH PRIVILEGES;"
+
+      mkdir -p /var/www/html
+      curl -sL https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
+
+      cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+      sed -i "s/database_name_here/$MYSQL_DATABASE/" /var/www/html/wp-config.php
+      sed -i "s/username_here/$MYSQL_USER/" /var/www/html/wp-config.php
+      sed -i "s/password_here/$MYSQL_PASSWORD/" /var/www/html/wp-config.php
+
+      curl -sL https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts.php
+      sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php
+      sed -i "/That's all, stop editing/r /tmp/wp-salts.php" /var/www/html/wp-config.php
+
+      chown -R www-data:www-data /var/www/html
+
+      systemctl restart php*-fpm
+      systemctl enable caddy
+
+  # Keep the Caddyfile in sync after the base setup is in place.
+  - action: file_push
+    when: update
+    path: /etc/caddy/Caddyfile
+    mode: "0644"
+    content: |
+      :80 {
+        root * /var/www/html
+        php_fastcgi unix//run/php/php-fpm.sock
+        file_server
+        log {
+          output file /var/log/caddy/access.log
+        }
+      }
+
+  # Reload Caddy after its config has been written.
+  - action: exec
+    when: update
+    command: systemctl restart caddy
+
 description: WordPress with Caddy and MySQL on a single Ubuntu container

@@ -50,6 +50,9 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			if resource.Type(res.Type) == resource.TypeInstance && opts.Launch {
 				item.Note = "launch"
 			}
+			if hasSetupForCreate(res) {
+				item.Note = appendNote(item.Note, "setup")
+			}
 			creates = append(creates, item)
 			preview.created++
 			plans = append(plans, upsertPlan{res: res, action: upsertCreate})
@@ -78,6 +81,9 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			if opts.Stop && resource.Type(res.Type) == resource.TypeInstance && client.Running(res) {
 				item.Note = "restart"
 			}
+			if hasSetupForUpdate(res) {
+				item.Note = appendNote(item.Note, "setup")
+			}
 			if !status.Managed && status.Warning != "" {
 				printWarning(opts.Quiet, "Warning: %s was not created by incus-apply; falling back to live-state diff and update behavior.", resourceID)
 				item.Note = appendNote(item.Note, status.Warning)
@@ -99,6 +105,10 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			updates = append(updates, item)
 			preview.updated++
 			plans = append(plans, upsertPlan{res: res, action: upsertUpdate})
+		} else if hasSetupForAlways(res) {
+			updates = append(updates, OutputItem{ResourceID: resourceID, Note: "setup"})
+			preview.updated++
+			plans = append(plans, upsertPlan{res: res, action: upsertSetupOnly})
 		} else {
 			unchanged = append(unchanged, OutputItem{ResourceID: resourceID})
 			preview.unchanged++
@@ -182,6 +192,44 @@ func shouldRedactPreviewPath(path string, prefixes []string) bool {
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(path, prefix) {
 			return true
+		}
+	}
+	return false
+}
+
+func hasSetupForCreate(res *config.Resource) bool {
+	return hasSetupForAction(res, upsertCreate)
+}
+
+func hasSetupForUpdate(res *config.Resource) bool {
+	return hasSetupForAction(res, upsertUpdate)
+}
+
+func hasSetupForAlways(res *config.Resource) bool {
+	return hasSetupForAction(res, upsertSetupOnly)
+}
+
+func hasSetupForAction(res *config.Resource, action upsertAction) bool {
+	if resource.Type(res.Type) != resource.TypeInstance {
+		return false
+	}
+	for _, setup := range res.Setup {
+		if setup.Skip {
+			continue
+		}
+		switch action {
+		case upsertCreate, upsertReplace:
+			if setup.When == config.SetupWhenCreate || setup.When == config.SetupWhenUpdate || setup.When == config.SetupWhenAlways {
+				return true
+			}
+		case upsertUpdate:
+			if setup.When == config.SetupWhenUpdate || setup.When == config.SetupWhenAlways {
+				return true
+			}
+		case upsertSetupOnly:
+			if setup.When == config.SetupWhenAlways {
+				return true
+			}
 		}
 	}
 	return false

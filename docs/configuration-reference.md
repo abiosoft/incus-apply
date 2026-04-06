@@ -15,15 +15,77 @@ This page contains the full field reference for `incus-apply` resource documents
 
 ## Instance Fields
 
-| Field      | Type   | Description                                   |
-| ---------- | ------ | --------------------------------------------- |
-| `image`    | string | Image to use (for example `images:debian/12`) |
-| `vm`       | bool   | Create a VM instead of a container            |
-| `empty`    | bool   | Create an empty instance                      |
-| `profiles` | list   | Profiles to apply                             |
-| `storage`  | string | Storage pool for the root disk                |
-| `network`  | string | Network to attach                             |
-| `target`   | string | Cluster member target                         |
+| Field      | Type   | Description                                                    |
+| ---------- | ------ | -------------------------------------------------------------- |
+| `image`    | string | Image to use (for example `images:debian/12`)                  |
+| `vm`       | bool   | Create a VM instead of a container                             |
+| `empty`    | bool   | Create an empty instance                                       |
+| `profiles` | list   | Profiles to apply                                              |
+| `storage`  | string | Storage pool for the root disk                                 |
+| `network`  | string | Network to attach                                              |
+| `target`   | string | Cluster member target                                          |
+| `setup`    | list   | Post-create and post-update actions to run inside the instance |
+
+### Instance Setup Actions
+
+Use `setup` to run imperative instance actions after Incus resource changes are applied.
+
+- `when: create` runs only when the instance is created or recreated.
+- `when: update` runs on create and on later applies when the instance changes.
+- `when: always` runs on every apply, even when the instance config itself is unchanged.
+- `skip: true` keeps the action in config but prevents execution.
+
+Supported actions:
+
+| Field       | Type    | Description                                                                                |
+| ----------- | ------- | ------------------------------------------------------------------------------------------ |
+| `action`    | string  | **Required.** `exec` or `file_push`                                                        |
+| `when`      | string  | **Required.** `create`, `update`, or `always`                                              |
+| `skip`      | boolean | Skip the action without removing it from config                                            |
+| `command`   | string  | Required for `action: exec`; executed as root using `sh -c <command>`                      |
+| `cwd`       | string  | Optional working directory for `action: exec`; passed to `incus exec --cwd`                |
+| `path`      | string  | Required for `action: file_push`; absolute path inside the instance                        |
+| `content`   | string  | Inline file content for `file_push`                                                        |
+| `source`    | string  | Local source path for `file_push`; relative paths are resolved from the owning config file |
+| `recursive` | boolean | Optional for `file_push`; passes `--recursive` to `incus file push` when `source` is used  |
+| `uid`       | integer | Optional file owner uid for `file_push`                                                    |
+| `gid`       | integer | Optional file owner gid for `file_push`                                                    |
+| `mode`      | string  | Optional file mode for `file_push`                                                         |
+
+Notes:
+
+- `file_push` requires exactly one of `content` or `source`.
+- `file_push.source` is passed to `incus file push` as-is after relative-path resolution. `incus-apply` validates that it exists when the action executes, but does not read it.
+- Use `recursive: true` with `file_push.source` when pushing directories or when you want `incus file push --recursive`.
+- `exec` actions run as the root user inside the instance unless Incus defaults are changed elsewhere.
+- `exec` actions always run non-interactively and use `sh -c` so shell syntax works as expected.
+- Relative `source` paths are resolved from the configuration file location. Absolute paths are also supported.
+- Relative `source` paths are not supported when applying config from stdin or a URL.
+- Changes to `when: create` actions are treated as recreate-required for managed instances, because those actions cannot be replayed on a normal update.
+
+### Example
+
+```yaml
+type: instance
+name: web
+image: images:debian/12
+setup:
+  - action: exec
+    when: create
+    cwd: /root
+    command: apt-get update && apt-get install -y nginx
+  - action: file_push
+    when: update
+    path: /etc/caddy/Caddyfile
+    source: ./Caddyfile
+    recursive: true
+    uid: 0
+    gid: 0
+    mode: "0644"
+  - action: exec
+    when: always
+    command: systemctl restart caddy
+```
 
 ## Storage Pool Fields
 
