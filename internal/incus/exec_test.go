@@ -89,7 +89,7 @@ func TestProgressWriterShowsLastLineAndClears(t *testing.T) {
 	var updates []string
 	cleared := 0
 	prefix := setupProgressLabel(1, 3)
-	writer := newProgressWriter(
+	writer := newProgressWriter(nil,
 		func(text string) { updates = append(updates, prefix+text) },
 		func() { cleared++ },
 	)
@@ -110,9 +110,36 @@ func TestProgressWriterShowsLastLineAndClears(t *testing.T) {
 	}
 }
 
+func TestProgressWriterDisplaysInitialLabel(t *testing.T) {
+	var updates []string
+	cleared := 0
+	writer := newProgressWriter(func() { updates = append(updates, "waiting for incus agent...") },
+		func(text string) { updates = append(updates, text) },
+		func() { cleared++ },
+	)
+
+	if len(updates) != 1 {
+		t.Fatalf("updates = %d, want 1", len(updates))
+	}
+	if updates[0] != "waiting for incus agent..." {
+		t.Fatalf("initial update = %q, want %q", updates[0], "waiting for incus agent...")
+	}
+
+	writer.Finish()
+	if cleared != 1 {
+		t.Fatalf("cleared = %d, want 1", cleared)
+	}
+}
+
 func TestSetupProgressLabelIncludesPosition(t *testing.T) {
 	if got := setupProgressLabel(1, 3); got != "  └─ running setup 1 of 3... " {
 		t.Fatalf("setupProgressLabel() = %q, want %q", got, "  └─ running setup 1 of 3... ")
+	}
+}
+
+func TestWaitForAgentProgressLabel(t *testing.T) {
+	if got := waitForAgentProgressLabel(); got != "  └─ waiting for incus agent... " {
+		t.Fatalf("waitForAgentProgressLabel() = %q, want %q", got, "  └─ waiting for incus agent... ")
 	}
 }
 

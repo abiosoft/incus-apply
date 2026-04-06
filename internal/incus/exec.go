@@ -93,19 +93,27 @@ type progressWriter struct {
 	mu       sync.Mutex
 	line     strings.Builder
 	shown    bool
+	onStart  func()
 	onUpdate func(string)
 	onClear  func()
 }
 
-func newProgressWriter(onUpdate func(string), onClear func()) *progressWriter {
-	return &progressWriter{onUpdate: onUpdate, onClear: onClear}
+func newProgressWriter(onStart func(), onUpdate func(string), onClear func()) *progressWriter {
+	w := &progressWriter{onStart: onStart, onUpdate: onUpdate, onClear: onClear}
+	if onStart != nil {
+		onStart()
+		w.shown = true
+	}
+	return w
 }
 
 func newTerminalProgressWriter(prefix string) *progressWriter {
 	if !terminal.IsTerminal(os.Stdout) {
 		return nil
 	}
-	return newProgressWriter(func(text string) {
+	return newProgressWriter(func() {
+		terminal.RewriteLine(prefix)
+	}, func(text string) {
 		terminal.RewriteLine(prefix + text)
 	}, terminal.ClearCurrentLine)
 }
@@ -115,6 +123,10 @@ func setupProgressLabel(current, total int) string {
 		return "  └─ running setup... "
 	}
 	return fmt.Sprintf("  └─ running setup %d of %d... ", current, total)
+}
+
+func waitForAgentProgressLabel() string {
+	return "  └─ waiting for incus agent... "
 }
 
 func (w *progressWriter) Write(p []byte) (int, error) {
