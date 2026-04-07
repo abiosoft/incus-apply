@@ -233,7 +233,8 @@ Flags:
   -d, --delete           Delete resources instead of creating/updating
   -y, --yes              Auto-accept and apply changes without prompting
     --diff [text|json] Show preview only without applying
-      --replace          Delete and recreate managed resources when create-only fields change
+      --replace          Delete and recreate managed resources when create-only fields change.
+                         Without this flag, resources with create-only field changes are skipped with a warning.
       --show-env         Show actual environment config values in preview output instead of redacting them
     --fetch-timeout duration
              Timeout for fetching remote config URLs (default: 30s, 0 disables)
