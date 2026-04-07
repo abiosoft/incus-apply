@@ -1,33 +1,32 @@
 # WordPress on a single container with setup actions
 #
-# Sets up MySQL, Caddy, and WordPress on an Ubuntu container using setup actions.
+# Sets up MariaDB, Caddy, and WordPress on a Debian container using setup actions.
 # WordPress will be available on port 80 of the container.
 ---
 type: vars
 vars:
-  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-  MYSQL_DATABASE: wordpress
-  MYSQL_USER: wordpress
-  MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpresspassword}
+  MARIADB_DATABASE: wordpress
+  MARIADB_USER: wordpress
+  MARIADB_PASSWORD: ${MARIADB_PASSWORD:-wordpresspassword}
 ---
 type: storage-volume
-name: mysql-data
+name: mariadb-data
 pool: default
 config:
   size: 10GiB
-description: Persistent storage for MySQL data
+description: Persistent storage for MariaDB data
 ---
 type: instance
 name: wordpress
-image: images:ubuntu/24.04
+image: images:debian/13
 config:
   limits.cpu: "2"
   limits.memory: 2GiB
 devices:
-  mysql-data:
+  mariadb-data:
     type: disk
     pool: default
-    source: mysql-data
+    source: mariadb-data
     path: /var/lib/mysql
 
 setup:
@@ -39,7 +38,7 @@ setup:
 
       apt-get update
       apt-get install -y \
-        mysql-server \
+        mariadb-server \
         php-fpm \
         php-mysql \
         php-curl \
@@ -57,21 +56,29 @@ setup:
       apt-get update
       apt-get install -y caddy
 
-      systemctl enable mysql
-      systemctl start mysql
+      systemctl enable mariadb
+      systemctl start mariadb
 
-      mysql -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-      mysql -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
-      mysql -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'localhost';"
-      mysql -e "FLUSH PRIVILEGES;"
+      PHP_FPM_SERVICE="$(systemctl list-unit-files 'php*-fpm.service' --no-legend | awk 'NR==1 {print $1}')"
+      PHP_FPM_SOCKET="$(find /run/php -maxdepth 1 -type s -name 'php*-fpm.sock' | head -n 1)"
+      test -n "$PHP_FPM_SERVICE"
+      test -n "$PHP_FPM_SOCKET"
+      ln -sf "$PHP_FPM_SOCKET" /run/php/php-fpm.sock
+
+      mariadb <<SQL
+      CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
+      CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'localhost' IDENTIFIED BY '${MARIADB_PASSWORD}';
+      GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'localhost';
+      FLUSH PRIVILEGES;
+      SQL
 
       mkdir -p /var/www/html
       curl -sL https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
 
       cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-      sed -i "s/database_name_here/$MYSQL_DATABASE/" /var/www/html/wp-config.php
-      sed -i "s/username_here/$MYSQL_USER/" /var/www/html/wp-config.php
-      sed -i "s/password_here/$MYSQL_PASSWORD/" /var/www/html/wp-config.php
+      sed -i "s/database_name_here/$MARIADB_DATABASE/" /var/www/html/wp-config.php
+      sed -i "s/username_here/$MARIADB_USER/" /var/www/html/wp-config.php
+      sed -i "s/password_here/$MARIADB_PASSWORD/" /var/www/html/wp-config.php
 
       curl -sL https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts.php
       sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php
@@ -79,12 +86,13 @@ setup:
 
       chown -R www-data:www-data /var/www/html
 
-      systemctl restart php*-fpm
+      systemctl enable "$PHP_FPM_SERVICE"
+      systemctl restart "$PHP_FPM_SERVICE"
       systemctl enable caddy
 
   # Keep the Caddyfile in sync after the base setup is in place.
   - action: file_push
-    when: update
+    when: always
     path: /etc/caddy/Caddyfile
     mode: "0644"
     content: |
@@ -99,7 +107,7 @@ setup:
 
   # Reload Caddy after its config has been written.
   - action: exec
-    when: update
+    when: always
     script: systemctl restart caddy
 
-description: WordPress with Caddy and MySQL on a single Ubuntu container
+description: WordPress with Caddy and MariaDB on a single Debian container
