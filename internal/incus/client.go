@@ -229,7 +229,10 @@ func (c client) Stop(res *config.Resource) *Result {
 
 // Running checks if an instance is currently running.
 func (c client) Running(res *config.Resource) bool {
-	args := []string{"list", res.Name, "--format=csv", "-c", "s"}
+	// Use anchored regex to match the exact instance name, avoiding partial
+	// matches against instances whose names share a common prefix (e.g.
+	// "wordpress" matching both "wordpress" and "wordpress-db").
+	args := []string{"list", fmt.Sprintf("^%s$", res.Name), "--format=csv", "-c", "s"}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
 	result := c.runQuiet(args, nil)

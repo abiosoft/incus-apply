@@ -1,7 +1,6 @@
 package apply
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -97,10 +96,13 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 					continue
 				}
 
-				err := fmt.Errorf("create-only fields changed (%s); delete or rerun with --replace", unsupportedChangePaths(status.UnsupportedChanges))
-				if preview.recordError(opts.FailFast, resourceID, "managed diff requires recreation", err) != nil {
-					return buildOutput(), preview, plans
-				}
+				// Without --replace, skip the resource and warn.
+				printWarning(opts.Quiet, "Warning: %s has create-only field changes (%s); skipping (rerun with --replace to recreate).",
+					resourceID, unsupportedChangePaths(status.UnsupportedChanges))
+				unchanged = append(unchanged, item)
+				preview.unchanged++
+				plans = append(plans, upsertPlan{res: res, action: upsertSkip})
+				continue
 			}
 			updates = append(updates, item)
 			preview.updated++

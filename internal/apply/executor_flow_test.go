@@ -452,9 +452,10 @@ func TestComputeUpsertDiff_DoesNotRedactNonMatchingPaths(t *testing.T) {
 	}
 }
 
-func TestExecutorUpsert_RecreateRequiredPreventsApply(t *testing.T) {
+func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
+	// Image changed (create-only) + config changed (normal) — entire resource skipped.
+	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -462,24 +463,23 @@ func TestExecutorUpsert_RecreateRequiredPreventsApply(t *testing.T) {
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
 
-	err := executor.Upsert()
-	if err == nil {
-		t.Fatal("Upsert() error = nil, want non-nil")
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
 	}
+	// No update — entire resource skipped because of create-only field change.
 	if len(client.updateCalls) != 0 {
 		t.Fatalf("update calls = %v, want none", client.updateCalls)
 	}
 	if len(renderer.outputs) != 1 {
 		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
 	}
-	if got := renderer.outputs[0].Summary; got != "Summary: 1 to update, 1 errors." {
-		t.Fatalf("summary = %q, want %q", got, "Summary: 1 to update, 1 errors.")
+	// Diff changes are still shown (so user sees what changed).
+	items := renderer.outputs[0].Groups[0].Items
+	if len(items) != 1 {
+		t.Fatalf("output items = %d, want 1", len(items))
 	}
-	if len(renderer.outputs[0].Groups) != 1 || len(renderer.outputs[0].Groups[0].Items) != 1 {
-		t.Fatalf("unexpected output groups: %#v", renderer.outputs[0].Groups)
-	}
-	if got := renderer.outputs[0].Groups[0].Items[0].Note; got != "recreate required" {
-		t.Fatalf("note = %q, want %q", got, "recreate required")
+	if len(items[0].Changes) == 0 {
+		t.Fatal("expected diff changes to be shown even when skipping")
 	}
 }
 

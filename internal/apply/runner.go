@@ -93,11 +93,11 @@ func (r *runner) update(res *config.Resource, resourceID string) error {
 }
 
 func (r *runner) setupOnly(res *config.Resource, resourceID string) error {
+	printColored(r.opts.Quiet, colorYellow, "~ %s setup", resourceID)
 	wasRunning := resource.Type(res.Type) == resource.TypeInstance && r.client.Running(res)
 	if err := r.runSetupForExistingInstance(res, resourceID, upsertSetupOnly, wasRunning); err != nil {
 		return err
 	}
-	printColored(r.opts.Quiet, colorYellow, "~ %s setup applied", resourceID)
 	r.result.updated++
 	return nil
 }
