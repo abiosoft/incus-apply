@@ -96,7 +96,9 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 					continue
 				}
 
-				// Without --replace, skip the resource and warn.
+				// Without --replace, skip the entire resource and warn. The diff is
+				// still shown so the user can see what changed and decide to rerun
+				// with --replace.
 				printWarning(opts.Quiet, "Warning: %s has create-only field changes (%s); skipping (rerun with --replace to recreate).",
 					resourceID, unsupportedChangePaths(status.UnsupportedChanges))
 				unchanged = append(unchanged, item)
