@@ -66,6 +66,7 @@ Notes:
 - Relative `source` paths are resolved from the configuration file location. Absolute paths are also supported.
 - Relative `source` paths are not supported when applying config from stdin or a URL.
 - Changes to `when: create` actions are treated as recreate-required for managed instances, because those actions cannot be replayed on a normal update.
+- For a full multi-service example, see [../examples/wordpress.incus.yaml](../examples/wordpress.incus.yaml), which provisions WordPress on Debian 13 with MariaDB and Caddy using setup actions.
 
 ### Example
 
@@ -76,16 +77,11 @@ image: images:debian/12
 setup:
   - action: exec
     when: create
-    cwd: /root
-    script: apt-get update && apt-get install -y nginx
+    script: apt-get update && apt-get install -y caddy
   - action: file_push
     when: update
     path: /etc/caddy/Caddyfile
     source: ./Caddyfile
-    recursive: true
-    uid: 0
-    gid: 0
-    mode: "0644"
   - action: exec
     when: always
     script: systemctl restart caddy
