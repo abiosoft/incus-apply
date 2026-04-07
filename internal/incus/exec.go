@@ -16,7 +16,7 @@ import (
 
 // run executes an incus command while showing transient progress in interactive terminals.
 func (c client) run(args []string, stdin []byte) *Result {
-	return c.execCmd(args, stdin, false)
+	return c.execCmd(args, stdin, true)
 }
 
 // runQuiet executes an incus command while still capturing all output.
