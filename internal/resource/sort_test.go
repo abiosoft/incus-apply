@@ -132,7 +132,7 @@ func TestSortForApplyAfterChain(t *testing.T) {
 	dbIdx := indexOf(names, "database")
 	apiIdx := indexOf(names, "api")
 	appIdx := indexOf(names, "app")
-	if !(dbIdx < apiIdx && apiIdx < appIdx) {
+	if dbIdx >= apiIdx || apiIdx >= appIdx {
 		t.Errorf("expected database < api < app, got order: %v", names)
 	}
 }
