@@ -10,6 +10,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -202,6 +208,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -394,6 +406,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -586,6 +604,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -779,6 +803,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -971,6 +1001,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -1163,6 +1199,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -1355,6 +1397,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -1547,6 +1595,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -1739,6 +1793,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -1931,6 +1991,12 @@
           "description": "An Incus resource definition.",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "config": {
               "description": "Key-value configuration options",
               "type": "object",
@@ -2125,16 +2191,6 @@
       "description": "Variable declarations for interpolation in resource configs.",
       "type": "object",
       "properties": {
-        "commands": {
-          "description": "Shell commands whose stdout becomes the variable value. Each key maps to a command string passed as a single argument to sh -c.",
-          "type": "object",
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
         "files": {
           "description": "Paths to .env files to load variables from.",
           "type": "array",
