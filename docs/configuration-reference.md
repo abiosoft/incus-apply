@@ -69,7 +69,7 @@ Notes:
 - Relative `source` paths are resolved from the configuration file location. Absolute paths are also supported.
 - Relative `source` paths are not supported when applying config from stdin or a URL.
 - Changes to `when: create` actions are treated as recreate-required for managed instances, because those actions cannot be replayed on a normal update. The resource is skipped until you rerun with `--replace`.
-- For a full multi-service example, see [../examples/wordpress.incus.yaml](../examples/wordpress.incus.yaml), which provisions WordPress on Debian 13 with MariaDB and Caddy using setup actions.
+- For a full multi-service example, see [../examples/wordpress.yaml](../examples/wordpress.yaml), which provisions WordPress on Debian 13 with MariaDB and Caddy using setup actions.
 
 ### Example
 

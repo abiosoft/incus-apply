@@ -16,7 +16,7 @@ type Base struct {
 	SourceFile  string                    `yaml:"-" json:"-"`                                         // Path to source file (set during parsing)
 }
 
-// Resource represents a single resource configuration from a .incus.yaml file.
+// Resource represents a single resource configuration from a .yaml file.
 // It embeds common fields plus the resource-specific field groups used
 // based on the resource Type.
 type Resource struct {
@@ -122,6 +122,28 @@ type Stdin struct {
 	Ingress     []map[string]any          `yaml:"ingress,omitempty"` // Network ACL ingress rules
 	Egress      []map[string]any          `yaml:"egress,omitempty"`  // Network ACL egress rules
 	Ports       []map[string]any          `yaml:"ports,omitempty"`   // Network forward port rules
+}
+
+// knownResourceTypes is the set of valid incus resource type strings.
+// "vars" is intentionally excluded — it is handled separately by the parser.
+var knownResourceTypes = map[string]struct{}{
+	"instance":        {},
+	"profile":         {},
+	"network":         {},
+	"network-forward": {},
+	"network-acl":     {},
+	"network-zone":    {},
+	"storage-pool":    {},
+	"storage-volume":  {},
+	"storage-bucket":  {},
+	"project":         {},
+	"cluster-group":   {},
+}
+
+// isKnownResourceType reports whether s is a supported incus resource type.
+func isKnownResourceType(s string) bool {
+	_, ok := knownResourceTypes[s]
+	return ok
 }
 
 // applyDefaults sets default values for optional fields.

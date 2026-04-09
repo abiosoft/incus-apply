@@ -13,7 +13,7 @@ import (
 
 const DefaultFetchTimeout = 30 * time.Second
 
-// Parser handles parsing of .incus.yaml and .incus.json configuration files.
+// Parser handles parsing of YAML and JSON configuration files.
 type Parser struct {
 	httpClient *http.Client
 }
@@ -127,14 +127,14 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 			continue
 		}
 
+		// Skip documents that don't have a recognized incus resource type.
+		if !isKnownResourceType(typ) {
+			continue
+		}
+
 		var res Resource
 		if err := remarshal(raw, &res); err != nil {
 			return nil, err
-		}
-
-		// Skip truly empty documents
-		if res.Type == "" && res.Name == "" {
-			continue
 		}
 
 		res.applyDefaults()

@@ -46,7 +46,7 @@ func TestDesiredForApply_AddsTrackingState(t *testing.T) {
 }
 
 func TestDesiredForApply_IncludesSetupSourceReference(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "instance.incus.yaml")
+	configPath := filepath.Join(t.TempDir(), "instance.yaml")
 	res := &config.Resource{
 		Base: config.Base{Type: "instance", Name: "test", SourceFile: configPath},
 		InstanceFields: config.InstanceFields{

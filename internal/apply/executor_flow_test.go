@@ -139,7 +139,7 @@ func writeConfigFile(t *testing.T, dir, name, content string) string {
 
 func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}
@@ -167,7 +167,7 @@ func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 
 func TestExecutorUpsertCreateRunsSetupActions(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n  - action: file_push\n    when: update\n    path: /etc/app.conf\n    content: hi\n  - action: exec\n    when: always\n    script: echo always\n  - action: exec\n    when: always\n    skip: true\n    script: echo skip\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n  - action: file_push\n    when: update\n    path: /etc/app.conf\n    content: hi\n  - action: exec\n    when: always\n    script: echo always\n  - action: exec\n    when: always\n    skip: true\n    script: echo skip\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}
@@ -203,7 +203,7 @@ func TestExecutorUpsertCreateRunsSetupActions(t *testing.T) {
 
 func TestExecutorUpsertAlwaysSetupRunsWithoutConfigUpdate(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: always\n    script: echo always\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: always\n    script: echo always\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -230,7 +230,7 @@ func TestExecutorUpsertAlwaysSetupRunsWithoutConfigUpdate(t *testing.T) {
 
 func TestExecutorUpsertOptionalSetupFailureContinues(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    required: false\n    script: echo optional\n  - action: exec\n    when: create\n    script: echo required\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    required: false\n    script: echo optional\n  - action: exec\n    when: create\n    script: echo required\n")
 
 	client := newFakeClient()
 	client.setupErr["default:instance/web:exec:create:echo optional"] = errors.New("optional failed")
@@ -250,7 +250,7 @@ func TestExecutorUpsertOptionalSetupFailureContinues(t *testing.T) {
 
 func TestExecutorUpsertVMWaitsForAgentBeforeSetup(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: vm1\nvm: true\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: vm1\nvm: true\nimage: images:alpine/3.19\nsetup:\n  - action: exec\n    when: create\n    script: echo create\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}
@@ -269,7 +269,7 @@ func TestExecutorUpsertVMWaitsForAgentBeforeSetup(t *testing.T) {
 
 func TestExecutorUpsertPlanningErrorPreventsApply(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	client.existsErr["default:instance/web"] = errors.New("boom")
@@ -293,7 +293,7 @@ func TestExecutorUpsertPlanningErrorPreventsApply(t *testing.T) {
 
 func TestExecutorDeleteRemovesExistingResource(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -455,7 +455,7 @@ func TestComputeUpsertDiff_DoesNotRedactNonMatchingPaths(t *testing.T) {
 func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T) {
 	dir := t.TempDir()
 	// Image changed (create-only) + config changed (normal) — entire resource skipped.
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -485,7 +485,7 @@ func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T
 
 func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -521,8 +521,8 @@ func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 
 func TestExecutorUpsert_DuplicateResourcesSameProjectFails(t *testing.T) {
 	dir := t.TempDir()
-	writeConfigFile(t, dir, "one.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
-	writeConfigFile(t, dir, "two.incus.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	writeConfigFile(t, dir, "one.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	writeConfigFile(t, dir, "two.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}

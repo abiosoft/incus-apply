@@ -23,6 +23,8 @@ type Schema struct {
 	Title             string             `json:"title,omitempty"`
 	Description       string             `json:"description,omitempty"`
 	Type              string             `json:"type,omitempty"`
+	If                *Schema            `json:"if,omitempty"`
+	Then              *Schema            `json:"then,omitempty"`
 	OneOf             []Schema           `json:"oneOf,omitempty"`
 	Properties        map[string]*Schema `json:"properties,omitempty"`
 	Required          []string           `json:"required,omitempty"`
@@ -46,15 +48,29 @@ func main() {
 
 func generateRootSchema() Schema {
 	resourceTypes := collectResourceTypes()
+	allTypes := append(resourceTypes, "vars")
 
+	// The schema only enforces constraints when `type` is present and matches a
+	// known incus-apply value. This allows the schema to be applied broadly
+	// (e.g. to all *.yaml files) without flagging unrelated YAML documents.
 	return Schema{
 		Schema:      "https://json-schema.org/draft/2020-12/schema",
 		ID:          "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json",
 		Title:       "incus-apply configuration",
-		Description: "Schema for incus-apply .incus.yaml configuration files. Each YAML document in the file is either a resource definition or a vars declaration.",
-		OneOf: []Schema{
-			generateResourceSchema(resourceTypes),
-			generateVarsSchema(),
+		Description: "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `type`) or a vars declaration. Documents without a recognized `type` value are unconstrained.",
+		If: &Schema{
+			Properties: map[string]*Schema{
+				"type": {
+					Enum: allTypes,
+				},
+			},
+			Required: []string{"type"},
+		},
+		Then: &Schema{
+			OneOf: []Schema{
+				generateResourceSchema(resourceTypes),
+				generateVarsSchema(),
+			},
 		},
 	}
 }

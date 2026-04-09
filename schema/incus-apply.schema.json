@@ -2,2261 +2,2286 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json",
   "title": "incus-apply configuration",
-  "description": "Schema for incus-apply .incus.yaml configuration files. Each YAML document in the file is either a resource definition or a vars declaration.",
-  "oneOf": [
-    {
-      "oneOf": [
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "instance"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "profile"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "network"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "network-forward"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "listen_address",
-            "network"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "network-acl"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "network-zone"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "storage-pool"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "storage-volume"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "storage-bucket"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "project"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        },
-        {
-          "description": "An Incus resource definition.",
-          "type": "object",
-          "properties": {
-            "after": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "config": {
-              "description": "Key-value configuration options",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": {
-              "description": "Resource description",
-              "type": "string"
-            },
-            "devices": {
-              "description": "Device configurations",
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              }
-            },
-            "driver": {
-              "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-              "type": "string"
-            },
-            "egress": {
-              "description": "Egress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "empty": {
-              "description": "Create an empty instance (no image)",
-              "type": "boolean"
-            },
-            "ephemeral": {
-              "type": "boolean"
-            },
-            "image": {
-              "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
-              "type": "string"
-            },
-            "ingress": {
-              "description": "Ingress firewall rules",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "listen_address": {
-              "description": "External listen address for a network forward",
-              "type": "string"
-            },
-            "name": {
-              "description": "Resource name (unique within type)",
-              "type": "string"
-            },
-            "network": {
-              "description": "Network name (for instances or the parent network of a network forward)",
-              "type": "string"
-            },
-            "networkType": {
-              "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-              "type": "string"
-            },
-            "pool": {
-              "description": "Storage pool name (required for storage volumes/buckets)",
-              "type": "string"
-            },
-            "ports": {
-              "description": "Optional network forward port rules in the same shape as incus network forward edit",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {}
-                }
-              }
-            },
-            "profiles": {
-              "description": "Profiles to apply to the instance",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "project": {
-              "description": "Incus project (can be overridden by --project flag)",
-              "type": "string"
-            },
-            "setup": {
-              "description": "Setup actions to run against an instance after create, update, or on every apply",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "action": {
-                    "description": "Setup action type",
-                    "type": "string"
-                  },
-                  "content": {
-                    "description": "Inline file content to push into the instance",
-                    "type": "string"
-                  },
-                  "cwd": {
-                    "description": "Working directory to use for an exec setup action",
-                    "type": "string"
-                  },
-                  "gid": {
-                    "description": "File owner gid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "mode": {
-                    "description": "File mode to set when pushing a file",
-                    "type": "string"
-                  },
-                  "path": {
-                    "description": "Absolute destination path inside the instance for a file_push action",
-                    "type": "string"
-                  },
-                  "recursive": {
-                    "description": "Pass --recursive to incus file push for a file_push setup action",
-                    "type": "boolean"
-                  },
-                  "required": {
-                    "description": "If false, setup failures are reported and apply continues with later setup actions",
-                    "type": "boolean"
-                  },
-                  "script": {
-                    "description": "Shell script to execute inside the instance",
-                    "type": "string"
-                  },
-                  "skip": {
-                    "description": "If true, the setup action is skipped",
-                    "type": "boolean"
-                  },
-                  "source": {
-                    "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                    "type": "string"
-                  },
-                  "uid": {
-                    "description": "File owner uid to set when pushing a file",
-                    "type": "integer"
-                  },
-                  "when": {
-                    "description": "When to run the setup action: create, update, or always",
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "source": {
-              "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-              "type": "string"
-            },
-            "storage": {
-              "description": "Storage pool for the instance root disk",
-              "type": "string"
-            },
-            "target": {
-              "description": "Cluster member target",
-              "type": "string"
-            },
-            "type": {
-              "description": "Resource type",
-              "type": "string",
-              "enum": [
-                "cluster-group"
-              ]
-            },
-            "vm": {
-              "description": "Create a virtual machine instead of a container",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "type",
-            "name"
-          ]
-        }
-      ]
+  "description": "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `type`) or a vars declaration. Documents without a recognized `type` value are unconstrained.",
+  "if": {
+    "properties": {
+      "type": {
+        "enum": [
+          "instance",
+          "profile",
+          "network",
+          "network-forward",
+          "network-acl",
+          "network-zone",
+          "storage-pool",
+          "storage-volume",
+          "storage-bucket",
+          "project",
+          "cluster-group",
+          "vars"
+        ]
+      }
     },
-    {
-      "description": "Variable declarations for interpolation in resource configs.",
-      "type": "object",
-      "properties": {
-        "files": {
-          "description": "Paths to .env files to load variables from.",
-          "type": "array",
-          "items": {
-            "type": "string"
+    "required": [
+      "type"
+    ]
+  },
+  "then": {
+    "oneOf": [
+      {
+        "oneOf": [
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "instance"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "profile"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "network"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "network-forward"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "listen_address",
+              "network"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "network-acl"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "network-zone"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "storage-pool"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "storage-volume"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "storage-bucket"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "project"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "setup": {
+                "description": "Setup actions to run against an instance after create, update, or on every apply",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "description": "Setup action type",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Inline file content to push into the instance",
+                      "type": "string"
+                    },
+                    "cwd": {
+                      "description": "Working directory to use for an exec setup action",
+                      "type": "string"
+                    },
+                    "gid": {
+                      "description": "File owner gid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "description": "File mode to set when pushing a file",
+                      "type": "string"
+                    },
+                    "path": {
+                      "description": "Absolute destination path inside the instance for a file_push action",
+                      "type": "string"
+                    },
+                    "recursive": {
+                      "description": "Pass --recursive to incus file push for a file_push setup action",
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "description": "If false, setup failures are reported and apply continues with later setup actions",
+                      "type": "boolean"
+                    },
+                    "script": {
+                      "description": "Shell script to execute inside the instance",
+                      "type": "string"
+                    },
+                    "skip": {
+                      "description": "If true, the setup action is skipped",
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "File owner uid to set when pushing a file",
+                      "type": "integer"
+                    },
+                    "when": {
+                      "description": "When to run the setup action: create, update, or always",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "source": {
+                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Resource type",
+                "type": "string",
+                "enum": [
+                  "cluster-group"
+                ]
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Variable declarations for interpolation in resource configs.",
+        "type": "object",
+        "properties": {
+          "files": {
+            "description": "Paths to .env files to load variables from.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "global": {
+            "description": "If true, variables are shared across all files instead of being file-scoped.",
+            "type": "boolean"
+          },
+          "type": {
+            "description": "Must be 'vars' for variable declarations.",
+            "type": "string",
+            "enum": [
+              "vars"
+            ]
+          },
+          "vars": {
+            "description": "Inline variable definitions (key-value pairs).",
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
-        "global": {
-          "description": "If true, variables are shared across all files instead of being file-scoped.",
-          "type": "boolean"
-        },
-        "type": {
-          "description": "Must be 'vars' for variable declarations.",
-          "type": "string",
-          "enum": [
-            "vars"
-          ]
-        },
-        "vars": {
-          "description": "Inline variable definitions (key-value pairs).",
-          "type": "object",
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "required": [
-        "type"
-      ],
-      "additionalProperties": false
-    }
-  ]
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  }
 }

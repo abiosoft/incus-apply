@@ -20,7 +20,7 @@ func NewRootCommand(version, commit, date string) *cobra.Command {
 		Short: "Declarative configuration management for Incus",
 		Long: `incus-apply is a declarative configuration management tool for Incus.
 
-It reads .incus.yaml or .incus.json configuration files and creates,
+It reads .yaml or .json configuration files and creates,
 updates, or deletes Incus resources accordingly.
 
 By default, a diff is shown and you are prompted before changes are applied.
@@ -30,16 +30,16 @@ Examples:
   incus-apply .
 
   # Apply specific files
-  incus-apply instance.incus.yaml network.incus.yaml
+  incus-apply instance.yaml network.yaml
 
   # Apply recursively from a directory
   incus-apply ./configs/ -r
 
   # Apply from stdin
-  cat instance.incus.yaml | incus-apply -
+  cat instance.yaml | incus-apply -
 
   # Apply from URL
-  incus-apply https://example.com/config.incus.yaml
+  incus-apply https://example.com/config.yaml
 
   # Auto-accept changes without prompting
   incus-apply . -y
@@ -88,7 +88,7 @@ Examples:
 
 	// Input flags
 	rootCmd.Flags().BoolVarP(&opts.Recursive, "recursive", "r", false,
-		"Recursively find .incus.yaml/.incus.json files in directories")
+		"Recursively find .yaml/.json files in directories")
 	rootCmd.Flags().DurationVar(&opts.FetchTimeout, "fetch-timeout", config.DefaultFetchTimeout,
 		"Timeout for fetching remote config URLs (0 disables the timeout)")
 

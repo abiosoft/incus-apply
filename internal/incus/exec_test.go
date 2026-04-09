@@ -63,7 +63,7 @@ func TestRunSetupActionPushFileResolvesRelativeSource(t *testing.T) {
 	}
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 
-	configPath := filepath.Join(dir, "instance.incus.yaml")
+	configPath := filepath.Join(dir, "instance.yaml")
 	sourcePath := filepath.Join(dir, "Caddyfile")
 	if err := os.WriteFile(sourcePath, []byte("content"), 0o644); err != nil {
 		t.Fatalf("os.WriteFile() error = %v", err)

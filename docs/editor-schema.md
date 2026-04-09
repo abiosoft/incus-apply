@@ -16,13 +16,13 @@ To enable the schema with the Red Hat YAML extension, add this to `.vscode/setti
 {
   "yaml.schemas": {
     "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json": [
-      "*.incus.yaml",
-      "*.incus.yml"
+      "*.yaml",
+      "*.yml"
     ]
   },
   "json.schemas": [
     {
-      "fileMatch": ["*.incus.json"],
+      "fileMatch": ["*.json"],
       "url": "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json"
     }
   ]

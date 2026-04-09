@@ -11,7 +11,7 @@ import (
 
 func TestResolveSetupSourcePathRelativeToConfig(t *testing.T) {
 	dir := t.TempDir()
-	configPath := filepath.Join(dir, "instance.incus.yaml")
+	configPath := filepath.Join(dir, "instance.yaml")
 	resolved, err := ResolveSetupSourcePath("./files/Caddyfile", configPath)
 	if err != nil {
 		t.Fatalf("ResolveSetupSourcePath() error = %v", err)
@@ -31,7 +31,7 @@ func TestResolveSetupSourcePathRejectsRelativeStdinSource(t *testing.T) {
 
 func TestValidateSetupSourceAcceptsExistingPath(t *testing.T) {
 	dir := t.TempDir()
-	configPath := filepath.Join(dir, "instance.incus.yaml")
+	configPath := filepath.Join(dir, "instance.yaml")
 	sourcePath := filepath.Join(dir, "files", "Caddyfile")
 	if err := os.MkdirAll(filepath.Dir(sourcePath), 0o755); err != nil {
 		t.Fatalf("os.MkdirAll() error = %v", err)
@@ -46,7 +46,7 @@ func TestValidateSetupSourceAcceptsExistingPath(t *testing.T) {
 
 func TestValidateSetupSourceRejectsMissingPath(t *testing.T) {
 	dir := t.TempDir()
-	configPath := filepath.Join(dir, "instance.incus.yaml")
+	configPath := filepath.Join(dir, "instance.yaml")
 	err := ValidateSetupSource(SetupAction{Source: "./files/Caddyfile"}, configPath)
 	if err == nil {
 		t.Fatal("ValidateSetupSource() error = nil, want non-nil")

@@ -25,7 +25,7 @@ make && sudo make install
 
 ## Quick Start
 
-1. Create a config file `debian.incus.yaml`:
+1. Create a config file `debian.yaml`:
 
 ```yaml
 type: instance
@@ -41,7 +41,7 @@ config:
 2. Apply it:
 
 ```bash
-incus-apply debian.incus.yaml
+incus-apply debian.yaml
 ```
 
 ## Usage
@@ -51,16 +51,16 @@ incus-apply debian.incus.yaml
 incus-apply .
 
 # Apply specific files
-incus-apply instance.incus.yaml network.incus.yaml
+incus-apply instance.yaml network.yaml
 
 # Apply recursively from a directory
 incus-apply ./configs/ -r
 
 # Apply from stdin
-cat instance.incus.yaml | incus-apply -
+cat instance.yaml | incus-apply -
 
 # Apply from URL
-incus-apply https://example.com/instance.incus.yaml
+incus-apply https://example.com/instance.yaml
 
 # Override remote fetch and incus command timeouts
 incus-apply . --fetch-timeout=10s --command-timeout=2m
@@ -101,12 +101,12 @@ incus-apply . --project myproject
 
 ## Configuration Format
 
-Configuration files must have the `.incus.yaml`, `.incus.yml`, or `.incus.json` extension.
+Configuration files can be any `.yaml`, `.yml`, or `.json` file. When scanning a directory, `incus-apply` reads all YAML and JSON files and processes only the documents whose `type` matches a supported incus resource type, skipping everything else.
 
 ### Basic Example
 
 ```yaml
-# web-server.incus.yaml
+# web-server.yaml
 type: instance
 name: web-server
 image: images:debian/12
@@ -129,7 +129,7 @@ description: Web server container
 Multiple resources can be defined in a single file using YAML document separators (`---`):
 
 ```yaml
-# stack.incus.yaml
+# stack.yaml
 ---
 type: profile
 name: app-profile
@@ -234,7 +234,7 @@ Arguments:
   file...   Config files, directories, URLs, or '-' for stdin
 
 Flags:
-  -r, --recursive        Recursively find .incus.yaml/.incus.json files in directories
+  -r, --recursive        Recursively find .yaml/.yml/.json files in directories
   -d, --delete           Delete resources instead of creating/updating
   -y, --yes              Auto-accept and apply changes without prompting
     --diff [text|json] Show preview only without applying

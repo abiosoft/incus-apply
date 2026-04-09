@@ -149,8 +149,8 @@ func TestFormatResourceID_NetworkForwardIncludesProjectAndNetwork(t *testing.T) 
 
 func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
 	resources := []*config.Resource{
-		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "one.incus.yaml"}},
-		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "two.incus.yaml"}},
+		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "one.yaml"}},
+		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "two.yaml"}},
 	}
 
 	err := validateUniqueResources(resources)
@@ -160,15 +160,15 @@ func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
 	if !strings.Contains(err.Error(), "default:instance/web") {
 		t.Fatalf("validateUniqueResources() error = %q, want duplicate resource id", err.Error())
 	}
-	if !strings.Contains(err.Error(), "one.incus.yaml") || !strings.Contains(err.Error(), "two.incus.yaml") {
+	if !strings.Contains(err.Error(), "one.yaml") || !strings.Contains(err.Error(), "two.yaml") {
 		t.Fatalf("validateUniqueResources() error = %q, want both file names", err.Error())
 	}
 }
 
 func TestValidateUniqueResources_DifferentProjectsAllowed(t *testing.T) {
 	resources := []*config.Resource{
-		{Base: config.Base{Type: "instance", Name: "web", Project: "app1", SourceFile: "one.incus.yaml"}},
-		{Base: config.Base{Type: "instance", Name: "web", Project: "app2", SourceFile: "two.incus.yaml"}},
+		{Base: config.Base{Type: "instance", Name: "web", Project: "app1", SourceFile: "one.yaml"}},
+		{Base: config.Base{Type: "instance", Name: "web", Project: "app2", SourceFile: "two.yaml"}},
 	}
 
 	if err := validateUniqueResources(resources); err != nil {

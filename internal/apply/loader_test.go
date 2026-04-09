@@ -9,18 +9,18 @@ import (
 func TestResolveAndInterpolateScopesVarsPerFile(t *testing.T) {
 	results := []*config.FileResult{
 		{
-			SourceFile: "shared.incus.yaml",
+			SourceFile: "shared.yaml",
 			Vars: []*config.Vars{
-				{Vars: map[string]string{"GLOBAL": "global"}, Global: true, SourceFile: "shared.incus.yaml"},
+				{Vars: map[string]string{"GLOBAL": "global"}, Global: true, SourceFile: "shared.yaml"},
 			},
 		},
 		{
-			SourceFile: "one.incus.yaml",
+			SourceFile: "one.yaml",
 			Vars: []*config.Vars{
-				{Vars: map[string]string{"NAME": "one"}, SourceFile: "one.incus.yaml"},
+				{Vars: map[string]string{"NAME": "one"}, SourceFile: "one.yaml"},
 			},
 			Resources: []*config.Resource{
-				{Base: config.Base{Type: "instance", Name: "one", SourceFile: "one.incus.yaml", Config: map[string]string{
+				{Base: config.Base{Type: "instance", Name: "one", SourceFile: "one.yaml", Config: map[string]string{
 					"user.global": "$GLOBAL",
 					"user.name":   "$NAME",
 					"user.home":   "$HOME",
@@ -28,12 +28,12 @@ func TestResolveAndInterpolateScopesVarsPerFile(t *testing.T) {
 			},
 		},
 		{
-			SourceFile: "two.incus.yaml",
+			SourceFile: "two.yaml",
 			Vars: []*config.Vars{
-				{Vars: map[string]string{"NAME": "two"}, SourceFile: "two.incus.yaml"},
+				{Vars: map[string]string{"NAME": "two"}, SourceFile: "two.yaml"},
 			},
 			Resources: []*config.Resource{
-				{Base: config.Base{Type: "instance", Name: "two", SourceFile: "two.incus.yaml", Config: map[string]string{
+				{Base: config.Base{Type: "instance", Name: "two", SourceFile: "two.yaml", Config: map[string]string{
 					"user.global": "$GLOBAL",
 					"user.name":   "$NAME",
 					"user.home":   "$HOME",
@@ -80,10 +80,10 @@ func TestResolveAndInterpolateScopesVarsPerFile(t *testing.T) {
 func TestResolveAndInterpolate_SetsPreviewRedactionOnlyForInstances(t *testing.T) {
 	results := []*config.FileResult{
 		{
-			SourceFile: "resources.incus.yaml",
+			SourceFile: "resources.yaml",
 			Resources: []*config.Resource{
-				{Base: config.Base{Type: "instance", Name: "web", SourceFile: "resources.incus.yaml"}},
-				{Base: config.Base{Type: "profile", Name: "base", SourceFile: "resources.incus.yaml"}},
+				{Base: config.Base{Type: "instance", Name: "web", SourceFile: "resources.yaml"}},
+				{Base: config.Base{Type: "profile", Name: "base", SourceFile: "resources.yaml"}},
 			},
 		},
 	}
@@ -107,13 +107,13 @@ func TestResolveAndInterpolate_AllowsYAMLContentInSingleLineScalar(t *testing.T)
 	seed := "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: app\n"
 	results := []*config.FileResult{
 		{
-			SourceFile: "app.incus.yaml",
+			SourceFile: "app.yaml",
 			Vars: []*config.Vars{
-				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.incus.yaml"},
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
 			},
 			Resources: []*config.Resource{
 				{
-					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.incus.yaml"},
+					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.yaml"},
 					InstanceFields: config.InstanceFields{
 						Image: "images:alpine/3.19",
 						Setup: []config.SetupAction{{
@@ -147,13 +147,13 @@ func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T)
 	seed := "{\n  \"name\": \"app\",\n  \"enabled\": true\n}"
 	results := []*config.FileResult{
 		{
-			SourceFile: "app.incus.yaml",
+			SourceFile: "app.yaml",
 			Vars: []*config.Vars{
-				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.incus.yaml"},
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
 			},
 			Resources: []*config.Resource{
 				{
-					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.incus.yaml"},
+					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.yaml"},
 					InstanceFields: config.InstanceFields{
 						Image: "images:alpine/3.19",
 						Setup: []config.SetupAction{{

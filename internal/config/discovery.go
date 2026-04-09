@@ -9,12 +9,12 @@ import (
 
 // Supported file extensions for incus configuration files.
 const (
-	extYAML = ".incus.yaml"
-	extYML  = ".incus.yml"
-	extJSON = ".incus.json"
+	extYAML = ".yaml"
+	extYML  = ".yml"
+	extJSON = ".json"
 )
 
-// Discovery finds .incus.yaml and .incus.json configuration files.
+// Discovery finds YAML and JSON configuration files containing incus resources.
 type Discovery struct {
 	recursive bool
 }
@@ -107,8 +107,7 @@ func (d Discovery) handleDirectory(path, rootDir string, info os.FileInfo) error
 	return nil
 }
 
-// isIncusConfigFile checks if the filename matches incus config patterns:
-// *.incus.yaml, *.incus.yml, or *.incus.json
+// isIncusConfigFile checks if the filename has a yaml or json extension.
 func isIncusConfigFile(name string) bool {
 	lower := strings.ToLower(name)
 	return strings.HasSuffix(lower, extYAML) ||

@@ -142,3 +142,52 @@ func TestParseInstanceSetupFields(t *testing.T) {
 		t.Fatal("required = false, want default true")
 	}
 }
+
+func TestParseSkipsDocumentsWithUnknownType(t *testing.T) {
+	// A multi-document YAML where some documents are not incus resources.
+	input := `---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+---
+type: instance
+name: web
+image: images:alpine/3.19
+---
+type: UnknownThing
+name: foo
+---
+name: no-type-field
+value: 42
+`
+
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v, want no error", err)
+	}
+	if len(result.Resources) != 1 {
+		t.Fatalf("resources = %d, want 1 (only the instance)", len(result.Resources))
+	}
+	if result.Resources[0].Name != "web" {
+		t.Fatalf("resource name = %q, want web", result.Resources[0].Name)
+	}
+}
+
+func TestParseSkipsEmptyTypeDocuments(t *testing.T) {
+	input := `---
+name: something
+value: 42
+---
+type: profile
+name: default
+`
+
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v", err)
+	}
+	if len(result.Resources) != 1 || result.Resources[0].Type != "profile" {
+		t.Fatalf("resources = %v, want [profile/default]", result.Resources)
+	}
+}
