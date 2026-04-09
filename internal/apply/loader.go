@@ -153,7 +153,16 @@ func interpolateResource(res *config.Resource, env map[string]string) (*config.R
 		return nil, err
 	}
 
-	data, err = config.InterpolateDeclared(data, env)
+	var node yaml.Node
+	if err := yaml.Unmarshal(data, &node); err != nil {
+		return nil, err
+	}
+
+	if err := interpolateYAMLNode(&node, env); err != nil {
+		return nil, err
+	}
+
+	data, err = yaml.Marshal(&node)
 	if err != nil {
 		return nil, err
 	}
@@ -164,6 +173,28 @@ func interpolateResource(res *config.Resource, env map[string]string) (*config.R
 	}
 	result.SourceFile = res.SourceFile
 	return &result, nil
+}
+
+func interpolateYAMLNode(node *yaml.Node, env map[string]string) error {
+	if node == nil {
+		return nil
+	}
+
+	if node.Kind == yaml.ScalarNode && node.Tag == "!!str" {
+		interpolated, err := config.InterpolateDeclared([]byte(node.Value), env)
+		if err != nil {
+			return err
+		}
+		node.Value = string(interpolated)
+	}
+
+	for _, child := range node.Content {
+		if err := interpolateYAMLNode(child, env); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // validateResourceTypes ensures all resources have valid types.

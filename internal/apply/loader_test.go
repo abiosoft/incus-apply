@@ -102,3 +102,80 @@ func TestResolveAndInterpolate_SetsPreviewRedactionOnlyForInstances(t *testing.T
 		t.Fatalf("profile preview redact prefixes = %#v, want none", resources[1].PreviewRedactPrefixes)
 	}
 }
+
+func TestResolveAndInterpolate_AllowsYAMLContentInSingleLineScalar(t *testing.T) {
+	seed := "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: app\n"
+	results := []*config.FileResult{
+		{
+			SourceFile: "app.incus.yaml",
+			Vars: []*config.Vars{
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.incus.yaml"},
+			},
+			Resources: []*config.Resource{
+				{
+					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.incus.yaml"},
+					InstanceFields: config.InstanceFields{
+						Image: "images:alpine/3.19",
+						Setup: []config.SetupAction{{
+							Action:  config.SetupActionPushFile,
+							When:    config.SetupWhenCreate,
+							Path:    "/seed/incus.yaml",
+							Content: "$SEED",
+						}},
+					},
+				},
+			},
+		},
+	}
+
+	resources, err := resolveAndInterpolate(results)
+	if err != nil {
+		t.Fatalf("resolveAndInterpolate() error = %v", err)
+	}
+	if len(resources) != 1 {
+		t.Fatalf("expected 1 resource, got %d", len(resources))
+	}
+	if got := resources[0].Setup[0].Content; got != seed {
+		t.Fatalf("setup content = %q, want %q", got, seed)
+	}
+	if got := resources[0].Setup[0].Path; got != "/seed/incus.yaml" {
+		t.Fatalf("setup path = %q, want %q", got, "/seed/incus.yaml")
+	}
+}
+
+func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T) {
+	seed := "{\n  \"name\": \"app\",\n  \"enabled\": true\n}"
+	results := []*config.FileResult{
+		{
+			SourceFile: "app.incus.yaml",
+			Vars: []*config.Vars{
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.incus.yaml"},
+			},
+			Resources: []*config.Resource{
+				{
+					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.incus.yaml"},
+					InstanceFields: config.InstanceFields{
+						Image: "images:alpine/3.19",
+						Setup: []config.SetupAction{{
+							Action:  config.SetupActionPushFile,
+							When:    config.SetupWhenCreate,
+							Path:    "/seed/data.json",
+							Content: "$SEED",
+						}},
+					},
+				},
+			},
+		},
+	}
+
+	resources, err := resolveAndInterpolate(results)
+	if err != nil {
+		t.Fatalf("resolveAndInterpolate() error = %v", err)
+	}
+	if len(resources) != 1 {
+		t.Fatalf("expected 1 resource, got %d", len(resources))
+	}
+	if got := resources[0].Setup[0].Content; got != seed {
+		t.Fatalf("setup content = %q, want %q", got, seed)
+	}
+}
