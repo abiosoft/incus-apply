@@ -15,16 +15,17 @@ This page contains the full field reference for `incus-apply` resource documents
 
 ## Instance Fields
 
-| Field      | Type   | Description                                                    |
-| ---------- | ------ | -------------------------------------------------------------- |
-| `image`    | string | Image to use (for example `images:debian/12`)                  |
-| `vm`       | bool   | Create a VM instead of a container                             |
-| `empty`    | bool   | Create an empty instance                                       |
-| `profiles` | list   | Profiles to apply                                              |
-| `storage`  | string | Storage pool for the root disk                                 |
-| `network`  | string | Network to attach                                              |
-| `target`   | string | Cluster member target                                          |
-| `setup`    | list   | Post-create and post-update actions to run inside the instance |
+| Field      | Type   | Description                                                        |
+| ---------- | ------ | ------------------------------------------------------------------ |
+| `image`    | string | Image to use (for example `images:debian/12`)                      |
+| `vm`       | bool   | Create a VM instead of a container                                 |
+| `empty`    | bool   | Create an empty instance                                           |
+| `profiles` | list   | Profiles to apply                                                  |
+| `storage`  | string | Storage pool for the root disk                                     |
+| `network`  | string | Network to attach                                                  |
+| `target`   | string | Cluster member target                                              |
+| `after`    | list   | Instance names (same project) that must be applied before this one |
+| `setup`    | list   | Post-create and post-update actions to run inside the instance     |
 
 ### Instance Setup Actions
 
@@ -33,6 +34,7 @@ Use `setup` to run imperative instance actions after Incus resource changes are 
 - `when: create` runs only when the instance is created or recreated.
 - `when: update` runs on create and on later applies when the instance changes.
 - `when: always` runs on every apply, even when the instance config itself is unchanged.
+- `when` defaults to `create` if omitted.
 - `required` defaults to `true`; set `required: false` to continue with later setup actions when one fails.
 - `skip: true` keeps the action in config but prevents execution.
 
@@ -41,7 +43,7 @@ Supported actions:
 | Field       | Type    | Description                                                                                |
 | ----------- | ------- | ------------------------------------------------------------------------------------------ |
 | `action`    | string  | **Required.** `exec` or `file_push`                                                        |
-| `when`      | string  | **Required.** `create`, `update`, or `always`                                              |
+| `when`      | string  | `create`, `update`, or `always` (defaults to `create`)                                     |
 | `required`  | boolean | Optional; defaults to `true`. Set to `false` to continue when this setup action fails      |
 | `skip`      | boolean | Skip the action without removing it from config                                            |
 | `script`    | string  | Required for `action: exec`; executed as root using `sh -c <script>`                       |
@@ -56,7 +58,7 @@ Supported actions:
 
 Notes:
 
-- `file_push` requires exactly one of `content` or `source`.
+- `file_push` accepts `content`, `source`, or neither. When both are omitted, an empty file is created at `path`.
 - `file_push.source` is passed to `incus file push` as-is after relative-path resolution. `incus-apply` validates that it exists when the action executes, but does not read it.
 - Use `recursive: true` with `file_push.source` when pushing directories or when you want `incus file push --recursive`.
 - `exec` actions run as the root user inside the instance unless Incus defaults are changed elsewhere.
