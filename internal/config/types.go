@@ -186,9 +186,10 @@ func (a SetupAction) Validate(index int) error {
 // Vars represents a `type: vars` document that declares variables
 // for interpolation in resource configs within the same file (or globally).
 type Vars struct {
-	Vars   map[string]string `yaml:"vars,omitempty"`
-	Files  []string          `yaml:"files,omitempty"` // .env files to load
-	Global bool              `yaml:"global,omitempty"`
+	Vars     map[string]string `yaml:"vars,omitempty"`
+	Files    []string          `yaml:"files,omitempty"`    // .env files to load
+	Commands map[string]string `yaml:"commands,omitempty"` // shell commands whose stdout becomes the value
+	Global   bool              `yaml:"global,omitempty"`
 
 	SourceFile string `yaml:"-"`
 }
