@@ -161,6 +161,8 @@ type: vars
 vars:
   NODE_ENV: production
   MYSQL_DATABASE: app
+commands:
+  GIT_SHA: "git rev-parse --short HEAD"
 ---
 type: instance
 name: api
@@ -168,7 +170,10 @@ image: docker:node:20
 config:
   environment.NODE_ENV: $NODE_ENV
   environment.MYSQL_DATABASE: $MYSQL_DATABASE
+  environment.GIT_SHA: $GIT_SHA
 ```
+
+`commands` maps variable names to shell command strings passed to `sh -c`; stdout becomes the value. Resolution order: `files` → `vars` → `commands` (later wins).
 
 For full variable usage, scoping rules, and syntax, see [docs/configuration-reference.md](./docs/configuration-reference.md).
 

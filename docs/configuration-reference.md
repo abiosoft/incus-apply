@@ -160,6 +160,8 @@ vars:
   DB_PASS: ${MYSQL_PASSWORD}
 files:
   - secrets.env
+commands:
+  DB_VERSION: "mysql --version | awk '{print $3}'"
 ---
 type: instance
 name: db
@@ -168,6 +170,7 @@ config:
   environment.MYSQL_DATABASE: $DB_NAME
   environment.MYSQL_USER: $DB_USER
   environment.MYSQL_PASSWORD: $DB_PASS
+  environment.MYSQL_VERSION: $DB_VERSION
 ```
 
 ### Scoping
@@ -199,6 +202,24 @@ config:
 ```
 
 In this example, `environment.APP_NAME` becomes `myapp`, while `environment.HOME_DIR` remains `$HOME` because `HOME` was not declared in `type: vars`.
+
+### Commands
+
+The `commands` key maps variable names to shell command strings. Each command is passed as a single argument to `sh -c`. The trimmed stdout of the command becomes the variable value.
+
+```yaml
+type: vars
+commands:
+  GIT_SHA: "git rev-parse --short HEAD"
+  HOSTNAME: "hostname -f"
+```
+
+Resolution order (later sources win):
+1. `files` — env files, in listed order
+2. `vars` — inline values
+3. `commands` — shell command output
+
+A non-zero exit code from any command is a fatal error.
 
 ### Preview Redaction
 
