@@ -137,6 +137,8 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 			continue
 		}
 
+		res.applyDefaults()
+
 		if err := res.Validate(); err != nil {
 			return nil, err
 		}

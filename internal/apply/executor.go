@@ -59,7 +59,10 @@ func (a *defaultExecutor) Upsert() error {
 	if err := validateUniqueResources(resources); err != nil {
 		return err
 	}
-	sorted := resource.SortForApply(resources)
+	sorted, err := resource.SortForApply(resources)
+	if err != nil {
+		return err
+	}
 	output, preview, plans := computeUpsertDiff(&a.opts, a.client, sorted)
 
 	if err := a.renderer.Render(output); err != nil {
