@@ -183,8 +183,8 @@ func (a SetupAction) Validate(index int) error {
 		if a.Path[0] != '/' {
 			return &ValidationError{Field: field("path"), Message: "path must be absolute"}
 		}
-		if (a.Content == "" && a.Source == "") || (a.Content != "" && a.Source != "") {
-			return &ValidationError{Field: field("content"), Message: "exactly one of content or source must be set for file_push actions"}
+		if a.Content != "" && a.Source != "" {
+			return &ValidationError{Field: field("content"), Message: "content and source are mutually exclusive for file_push actions"}
 		}
 		if a.Recursive && a.Source == "" {
 			return &ValidationError{Field: field("recursive"), Message: "recursive is only supported when source is set"}

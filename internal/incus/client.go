@@ -287,7 +287,7 @@ func (c client) pushSetupFile(res *config.Resource, action config.SetupAction, p
 	}
 
 	var stdin []byte
-	if action.Content != "" {
+	if action.Source == "" {
 		args = append(args, "-")
 		stdin = []byte(action.Content)
 	} else {
