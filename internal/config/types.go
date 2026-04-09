@@ -40,6 +40,7 @@ type InstanceFields struct {
 	Storage  string        `yaml:"storage,omitempty" json:"storage,omitempty"`
 	Network  string        `yaml:"network,omitempty" json:"network,omitempty"`
 	Target   string        `yaml:"target,omitempty" json:"target,omitempty"`
+	After    []string      `yaml:"after,omitempty" json:"after,omitempty"`
 	Setup    []SetupAction `yaml:"setup,omitempty" json:"setup,omitempty"`
 }
 
@@ -122,6 +123,15 @@ type Stdin struct {
 	Ports       []map[string]any          `yaml:"ports,omitempty"`   // Network forward port rules
 }
 
+// applyDefaults sets default values for optional fields.
+func (r *Resource) applyDefaults() {
+	for i := range r.Setup {
+		if r.Setup[i].When == "" {
+			r.Setup[i].When = SetupWhenCreate
+		}
+	}
+}
+
 // Validate checks if required fields are present in the resource configuration.
 func (r Resource) Validate() error {
 	if r.Type == "" {
@@ -129,6 +139,9 @@ func (r Resource) Validate() error {
 	}
 	if len(r.Setup) > 0 && r.Type != "instance" {
 		return &ValidationError{Field: "setup", Message: "setup is only supported for instances"}
+	}
+	if len(r.After) > 0 && r.Type != "instance" {
+		return &ValidationError{Field: "after", Message: "after is only supported for instances"}
 	}
 	if r.Type == "network-forward" {
 		if r.ListenAddress == "" {
