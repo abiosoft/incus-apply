@@ -33,15 +33,16 @@ type Resource struct {
 
 // InstanceFields captures the fields specific to Incus instances.
 type InstanceFields struct {
-	Image    string        `yaml:"image,omitempty" json:"image,omitempty"`
-	VM       bool          `yaml:"vm,omitempty" json:"vm,omitempty"`
-	Empty    bool          `yaml:"empty,omitempty" json:"empty,omitempty"`
-	Profiles []string      `yaml:"profiles,omitempty" json:"profiles,omitempty"`
-	Storage  string        `yaml:"storage,omitempty" json:"storage,omitempty"`
-	Network  string        `yaml:"network,omitempty" json:"network,omitempty"`
-	Target   string        `yaml:"target,omitempty" json:"target,omitempty"`
-	After    []string      `yaml:"after,omitempty" json:"after,omitempty"`
-	Setup    []SetupAction `yaml:"setup,omitempty" json:"setup,omitempty"`
+	Image     string        `yaml:"image,omitempty" json:"image,omitempty"`
+	VM        bool          `yaml:"vm,omitempty" json:"vm,omitempty"`
+	Empty     bool          `yaml:"empty,omitempty" json:"empty,omitempty"`
+	Ephemeral bool          `yaml:"ephemeral,omitempty" json:"ephemeral,omitempty"`
+	Profiles  []string      `yaml:"profiles,omitempty" json:"profiles,omitempty"`
+	Storage   string        `yaml:"storage,omitempty" json:"storage,omitempty"`
+	Network   string        `yaml:"network,omitempty" json:"network,omitempty"`
+	Target    string        `yaml:"target,omitempty" json:"target,omitempty"`
+	After     []string      `yaml:"after,omitempty" json:"after,omitempty"`
+	Setup     []SetupAction `yaml:"setup,omitempty" json:"setup,omitempty"`
 }
 
 // SetupActionType identifies the supported setup action kinds.

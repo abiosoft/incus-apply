@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/abiosoft/incus-apply/internal/config"
+	"github.com/abiosoft/incus-apply/internal/resource"
 )
 
 func TestExecCmdTimeout(t *testing.T) {
@@ -159,5 +160,18 @@ func TestWaitInstanceAgentUsesTimeoutAndProject(t *testing.T) {
 	}
 	if !strings.Contains(result.Command, "wait vm1 agent --interval 1 --timeout 6 --project prod") {
 		t.Fatalf("command = %q, want wait agent command with timeout and project", result.Command)
+	}
+}
+
+func TestBuildInstanceCreateArgsEphemeral(t *testing.T) {
+	res := &config.Resource{
+		Base:           config.Base{Type: "instance", Name: "tmp1"},
+		InstanceFields: config.InstanceFields{Image: "images:alpine/3.19", Ephemeral: true},
+	}
+	meta, _ := resource.GetTypeMeta("instance")
+	args, _ := client{}.buildCreateCommand(meta, res)
+	cmd := strings.Join(args, " ")
+	if !strings.Contains(cmd, "--ephemeral") {
+		t.Fatalf("command = %q, want --ephemeral flag", cmd)
 	}
 }

@@ -82,6 +82,9 @@ func (c client) buildInstanceCreateArgs(args []string, res *config.Resource) []s
 	if res.Empty {
 		args = append(args, "--empty")
 	}
+	if res.Ephemeral {
+		args = append(args, "--ephemeral")
+	}
 	if res.Storage != "" {
 		args = append(args, "--storage", res.Storage)
 	}

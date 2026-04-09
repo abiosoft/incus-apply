@@ -15,17 +15,18 @@ This page contains the full field reference for `incus-apply` resource documents
 
 ## Instance Fields
 
-| Field      | Type   | Description                                                        |
-| ---------- | ------ | ------------------------------------------------------------------ |
-| `image`    | string | Image to use (for example `images:debian/12`)                      |
-| `vm`       | bool   | Create a VM instead of a container                                 |
-| `empty`    | bool   | Create an empty instance                                           |
-| `profiles` | list   | Profiles to apply                                                  |
-| `storage`  | string | Storage pool for the root disk                                     |
-| `network`  | string | Network to attach                                                  |
-| `target`   | string | Cluster member target                                              |
-| `after`    | list   | Instance names (same project) that must be applied before this one |
-| `setup`    | list   | Post-create and post-update actions to run inside the instance     |
+| Field       | Type   | Description                                                        |
+| ----------- | ------ | ------------------------------------------------------------------ |
+| `image`     | string | Image to use (for example `images:debian/12`)                      |
+| `vm`        | bool   | Create a VM instead of a container                                 |
+| `empty`     | bool   | Create an empty instance                                           |
+| `ephemeral` | bool   | Create an ephemeral instance (deleted when it stops)               |
+| `profiles`  | list   | Profiles to apply                                                  |
+| `storage`   | string | Storage pool for the root disk                                     |
+| `network`   | string | Network to attach                                                  |
+| `target`    | string | Cluster member target                                              |
+| `after`     | list   | Instance names (same project) that must be applied before this one |
+| `setup`     | list   | Post-create and post-update actions to run inside the instance     |
 
 ### Instance Setup Actions
 

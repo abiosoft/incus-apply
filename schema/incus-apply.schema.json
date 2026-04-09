@@ -59,6 +59,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -255,6 +258,9 @@
             },
             "empty": {
               "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "ephemeral": {
               "type": "boolean"
             },
             "image": {
@@ -455,6 +461,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -651,6 +660,9 @@
             },
             "empty": {
               "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "ephemeral": {
               "type": "boolean"
             },
             "image": {
@@ -852,6 +864,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -1048,6 +1063,9 @@
             },
             "empty": {
               "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "ephemeral": {
               "type": "boolean"
             },
             "image": {
@@ -1248,6 +1266,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -1444,6 +1465,9 @@
             },
             "empty": {
               "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "ephemeral": {
               "type": "boolean"
             },
             "image": {
@@ -1644,6 +1668,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -1842,6 +1869,9 @@
               "description": "Create an empty instance (no image)",
               "type": "boolean"
             },
+            "ephemeral": {
+              "type": "boolean"
+            },
             "image": {
               "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
               "type": "string"
@@ -2038,6 +2068,9 @@
             },
             "empty": {
               "description": "Create an empty instance (no image)",
+              "type": "boolean"
+            },
+            "ephemeral": {
               "type": "boolean"
             },
             "image": {
