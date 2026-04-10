@@ -158,6 +158,14 @@ func generateVarsSchema() Schema {
 				Description: "Paths to .env files to load variables from.",
 				Items:       &Schema{Type: "string"},
 			},
+			"commands": {
+				Type:        "object",
+				Description: "Shell commands whose stdout is used as the variable value (key-value pairs).",
+				PatternProperties: map[string]*Schema{
+					".*": {Type: "string"},
+				},
+				AdditionalProperties: &falseVal,
+			},
 			"global": {
 				Type:        "boolean",
 				Description: "If true, variables are shared across all files instead of being file-scoped.",
