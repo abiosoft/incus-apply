@@ -26,44 +26,24 @@ updates, or deletes Incus resources accordingly.
 By default, a diff is shown and you are prompted before changes are applied.
 
 Examples:
-  # Apply configs (shows diff, then prompts)
+  # Apply configs in the current directory
   incus-apply .
 
-  # Apply specific files
+  # Apply from specific files or a URL
   incus-apply instance.yaml network.yaml
-
-  # Apply recursively from a directory
-  incus-apply ./configs/ -r
-
-  # Apply from stdin
-  cat instance.yaml | incus-apply -
-
-  # Apply from URL
   incus-apply https://example.com/config.yaml
-
-  # Auto-accept changes without prompting
-  incus-apply . -y
-
-  # Silent mode for CI (no diff, no prompt)
-  incus-apply . -yq
 
   # Show diff only (no apply)
   incus-apply . --diff
 
-  # Replace resources when create-only fields change
-  incus-apply . --replace -y
+  # Auto-accept changes without prompting
+  incus-apply . -y
 
-  # Show diff as JSON (for tooling)
-  incus-apply . --diff=json
+  # Silent mode for CI (no prompt, no progress output)
+  incus-apply . -yq
 
-  # Delete resources defined in configs
+  # Delete resources
   incus-apply . -d -y
-
-  # Stop running instances before applying (for config keys that require restart)
-  incus-apply . --stop
-
-  # Create instances without starting them
-  incus-apply . --launch=false
 
   # Apply to a specific project
   incus-apply . --project myproject`,
@@ -97,6 +77,8 @@ Examples:
 		"Delete resources instead of creating/updating")
 	rootCmd.Flags().BoolVar(&opts.Reset, "reset", false,
 		"Delete all resources then recreate them from configs")
+	rootCmd.Flags().BoolVar(&opts.Select, "select", false,
+		"Interactively select which resources to include before applying")
 	rootCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false,
 		"Auto-accept and apply changes without prompting")
 	rootCmd.Flags().StringVar(&opts.Diff, "diff", "",
@@ -150,6 +132,9 @@ func validateOptions(opts *apply.Options) error {
 	}
 	if opts.Reset && opts.Diff != "" {
 		return fmt.Errorf("--reset and --diff are mutually exclusive")
+	}
+	if opts.Select && opts.Yes {
+		return fmt.Errorf("--select and --yes are mutually exclusive")
 	}
 	if opts.FetchTimeout < 0 {
 		return fmt.Errorf("--fetch-timeout must be >= 0")

@@ -67,6 +67,14 @@ It computes a combined diff showing what will be deleted and what will be recrea
 
 It is mutually exclusive with `--delete` and `--diff`. Use `--yes` to skip the confirmation prompt.
 
+## Can I apply only a subset of resources?
+
+Yes. Use `--select` to open an interactive multi-select dialog before the diff is computed. Navigate with `↑`/`↓` or `j`/`k`, toggle items with `space`, toggle all with `a`, confirm with `enter`, and cancel with `q`.
+
+Only the resources you confirm are passed through to the diff and apply steps. `--select` works with all operation modes: normal apply, `--delete`, and `--reset`.
+
+Because selection happens before confirmation, `--select` is mutually exclusive with `--yes`.
+
 ## How do variables work?
 
 Declare variables in a `type: vars` document and reference them in resource documents with `$VAR` or `${VAR}`. See [configuration-reference.md](./configuration-reference.md) for syntax and scoping rules.

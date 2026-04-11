@@ -73,6 +73,18 @@ func (a *defaultExecutor) Upsert() error {
 	if resources == nil {
 		return nil
 	}
+	if a.opts.Select {
+		resources, err = a.doMultiSelect(resources)
+		if err != nil {
+			if errors.Is(err, errCancelled) {
+				return nil
+			}
+			return err
+		}
+		if resources == nil {
+			return nil
+		}
+	}
 	sorted, err := resource.SortForApply(resources)
 	if err != nil {
 		return err
@@ -120,6 +132,18 @@ func (a *defaultExecutor) Delete() error {
 	if resources == nil {
 		return nil
 	}
+	if a.opts.Select {
+		resources, err = a.doMultiSelect(resources)
+		if err != nil {
+			if errors.Is(err, errCancelled) {
+				return nil
+			}
+			return err
+		}
+		if resources == nil {
+			return nil
+		}
+	}
 	sorted := resource.SortForDelete(resources)
 	output, preview, plans := computeDeleteDiff(&a.opts, a.client, sorted)
 
@@ -164,6 +188,18 @@ func (a *defaultExecutor) Reset() error {
 	}
 	if resources == nil {
 		return nil
+	}
+	if a.opts.Select {
+		resources, err = a.doMultiSelect(resources)
+		if err != nil {
+			if errors.Is(err, errCancelled) {
+				return nil
+			}
+			return err
+		}
+		if resources == nil {
+			return nil
+		}
 	}
 
 	deleteSorted := resource.SortForDelete(resources)
@@ -220,6 +256,36 @@ func (a defaultExecutor) applyProjectOverride(resources []*config.Resource) {
 			res.Project = a.opts.Project
 		}
 	}
+}
+
+// doMultiSelect shows an interactive multi-select UI and returns only the
+// resources the user chose. Returns errCancelled when the user aborts.
+func (a defaultExecutor) doMultiSelect(resources []*config.Resource) ([]*config.Resource, error) {
+	labels := make([]string, len(resources))
+	for i, res := range resources {
+		labels[i] = formatResourceID(res)
+	}
+
+	chosen, result, err := terminal.MultiSelect("Select resources", labels)
+	if err != nil {
+		return nil, err
+	}
+	if result == terminal.MultiSelectCancelled {
+		return nil, errCancelled
+	}
+	if result == terminal.MultiSelectAll {
+		return resources, nil
+	}
+	if len(chosen) == 0 {
+		printInfo(a.opts.Quiet, "No resources selected.")
+		return nil, nil
+	}
+
+	filtered := make([]*config.Resource, len(chosen))
+	for i, idx := range chosen {
+		filtered[i] = resources[idx]
+	}
+	return filtered, nil
 }
 
 func (a defaultExecutor) confirmApply(prompt string) error {

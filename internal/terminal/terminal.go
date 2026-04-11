@@ -90,3 +90,17 @@ func Width(w io.Writer, fallback int) int {
 	}
 	return width
 }
+
+// Height returns the current terminal height for the given writer when available.
+// If the height cannot be detected, fallback is returned.
+func Height(w io.Writer, fallback int) int {
+	file, ok := w.(*os.File)
+	if !ok {
+		return fallback
+	}
+	_, height, err := term.GetSize(int(file.Fd()))
+	if err != nil || height <= 0 {
+		return fallback
+	}
+	return height
+}
