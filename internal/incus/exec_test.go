@@ -133,14 +133,14 @@ func TestProgressWriterDisplaysInitialLabel(t *testing.T) {
 }
 
 func TestSetupProgressLabelIncludesPosition(t *testing.T) {
-	if got := setupProgressLabel(1, 3); got != "  └─ running setup 1 of 3... " {
-		t.Fatalf("setupProgressLabel() = %q, want %q", got, "  └─ running setup 1 of 3... ")
+	if got := setupProgressLabel(1, 3); got != "  └─ running setup 1 of 3: " {
+		t.Fatalf("setupProgressLabel() = %q, want %q", got, "  └─ running setup 1 of 3: ")
 	}
 }
 
 func TestWaitForAgentProgressLabel(t *testing.T) {
-	if got := waitForAgentProgressLabel(); got != "  └─ waiting for incus agent... " {
-		t.Fatalf("waitForAgentProgressLabel() = %q, want %q", got, "  └─ waiting for incus agent... ")
+	if got := waitForAgentProgressLabel(); got != "  └─ waiting for incus agent " {
+		t.Fatalf("waitForAgentProgressLabel() = %q, want %q", got, "  └─ waiting for incus agent ")
 	}
 }
 
