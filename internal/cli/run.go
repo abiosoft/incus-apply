@@ -24,5 +24,8 @@ func runApply(opts *apply.Options) error {
 	if opts.Delete {
 		return executor.Delete()
 	}
+	if opts.Reset {
+		return executor.Reset()
+	}
 	return executor.Upsert()
 }

@@ -19,6 +19,8 @@ type Executor interface {
 	Upsert() error
 	// Delete removes resources based on config.
 	Delete() error
+	// Reset deletes all resources then recreates them from config.
+	Reset() error
 }
 
 // Renderer renders preview output to the user.
@@ -45,19 +47,31 @@ func NewExecutor(opts Options, client incus.Client, renderer Renderer) Executor 
 	}
 }
 
+// loadAndValidate loads resources from config files, applies project override,
+// and validates uniqueness. Returns nil resources (no error) when none are found.
+func (a *defaultExecutor) loadAndValidate() ([]*config.Resource, error) {
+	resources, err := loadResources(&a.opts)
+	if err != nil {
+		return nil, err
+	}
+	if resources == nil {
+		return nil, nil
+	}
+	a.applyProjectOverride(resources)
+	if err := validateUniqueResources(resources); err != nil {
+		return nil, err
+	}
+	return resources, nil
+}
+
 // Upsert creates or updates resources based on config.
 func (a *defaultExecutor) Upsert() error {
-	resources, err := loadResources(&a.opts)
+	resources, err := a.loadAndValidate()
 	if err != nil {
 		return err
 	}
 	if resources == nil {
 		return nil
-	}
-
-	a.applyProjectOverride(resources)
-	if err := validateUniqueResources(resources); err != nil {
-		return err
 	}
 	sorted, err := resource.SortForApply(resources)
 	if err != nil {
@@ -99,17 +113,12 @@ func (a *defaultExecutor) Upsert() error {
 
 // Delete removes resources based on config.
 func (a *defaultExecutor) Delete() error {
-	resources, err := loadResources(&a.opts)
+	resources, err := a.loadAndValidate()
 	if err != nil {
 		return err
 	}
 	if resources == nil {
 		return nil
-	}
-
-	a.applyProjectOverride(resources)
-	if err := validateUniqueResources(resources); err != nil {
-		return err
 	}
 	sorted := resource.SortForDelete(resources)
 	output, preview, plans := computeDeleteDiff(&a.opts, a.client, sorted)
@@ -144,6 +153,64 @@ func (a *defaultExecutor) Delete() error {
 	}
 	r.printSummary()
 	return r.result.errorResult()
+}
+
+// Reset deletes all resources then recreates them from config.
+// Shows a combined diff with a single confirmation prompt.
+func (a *defaultExecutor) Reset() error {
+	resources, err := a.loadAndValidate()
+	if err != nil {
+		return err
+	}
+	if resources == nil {
+		return nil
+	}
+
+	deleteSorted := resource.SortForDelete(resources)
+	createSorted, err := resource.SortForApply(resources)
+	if err != nil {
+		return err
+	}
+	output, delPreview, delPlans, _, createPlans := computeResetDiff(&a.opts, a.client, deleteSorted, createSorted)
+
+	if err := a.renderer.Render(output); err != nil {
+		return err
+	}
+	if a.opts.IsDiffOnly() {
+		return delPreview.errorResult()
+	}
+	if delPreview.hasErrors() {
+		printInfo(a.opts.Quiet, "Not applying reset because planning encountered errors.")
+		return delPreview.errorResult()
+	}
+
+	if err := a.confirmApply("Proceed to reset (delete then recreate) these resources"); err != nil {
+		if errors.Is(err, errCancelled) {
+			return nil
+		}
+		return err
+	}
+
+	dr := &runner{opts: &a.opts, client: a.client, printer: deletePrinter{}}
+	for _, p := range delPlans {
+		if err := dr.delete(p); err != nil {
+			return err
+		}
+	}
+	dr.printSummary()
+	if err := dr.result.errorResult(); err != nil {
+		return err
+	}
+
+	printInfo(a.opts.Quiet, "")
+	cr := &runner{opts: &a.opts, client: a.client, printer: upsertPrinter{}}
+	for _, p := range createPlans {
+		if err := cr.upsert(p); err != nil {
+			return err
+		}
+	}
+	cr.printSummary()
+	return cr.result.errorResult()
 }
 
 // applyProjectOverride sets the project on all resources if specified.

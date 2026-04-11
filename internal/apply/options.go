@@ -14,6 +14,7 @@ type Options struct {
 
 	// Operation modes
 	Delete   bool
+	Reset    bool
 	Yes      bool
 	Diff     string
 	Replace  bool

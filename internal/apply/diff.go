@@ -9,18 +9,20 @@ import (
 	"github.com/abiosoft/incus-apply/internal/resource"
 )
 
+// appendNote appends extra to note, separated by ", ".
+func appendNote(note, extra string) string {
+	if note == "" {
+		return extra
+	}
+	return note + ", " + extra
+}
+
 // computeUpsertDiff computes what would change for each resource without applying.
 // Returns an Output ready for rendering, the stats, and the execution plan.
 func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.Resource) (Output, *result, []upsertPlan) {
 	preview := &result{}
 	var creates, updates, replaces, unchanged []OutputItem
 	var plans []upsertPlan
-	appendNote := func(note, extra string) string {
-		if note == "" {
-			return extra
-		}
-		return note + ", " + extra
-	}
 	buildOutput := func() Output {
 		var output Output
 		output.FileCount = opts.FileCount
@@ -211,6 +213,49 @@ func hasSetupForUpdate(res *config.Resource) bool {
 
 func hasSetupForAlways(res *config.Resource) bool {
 	return hasSetupForAction(res, upsertSetupOnly)
+}
+
+// computeResetDiff builds a combined diff for the reset operation.
+// deleteResources must be sorted for delete; createResources sorted for apply.
+// The delete half reuses computeDeleteDiff. The create half builds plans directly
+// without checking existence (resources still exist at diff time).
+func computeResetDiff(opts *Options, client incus.Client, deleteResources, createResources []*config.Resource) (Output, *result, []deletePlan, *result, []upsertPlan) {
+	// delete half — reuse existing logic
+	_, delPreview, delPlans := computeDeleteDiff(opts, client, deleteResources)
+
+	// create half — no existence check needed
+	createPreview := &result{}
+	var createItems []OutputItem
+	var createPlans []upsertPlan
+	for _, res := range createResources {
+		resourceID := formatResourceID(res)
+		item := OutputItem{ResourceID: resourceID}
+		if resource.Type(res.Type) == resource.TypeInstance && opts.Launch {
+			item.Note = "launch"
+		}
+		if hasSetupForCreate(res) {
+			item.Note = appendNote(item.Note, "setup")
+		}
+		createItems = append(createItems, item)
+		createPreview.created++
+		createPlans = append(createPlans, upsertPlan{res: res, action: upsertCreate})
+	}
+
+	// Only show resources that will actually be deleted (skip not-found).
+	var deleteItems []OutputItem
+	for _, p := range delPlans {
+		if !p.skip {
+			deleteItems = append(deleteItems, OutputItem{ResourceID: formatResourceID(p.res)})
+		}
+	}
+
+	var output Output
+	output.FileCount = opts.FileCount
+	output.ResourceCount = len(createResources)
+	output.AddGroup(ActionDelete, deleteItems)
+	output.AddGroup(ActionCreate, createItems)
+	output.Summary = resetSummary(delPreview, createPreview)
+	return output, delPreview, delPlans, createPreview, createPlans
 }
 
 func hasSetupForAction(res *config.Resource, action upsertAction) bool {

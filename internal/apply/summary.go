@@ -88,6 +88,24 @@ func (s result) deleteSummary() string {
 	return "Summary: " + strings.Join(parts, ", ") + "."
 }
 
+func resetSummary(del, create *result) string {
+	var parts []string
+	if del.deleted > 0 {
+		parts = append(parts, fmt.Sprintf("%d to delete", del.deleted))
+	}
+	if create.created > 0 {
+		parts = append(parts, fmt.Sprintf("%d to create", create.created))
+	}
+	errs := len(del.errors) + len(create.errors)
+	if errs > 0 {
+		parts = append(parts, fmt.Sprintf("%d errors", errs))
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return "Summary: " + strings.Join(parts, ", ") + "."
+}
+
 // --- Summary Printing ---
 
 // printer prints a summary of operation statistics.

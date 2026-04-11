@@ -95,6 +95,8 @@ Examples:
 	// Operation mode flags
 	rootCmd.Flags().BoolVarP(&opts.Delete, "delete", "d", false,
 		"Delete resources instead of creating/updating")
+	rootCmd.Flags().BoolVar(&opts.Reset, "reset", false,
+		"Delete all resources then recreate them from configs")
 	rootCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false,
 		"Auto-accept and apply changes without prompting")
 	rootCmd.Flags().StringVar(&opts.Diff, "diff", "",
@@ -142,6 +144,12 @@ func validateOptions(opts *apply.Options) error {
 	case "", "text", "json":
 	default:
 		return fmt.Errorf("invalid --diff value %q (allowed: text, json)", opts.Diff)
+	}
+	if opts.Reset && opts.Delete {
+		return fmt.Errorf("--reset and --delete are mutually exclusive")
+	}
+	if opts.Reset && opts.Diff != "" {
+		return fmt.Errorf("--reset and --diff are mutually exclusive")
 	}
 	if opts.FetchTimeout < 0 {
 		return fmt.Errorf("--fetch-timeout must be >= 0")
