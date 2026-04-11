@@ -153,7 +153,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -368,7 +369,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -583,7 +585,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -798,7 +801,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -1014,7 +1018,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -1229,7 +1234,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -1444,7 +1450,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -1659,7 +1666,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -1874,7 +1882,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -2089,7 +2098,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
@@ -2304,7 +2314,8 @@
                       "enum": [
                         "exec",
                         "file_push",
-                        "restart"
+                        "restart",
+                        "stop"
                       ]
                     },
                     "content": {
