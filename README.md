@@ -62,38 +62,17 @@ cat instance.yaml | incus-apply -
 # Apply from URL
 incus-apply https://example.com/instance.yaml
 
-# Override remote fetch and incus command timeouts
-incus-apply . --fetch-timeout=10s --command-timeout=2m
+# Show diff only (no apply)
+incus-apply . --diff
 
 # Auto-accept changes without prompting
 incus-apply . -y
 
-# In non-interactive environments, use --yes to apply changes
+# Silent mode for CI (no prompt, no progress output)
 incus-apply . -yq
-
-# Silent mode for CI (no diff, no prompt)
-incus-apply . -yq
-
-# Show diff only (no apply)
-incus-apply . --diff
-
-# Show diff only and reveal environment values in preview
-incus-apply . --diff --show-env
-
-# Replace resources when create-only fields change
-incus-apply . --replace -y
-
-# Show diff as JSON (for tooling)
-incus-apply . --diff=json
 
 # Delete resources defined in configs
 incus-apply . -d -y
-
-# Stop running instances before applying (for config keys that require restart)
-incus-apply . --stop
-
-# Create instances without starting them
-incus-apply . --launch=false
 
 # Apply to a specific project
 incus-apply . --project myproject
@@ -236,6 +215,9 @@ Arguments:
 Flags:
   -r, --recursive        Recursively find .yaml/.yml/.json files in directories
   -d, --delete           Delete resources instead of creating/updating
+      --reset            Delete all resources then recreate them from configs.
+                         Shows a combined diff and single confirmation before executing.
+                         Mutually exclusive with --delete and --diff.
   -y, --yes              Auto-accept and apply changes without prompting
     --diff [text|json] Show preview only without applying
       --replace          Delete and recreate managed resources when create-only fields change.
