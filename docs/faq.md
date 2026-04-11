@@ -57,6 +57,16 @@ When you run `incus-apply` with `--stop`, a running instance is stopped before t
 
 If that restart path will be used, the preview shows a `restart` note in the diff output.
 
+## What does --reset do?
+
+`--reset` deletes every resource described in your config files and then recreates them all from scratch.
+
+It computes a combined diff showing what will be deleted and what will be recreated, then asks for confirmation once before executing both phases. Delete and create execution summaries are printed separately after each phase.
+
+`--reset` is useful when you want a clean slate — for example to test a full provisioning run from zero, or to recover from state drift that simpler updates cannot fix.
+
+It is mutually exclusive with `--delete` and `--diff`. Use `--yes` to skip the confirmation prompt.
+
 ## How do variables work?
 
 Declare variables in a `type: vars` document and reference them in resource documents with `$VAR` or `${VAR}`. See [configuration-reference.md](./configuration-reference.md) for syntax and scoping rules.
