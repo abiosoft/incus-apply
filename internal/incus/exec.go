@@ -6,12 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"strings"
-	"sync"
-
-	"github.com/abiosoft/incus-apply/internal/terminal"
 )
 
 // run executes an incus command while showing transient progress in interactive terminals.
@@ -53,10 +49,14 @@ func (c client) execCmd(args []string, stdin []byte, showProgress bool, progress
 			label = progressLabel[0]
 		}
 		progress = newTerminalProgressWriter(label)
-	}
-	if progress != nil {
-		stdoutWriter = io.MultiWriter(&stdout, progress)
-		stderrWriter = io.MultiWriter(&stderr, progress)
+		if progress != nil {
+			stdoutWriter = io.MultiWriter(&stdout, progress)
+			stderrWriter = io.MultiWriter(&stderr, progress)
+		}
+	} else {
+		// Even for quiet commands, show a spinner so the terminal doesn't
+		// appear frozen while waiting for the Incus daemon to respond.
+		progress = newTerminalSpinnerWriter()
 	}
 	cmd.Stdout = stdoutWriter
 	cmd.Stderr = stderrWriter
@@ -87,93 +87,4 @@ func (c client) execCmd(args []string, stdin []byte, showProgress bool, progress
 		result.Error = fmt.Errorf("%w: %s", err, strings.TrimSpace(result.Stderr))
 	}
 	return result
-}
-
-type progressWriter struct {
-	mu       sync.Mutex
-	line     strings.Builder
-	shown    bool
-	onStart  func()
-	onUpdate func(string)
-	onClear  func()
-}
-
-func newProgressWriter(onStart func(), onUpdate func(string), onClear func()) *progressWriter {
-	w := &progressWriter{onStart: onStart, onUpdate: onUpdate, onClear: onClear}
-	if onStart != nil {
-		onStart()
-		w.shown = true
-	}
-	return w
-}
-
-func newTerminalProgressWriter(prefix string) *progressWriter {
-	if !terminal.IsTerminal(os.Stdout) {
-		return nil
-	}
-	return newProgressWriter(func() {
-		terminal.RewriteLine(prefix)
-	}, func(text string) {
-		terminal.RewriteLine(prefix + text)
-	}, terminal.ClearCurrentLine)
-}
-
-func setupProgressLabel(current, total int) string {
-	if current <= 0 || total <= 0 {
-		return "  └─ running setup... "
-	}
-	return fmt.Sprintf("  └─ running setup %d of %d... ", current, total)
-}
-
-func waitForAgentProgressLabel() string {
-	return "  └─ waiting for incus agent... "
-}
-
-func restartProgressLabel() string {
-	return "  └─ restarting... "
-}
-
-func (w *progressWriter) Write(p []byte) (int, error) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
-	for _, b := range p {
-		switch b {
-		case '\r', '\n':
-			w.flushLocked()
-		default:
-			w.line.WriteByte(b)
-		}
-	}
-	if w.line.Len() > 0 {
-		w.updateLocked(w.line.String())
-	}
-	return len(p), nil
-}
-
-func (w *progressWriter) Finish() {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
-	w.line.Reset()
-	if w.shown && w.onClear != nil {
-		w.onClear()
-		w.shown = false
-	}
-}
-
-func (w *progressWriter) flushLocked() {
-	if w.line.Len() == 0 {
-		return
-	}
-	w.updateLocked(w.line.String())
-	w.line.Reset()
-}
-
-func (w *progressWriter) updateLocked(text string) {
-	if text == "" || w.onUpdate == nil {
-		return
-	}
-	w.onUpdate(text)
-	w.shown = true
 }
