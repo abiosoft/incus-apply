@@ -76,13 +76,17 @@ type dimWriter struct {
 	buf strings.Builder
 }
 
+func (d *dimWriter) writeLine(line string) error {
+	_, err := fmt.Fprintf(d.w, "%s  > %s%s\n", terminal.ColorDim, line, terminal.ColorReset)
+	return err
+}
+
 func (d *dimWriter) Write(p []byte) (int, error) {
 	for _, b := range p {
 		if b == '\n' {
 			line := d.buf.String()
 			d.buf.Reset()
-			_, err := fmt.Fprintf(d.w, "%s%s%s\n", terminal.ColorDim, line, terminal.ColorReset)
-			if err != nil {
+			if err := d.writeLine(line); err != nil {
 				return 0, err
 			}
 		} else {
@@ -94,7 +98,7 @@ func (d *dimWriter) Write(p []byte) (int, error) {
 
 func (d *dimWriter) flush() {
 	if d.buf.Len() > 0 {
-		_, _ = fmt.Fprintf(d.w, "%s%s%s\n", terminal.ColorDim, d.buf.String(), terminal.ColorReset)
+		_ = d.writeLine(d.buf.String())
 		d.buf.Reset()
 	}
 }
