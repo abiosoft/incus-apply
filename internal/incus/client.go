@@ -284,6 +284,14 @@ func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, 
 			return c.WaitInstanceAgent(res)
 		}
 		return result
+	case config.SetupActionStop:
+		args := []string{"stop", res.Name}
+		if action.Force {
+			args = append(args, "--force")
+		}
+		args = append(args, c.globalFlags...)
+		args = c.appendProjectFlag(args, res.Project)
+		return c.runWithProgress(args, nil, stopProgressLabel())
 	default:
 		return &Result{Error: fmt.Errorf("unsupported setup action: %s", action.Action)}
 	}

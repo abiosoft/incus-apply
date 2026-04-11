@@ -291,6 +291,7 @@ func fieldEnum(f reflect.StructField) []string {
 			string(config.SetupActionExec),
 			string(config.SetupActionPushFile),
 			string(config.SetupActionRestart),
+			string(config.SetupActionStop),
 		},
 		"When": {
 			string(config.SetupWhenCreate),

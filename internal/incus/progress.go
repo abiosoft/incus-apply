@@ -102,6 +102,10 @@ func restartProgressLabel() string {
 	return "  └─ restarting "
 }
 
+func stopProgressLabel() string {
+	return "  └─ stopping "
+}
+
 func (w *progressWriter) Write(p []byte) (int, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()

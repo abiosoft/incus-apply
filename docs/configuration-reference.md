@@ -43,10 +43,11 @@ Supported actions:
 
 | Field       | Type    | Description                                                                                |
 | ----------- | ------- | ------------------------------------------------------------------------------------------ |
-| `action`    | string  | **Required.** `exec` or `file_push`                                                        |
+| `action`    | string  | **Required.** `exec`, `file_push`, `restart`, or `stop`                                    |
 | `when`      | string  | `create`, `update`, or `always` (defaults to `create`)                                     |
 | `required`  | boolean | Optional; defaults to `true`. Set to `false` to continue when this setup action fails      |
 | `skip`      | boolean | Skip the action without removing it from config                                            |
+| `force`     | boolean | For `restart` and `stop`: pass `--force` to `incus restart`/`incus stop`                   |
 | `script`    | string  | Required for `action: exec`; executed as root using `sh -c <script>`                       |
 | `cwd`       | string  | Optional working directory for `action: exec`; passed to `incus exec --cwd`                |
 | `path`      | string  | Required for `action: file_push`; absolute path inside the instance                        |
@@ -66,6 +67,9 @@ Notes:
 - `exec` actions always run non-interactively and use `sh -c`, so multi-line shell scripts work as expected.
 - `required: false` allows apply to continue after a setup failure; failed optional actions are reported as warnings.
 - VM setup waits for `incus wait <instance> agent` before executing `exec` or `file_push` actions.
+- After a `restart` action on a VM, `incus-apply` waits for the incus agent to come back online before continuing.
+- `stop` stops the instance and does not start it again. Use `force: true` to pass `--force` to `incus stop`.
+- `restart` restarts the instance. Use `force: true` to pass `--force` to `incus restart`.
 - Relative `source` paths are resolved from the configuration file location. Absolute paths are also supported.
 - Relative `source` paths are not supported when applying config from stdin or a URL.
 - Changes to `when: create` actions are treated as recreate-required for managed instances, because those actions cannot be replayed on a normal update. The resource is skipped until you rerun with `--replace`.

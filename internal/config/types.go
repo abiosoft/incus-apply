@@ -52,6 +52,7 @@ const (
 	SetupActionExec     SetupActionType = "exec"
 	SetupActionPushFile SetupActionType = "file_push"
 	SetupActionRestart  SetupActionType = "restart"
+	SetupActionStop     SetupActionType = "stop"
 )
 
 // SetupWhen controls when a setup action runs during apply.
@@ -216,8 +217,10 @@ func (a SetupAction) Validate(index int) error {
 		}
 	case SetupActionRestart:
 		// no required fields; force is optional
+	case SetupActionStop:
+		// no required fields; force is optional
 	default:
-		return &ValidationError{Field: field("action"), Message: "action must be one of exec, file_push, restart"}
+		return &ValidationError{Field: field("action"), Message: "action must be one of exec, file_push, restart, stop"}
 	}
 
 	return nil
