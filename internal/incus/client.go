@@ -266,6 +266,21 @@ func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, 
 		return c.runWithProgress(args, nil, progressLabel)
 	case config.SetupActionPushFile:
 		return c.pushSetupFile(res, action, progressLabel)
+	case config.SetupActionRestart:
+		args := []string{"restart", res.Name}
+		if action.Force {
+			args = append(args, "--force")
+		}
+		args = append(args, c.globalFlags...)
+		args = c.appendProjectFlag(args, res.Project)
+		result := c.runWithProgress(args, nil, restartProgressLabel())
+		if result.Error != nil {
+			return result
+		}
+		if res.VM {
+			return c.WaitInstanceAgent(res)
+		}
+		return result
 	default:
 		return &Result{Error: fmt.Errorf("unsupported setup action: %s", action.Action)}
 	}

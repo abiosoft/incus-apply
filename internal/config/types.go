@@ -51,6 +51,7 @@ type SetupActionType string
 const (
 	SetupActionExec     SetupActionType = "exec"
 	SetupActionPushFile SetupActionType = "file_push"
+	SetupActionRestart  SetupActionType = "restart"
 )
 
 // SetupWhen controls when a setup action runs during apply.
@@ -68,6 +69,7 @@ type SetupAction struct {
 	When      SetupWhen       `yaml:"when" json:"when"`
 	Required  *bool           `yaml:"required,omitempty" json:"required,omitempty"`
 	Skip      bool            `yaml:"skip,omitempty" json:"skip,omitempty"`
+	Force     bool            `yaml:"force,omitempty" json:"force,omitempty"`
 	Script    string          `yaml:"script,omitempty" json:"script,omitempty"`
 	CWD       string          `yaml:"cwd,omitempty" json:"cwd,omitempty"`
 	Path      string          `yaml:"path,omitempty" json:"path,omitempty"`
@@ -212,8 +214,10 @@ func (a SetupAction) Validate(index int) error {
 		if a.Recursive && a.Source == "" {
 			return &ValidationError{Field: field("recursive"), Message: "recursive is only supported when source is set"}
 		}
+	case SetupActionRestart:
+		// no required fields; force is optional
 	default:
-		return &ValidationError{Field: field("action"), Message: "action must be one of exec, file_push"}
+		return &ValidationError{Field: field("action"), Message: "action must be one of exec, file_push, restart"}
 	}
 
 	return nil

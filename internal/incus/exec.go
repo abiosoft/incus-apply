@@ -129,6 +129,10 @@ func waitForAgentProgressLabel() string {
 	return "  └─ waiting for incus agent... "
 }
 
+func restartProgressLabel() string {
+	return "  └─ restarting... "
+}
+
 func (w *progressWriter) Write(p []byte) (int, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
