@@ -149,7 +149,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -158,6 +163,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -197,7 +206,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -350,7 +364,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -359,6 +378,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -398,7 +421,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -551,7 +579,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -560,6 +593,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -599,7 +636,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -752,7 +794,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -761,6 +808,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -800,7 +851,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -954,7 +1010,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -963,6 +1024,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -1002,7 +1067,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -1155,7 +1225,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -1164,6 +1239,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -1203,7 +1282,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -1356,7 +1440,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -1365,6 +1454,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -1404,7 +1497,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -1557,7 +1655,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -1566,6 +1669,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -1605,7 +1712,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -1758,7 +1870,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -1767,6 +1884,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -1806,7 +1927,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -1959,7 +2085,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -1968,6 +2099,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -2007,7 +2142,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }
@@ -2160,7 +2300,12 @@
                   "properties": {
                     "action": {
                       "description": "Setup action type",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "exec",
+                        "file_push",
+                        "restart"
+                      ]
                     },
                     "content": {
                       "description": "Inline file content to push into the instance",
@@ -2169,6 +2314,10 @@
                     "cwd": {
                       "description": "Working directory to use for an exec setup action",
                       "type": "string"
+                    },
+                    "force": {
+                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
+                      "type": "boolean"
                     },
                     "gid": {
                       "description": "File owner gid to set when pushing a file",
@@ -2208,7 +2357,12 @@
                     },
                     "when": {
                       "description": "When to run the setup action: create, update, or always",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "always"
+                      ]
                     }
                   }
                 }

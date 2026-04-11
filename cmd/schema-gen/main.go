@@ -197,6 +197,9 @@ func structProperties(t reflect.Type) map[string]*Schema {
 		name, _ := strings.CutSuffix(yamlTag, ",omitempty")
 		description := fieldDescription(field)
 		schema := goTypeToSchema(field.Type, description)
+		if enum := fieldEnum(field); len(enum) > 0 {
+			schema.Enum = enum
+		}
 		properties[name] = schema
 	}
 
@@ -272,6 +275,7 @@ func fieldDescription(f reflect.StructField) string {
 		"Driver":        "Storage driver (dir, zfs, btrfs, lvm, ceph)",
 		"Source":        "Source path or device for a storage pool, or a local file path for file_push setup actions",
 		"Recursive":     "Pass --recursive to incus file push for a file_push setup action",
+		"Force":         "Force the instance to restart without a clean shutdown (restart action only)",
 		"Ingress":       "Ingress firewall rules",
 		"Egress":        "Egress firewall rules",
 	}
@@ -279,4 +283,23 @@ func fieldDescription(f reflect.StructField) string {
 		return desc
 	}
 	return ""
+}
+
+func fieldEnum(f reflect.StructField) []string {
+	enums := map[string][]string{
+		"Action": {
+			string(config.SetupActionExec),
+			string(config.SetupActionPushFile),
+			string(config.SetupActionRestart),
+		},
+		"When": {
+			string(config.SetupWhenCreate),
+			string(config.SetupWhenUpdate),
+			string(config.SetupWhenAlways),
+		},
+	}
+	if vals, ok := enums[f.Name]; ok {
+		return vals
+	}
+	return nil
 }
