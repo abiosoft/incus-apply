@@ -218,6 +218,8 @@ Flags:
       --reset            Delete all resources then recreate them from configs.
                          Shows a combined diff and single confirmation before executing.
                          Mutually exclusive with --delete and --diff.
+      --select           Open an interactive multi-select dialog to choose which resources
+                         to include before showing the diff. Mutually exclusive with --yes.
   -y, --yes              Auto-accept and apply changes without prompting
     --diff [text|json] Show preview only without applying
       --replace          Delete and recreate managed resources when create-only fields change.
