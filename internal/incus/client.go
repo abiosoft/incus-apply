@@ -48,16 +48,16 @@ type Client interface {
 type client struct {
 	globalFlags []string
 	stop        bool
-	debug       bool
+	verbose     bool
 	timeout     time.Duration
 }
 
 // New creates a new Incus client.
-func New(globalFlags []string, stop, debug bool, timeout time.Duration) Client {
+func New(globalFlags []string, stop, verbose bool, timeout time.Duration) Client {
 	return &client{
 		globalFlags: globalFlags,
 		stop:        stop,
-		debug:       debug,
+		verbose:     verbose,
 		timeout:     timeout,
 	}
 }
@@ -263,6 +263,9 @@ func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, 
 		args = append(args, c.globalFlags...)
 		args = c.appendProjectFlag(args, res.Project)
 		args = append(args, "--", "sh", "-c", action.Script)
+		if c.verbose {
+			return c.runVerbose(args, nil)
+		}
 		return c.runWithProgress(args, nil, progressLabel)
 	case config.SetupActionPushFile:
 		return c.pushSetupFile(res, action, progressLabel)
@@ -320,5 +323,8 @@ func (c client) pushSetupFile(res *config.Resource, action config.SetupAction, p
 	}
 
 	args = append(args, res.Name+action.Path)
+	if c.verbose {
+		return c.runVerbose(args, stdin)
+	}
 	return c.runWithProgress(args, stdin, progressLabel)
 }

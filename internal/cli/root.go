@@ -100,14 +100,12 @@ Examples:
 		"Timeout for individual incus commands (0 disables the timeout)")
 	rootCmd.PersistentFlags().StringVar(&opts.Project, "project", "",
 		"Incus project to use")
-	rootCmd.PersistentFlags().BoolVar(&opts.Debug, "debug", false,
-		"Show debug output from incus")
-	rootCmd.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "v", false,
-		"Show verbose output from incus")
-	rootCmd.PersistentFlags().BoolVarP(&opts.Quiet, "quiet", "q", false,
-		"Suppress progress output")
 	rootCmd.PersistentFlags().BoolVar(&opts.ForceLocal, "force-local", false,
 		"Force using local unix socket")
+	rootCmd.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "v", false,
+		"Show verbose output: print all setup command output and log each incus command")
+	rootCmd.PersistentFlags().BoolVarP(&opts.Quiet, "quiet", "q", false,
+		"Suppress progress output")
 
 	return rootCmd
 }
@@ -148,9 +146,6 @@ func validateOptions(opts *apply.Options) error {
 // buildGlobalFlags converts Options into incus global flags.
 func buildGlobalFlags(opts *apply.Options) []string {
 	var flags []string
-	if opts.Debug {
-		flags = append(flags, "--debug")
-	}
 	if opts.Verbose {
 		flags = append(flags, "--verbose")
 	}

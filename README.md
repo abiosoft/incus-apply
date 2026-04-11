@@ -237,8 +237,7 @@ Incus Global Flags (passed through):
     --command-timeout duration
              Timeout for individual incus commands (default: 5m, 0 disables)
       --project string   Incus project to use
-      --debug            Show debug output from incus
-  -v, --verbose          Show verbose output from incus
+  -v, --verbose          Show verbose output: print all setup command output and log each incus command
   -q, --quiet            Suppress progress output
       --force-local      Force using local unix socket
 ```

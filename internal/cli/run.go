@@ -13,7 +13,7 @@ func runApply(opts *apply.Options) error {
 	}
 
 	globalFlags := buildGlobalFlags(opts)
-	client := incus.New(globalFlags, opts.Stop, opts.Debug, opts.CommandTimeout)
+	client := incus.New(globalFlags, opts.Stop, opts.Verbose, opts.CommandTimeout)
 
 	if err := client.Ping(); err != nil {
 		return err

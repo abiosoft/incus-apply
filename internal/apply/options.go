@@ -29,7 +29,6 @@ type Options struct {
 
 	// Incus flags (passed through to incus commands)
 	Project    string
-	Debug      bool
 	Verbose    bool
 	Quiet      bool
 	ForceLocal bool
