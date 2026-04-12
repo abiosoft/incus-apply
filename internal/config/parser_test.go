@@ -96,50 +96,20 @@ ports:
 	}
 }
 
-func TestParseInstanceSetupFields(t *testing.T) {
+func TestParseInstanceApplyAfterField(t *testing.T) {
 	input := "type: instance\n" +
 		"name: web\n" +
 		"image: images:alpine/3.19\n" +
-		"setup:\n" +
-		"  - action: exec\n" +
-		"    when: create\n" +
-		"    required: false\n" +
-		"    cwd: /root\n" +
-		"    script: echo hi\n" +
-		"  - action: file_push\n" +
-		"    when: update\n" +
-		"    path: /etc/app.conf\n" +
-		"    source: ./app.conf\n" +
-		"    recursive: true\n" +
-		"    uid: 0\n" +
-		"    gid: 0\n" +
-		"    mode: \"0644\"\n"
+		"apply.after:\n" +
+		"  - db\n"
 
 	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
 	if err != nil {
 		t.Fatalf("ParseStdin() error = %v", err)
 	}
 	res := result.Resources[0]
-	if len(res.Setup) != 2 {
-		t.Fatalf("setup = %#v, want 2 actions", res.Setup)
-	}
-	if res.Setup[0].Action != SetupActionExec || res.Setup[0].When != SetupWhenCreate {
-		t.Fatalf("first setup action = %#v, want exec/create", res.Setup[0])
-	}
-	if res.Setup[0].CWD != "/root" {
-		t.Fatalf("cwd = %q, want /root", res.Setup[0].CWD)
-	}
-	if res.Setup[0].IsRequired() {
-		t.Fatal("required = true, want false")
-	}
-	if res.Setup[1].Mode != "0644" {
-		t.Fatalf("mode = %q, want 0644", res.Setup[1].Mode)
-	}
-	if !res.Setup[1].Recursive {
-		t.Fatal("recursive = false, want true")
-	}
-	if !res.Setup[1].IsRequired() {
-		t.Fatal("required = false, want default true")
+	if len(res.After) != 1 || res.After[0] != "db" {
+		t.Fatalf("after = %#v, want [db]", res.After)
 	}
 }
 

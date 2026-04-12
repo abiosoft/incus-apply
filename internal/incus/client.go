@@ -41,8 +41,8 @@ type Client interface {
 	// WaitInstanceAgent waits for a VM instance agent to become available.
 	WaitInstanceAgent(res *config.Resource) *Result
 
-	// RunSetupAction executes an instance setup action.
-	RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result
+	// WaitCloudInit waits for cloud-init to finish inside the instance.
+	WaitCloudInit(res *config.Resource) *Result
 }
 
 type client struct {
@@ -252,87 +252,16 @@ func (c client) WaitInstanceAgent(res *config.Resource) *Result {
 	return c.runWithProgress(args, nil, waitForAgentProgressLabel())
 }
 
-func (c client) RunSetupAction(res *config.Resource, action config.SetupAction, current, total int) *Result {
-	progressLabel := setupProgressLabel(current, total)
-	switch action.Action {
-	case config.SetupActionExec:
-		args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
-		if action.CWD != "" {
-			args = append(args, "--cwd", action.CWD)
-		}
-		args = append(args, c.globalFlags...)
-		args = c.appendProjectFlag(args, res.Project)
-		args = append(args, "--", "sh", "-c", action.Script)
-		if c.verbose {
-			return c.runVerbose(args, nil)
-		}
-		return c.runWithProgress(args, nil, progressLabel)
-	case config.SetupActionPushFile:
-		return c.pushSetupFile(res, action, progressLabel)
-	case config.SetupActionRestart:
-		args := []string{"restart", res.Name}
-		if action.Force {
-			args = append(args, "--force")
-		}
-		args = append(args, c.globalFlags...)
-		args = c.appendProjectFlag(args, res.Project)
-		result := c.runWithProgress(args, nil, restartProgressLabel())
-		if result.Error != nil {
-			return result
-		}
-		if res.VM {
-			return c.WaitInstanceAgent(res)
-		}
-		return result
-	case config.SetupActionStop:
-		args := []string{"stop", res.Name}
-		if action.Force {
-			args = append(args, "--force")
-		}
-		args = append(args, c.globalFlags...)
-		args = c.appendProjectFlag(args, res.Project)
-		return c.runWithProgress(args, nil, stopProgressLabel())
-	default:
-		return &Result{Error: fmt.Errorf("unsupported setup action: %s", action.Action)}
-	}
-}
-
-func (c client) pushSetupFile(res *config.Resource, action config.SetupAction, progressLabel string) *Result {
-	args := []string{"file", "push"}
+func (c client) WaitCloudInit(res *config.Resource) *Result {
+	// Tail the cloud-init output log while waiting; discard cloud-init output.
+	// tail is killed once cloud-init --wait exits.
+	script := "tail -f /var/log/cloud-init-output.log & TAIL_PID=$!; cloud-init status --wait >/dev/null 2>&1; CI_RC=$?; kill $TAIL_PID 2>/dev/null; wait $TAIL_PID 2>/dev/null; exit $CI_RC"
+	args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
-	args = append(args, "--create-dirs")
-	if action.UID != nil {
-		args = append(args, "--uid", strconv.Itoa(*action.UID))
-	}
-	if action.GID != nil {
-		args = append(args, "--gid", strconv.Itoa(*action.GID))
-	}
-	if action.Mode != "" {
-		args = append(args, "--mode", string(action.Mode))
-	}
-
-	var stdin []byte
-	if action.Source == "" {
-		args = append(args, "-")
-		stdin = []byte(action.Content)
-	} else {
-		if err := config.ValidateSetupSource(action, res.SourceFile); err != nil {
-			return &Result{Error: err}
-		}
-		resolved, err := config.ResolveSetupSourcePath(action.Source, res.SourceFile)
-		if err != nil {
-			return &Result{Error: err}
-		}
-		if action.Recursive {
-			args = append(args, "--recursive")
-		}
-		args = append(args, resolved)
-	}
-
-	args = append(args, res.Name+action.Path)
+	args = append(args, "--", "sh", "-c", script)
 	if c.verbose {
-		return c.runVerbose(args, stdin)
+		return c.runVerbose(args, nil)
 	}
-	return c.runWithProgress(args, stdin, progressLabel)
+	return c.runWithProgress(args, nil, cloudInitProgressLabel())
 }

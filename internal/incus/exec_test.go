@@ -34,62 +34,10 @@ func TestExecCmdTimeout(t *testing.T) {
 	}
 }
 
-func TestRunSetupActionExecUsesShellAndNonInteractive(t *testing.T) {
-	dir := t.TempDir()
-	scriptPath := filepath.Join(dir, "incus")
-	script := "#!/bin/sh\nexit 0\n"
-	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
-		t.Fatalf("os.WriteFile() error = %v", err)
-	}
-	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-
-	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
-	action := config.SetupAction{Action: config.SetupActionExec, When: config.SetupWhenAlways, CWD: "/srv/app", Script: "echo hello"}
-	result := client{}.RunSetupAction(res, action, 1, 1)
-	if result.Error != nil {
-		t.Fatalf("RunSetupAction() error = %v", result.Error)
-	}
-	if !strings.Contains(result.Command, "exec web --disable-stdin --force-noninteractive --cwd /srv/app -- sh -c echo hello") {
-		t.Fatalf("command = %q, want non-interactive shell exec with cwd", result.Command)
-	}
-}
-
-func TestRunSetupActionPushFileResolvesRelativeSource(t *testing.T) {
-	dir := t.TempDir()
-	scriptPath := filepath.Join(dir, "incus")
-	script := "#!/bin/sh\nexit 0\n"
-	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
-		t.Fatalf("os.WriteFile() error = %v", err)
-	}
-	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-
-	configPath := filepath.Join(dir, "instance.yaml")
-	sourcePath := filepath.Join(dir, "Caddyfile")
-	if err := os.WriteFile(sourcePath, []byte("content"), 0o644); err != nil {
-		t.Fatalf("os.WriteFile() error = %v", err)
-	}
-	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web", SourceFile: configPath}}
-	action := config.SetupAction{Action: config.SetupActionPushFile, When: config.SetupWhenUpdate, Path: "/etc/caddy/Caddyfile", Source: "./Caddyfile", Recursive: true}
-
-	result := client{}.RunSetupAction(res, action, 1, 1)
-	if result.Error != nil {
-		t.Fatalf("RunSetupAction() error = %v", result.Error)
-	}
-	if !strings.Contains(result.Command, sourcePath) {
-		t.Fatalf("command = %q, want resolved absolute source path", result.Command)
-	}
-	if !strings.Contains(result.Command, "file push --create-dirs --recursive ") {
-		t.Fatalf("command = %q, want file push command with recursive flag", result.Command)
-	}
-	if !strings.Contains(result.Command, " web/etc/caddy/Caddyfile") {
-		t.Fatalf("command = %q, want instance target path", result.Command)
-	}
-}
-
 func TestProgressWriterShowsLastLineAndClears(t *testing.T) {
 	var updates []string
 	cleared := 0
-	prefix := setupProgressLabel(1, 3)
+	prefix := cloudInitProgressLabel()
 	writer := newProgressWriter(nil,
 		func(text string) { updates = append(updates, prefix+text) },
 		func() { cleared++ },
@@ -132,9 +80,9 @@ func TestProgressWriterDisplaysInitialLabel(t *testing.T) {
 	}
 }
 
-func TestSetupProgressLabelIncludesPosition(t *testing.T) {
-	if got := setupProgressLabel(1, 3); got != "  └─ running setup 1 of 3: " {
-		t.Fatalf("setupProgressLabel() = %q, want %q", got, "  └─ running setup 1 of 3: ")
+func TestCloudInitProgressLabel(t *testing.T) {
+	if got := cloudInitProgressLabel(); got != "  └─ waiting for cloud-init: " {
+		t.Fatalf("cloudInitProgressLabel() = %q, want %q", got, "  └─ waiting for cloud-init: ")
 	}
 }
 

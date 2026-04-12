@@ -156,8 +156,16 @@ func resolveExpr(expr string, env map[string]string, strict bool) (string, error
 
 	// Extract variable name
 	i := 0
-	for i < len(expr) && isVarChar(expr[i]) {
-		i++
+	if strings.HasPrefix(expr, "incus.") {
+		// incus.* variables use dotted.kebab-case names; consume until
+		// end-of-expression or the ":-" default separator.
+		for i < len(expr) && expr[i] != ':' {
+			i++
+		}
+	} else {
+		for i < len(expr) && isVarChar(expr[i]) {
+			i++
+		}
 	}
 	name := expr[:i]
 
@@ -194,8 +202,14 @@ func resolveDeclaredExpr(expr string, env map[string]string) (string, bool, erro
 	}
 
 	i := 0
-	for i < len(expr) && isVarChar(expr[i]) {
-		i++
+	if strings.HasPrefix(expr, "incus.") {
+		for i < len(expr) && expr[i] != ':' {
+			i++
+		}
+	} else {
+		for i < len(expr) && isVarChar(expr[i]) {
+			i++
+		}
 	}
 	name := expr[:i]
 

@@ -34,7 +34,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -141,84 +142,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -250,7 +175,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -357,84 +283,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -466,7 +316,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -573,84 +424,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -682,7 +457,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -789,84 +565,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -899,7 +599,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1006,84 +707,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -1115,7 +740,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1222,84 +848,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -1331,7 +881,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1438,84 +989,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -1547,7 +1022,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1654,84 +1130,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -1763,7 +1163,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1870,84 +1271,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -1979,7 +1304,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -2086,84 +1412,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -2195,7 +1445,8 @@
             "description": "An Incus resource definition.",
             "type": "object",
             "properties": {
-              "after": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -2302,84 +1553,8 @@
                 "description": "Incus project (can be overridden by --project flag)",
                 "type": "string"
               },
-              "setup": {
-                "description": "Setup actions to run against an instance after create, update, or on every apply",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "action": {
-                      "description": "Setup action type",
-                      "type": "string",
-                      "enum": [
-                        "exec",
-                        "file_push",
-                        "restart",
-                        "stop"
-                      ]
-                    },
-                    "content": {
-                      "description": "Inline file content to push into the instance",
-                      "type": "string"
-                    },
-                    "cwd": {
-                      "description": "Working directory to use for an exec setup action",
-                      "type": "string"
-                    },
-                    "force": {
-                      "description": "Force the instance to restart without a clean shutdown (restart action only)",
-                      "type": "boolean"
-                    },
-                    "gid": {
-                      "description": "File owner gid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "mode": {
-                      "description": "File mode to set when pushing a file",
-                      "type": "string"
-                    },
-                    "path": {
-                      "description": "Absolute destination path inside the instance for a file_push action",
-                      "type": "string"
-                    },
-                    "recursive": {
-                      "description": "Pass --recursive to incus file push for a file_push setup action",
-                      "type": "boolean"
-                    },
-                    "required": {
-                      "description": "If false, setup failures are reported and apply continues with later setup actions",
-                      "type": "boolean"
-                    },
-                    "script": {
-                      "description": "Shell script to execute inside the instance",
-                      "type": "string"
-                    },
-                    "skip": {
-                      "description": "If true, the setup action is skipped",
-                      "type": "boolean"
-                    },
-                    "source": {
-                      "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "description": "File owner uid to set when pushing a file",
-                      "type": "integer"
-                    },
-                    "when": {
-                      "description": "When to run the setup action: create, update, or always",
-                      "type": "string",
-                      "enum": [
-                        "create",
-                        "update",
-                        "always"
-                      ]
-                    }
-                  }
-                }
-              },
               "source": {
-                "description": "Source path or device for a storage pool, or a local file path for file_push setup actions",
+                "description": "Source path or device for a storage pool",
                 "type": "string"
               },
               "storage": {
@@ -2413,16 +1588,6 @@
         "description": "Variable declarations for interpolation in resource configs.",
         "type": "object",
         "properties": {
-          "commands": {
-            "description": "Shell commands whose stdout is used as the variable value (key-value pairs).",
-            "type": "object",
-            "patternProperties": {
-              ".*": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          },
           "files": {
             "description": "Paths to .env files to load variables from.",
             "type": "array",

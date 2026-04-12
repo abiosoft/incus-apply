@@ -94,6 +94,8 @@ Examples:
 		"Start newly created instances after creation")
 	rootCmd.Flags().BoolVar(&opts.FailFast, "fail-fast", false,
 		"Stop on first error instead of continuing")
+	rootCmd.Flags().BoolVar(&opts.NoWaitCloudInit, "no-wait-cloud-init", false,
+		"Skip waiting for cloud-init to complete after instance creation")
 
 	// Incus global flags (passthrough to incus commands)
 	rootCmd.PersistentFlags().DurationVar(&opts.CommandTimeout, "command-timeout", incus.DefaultCommandTimeout,

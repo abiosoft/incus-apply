@@ -158,14 +158,6 @@ func generateVarsSchema() Schema {
 				Description: "Paths to .env files to load variables from.",
 				Items:       &Schema{Type: "string"},
 			},
-			"commands": {
-				Type:        "object",
-				Description: "Shell commands whose stdout is used as the variable value (key-value pairs).",
-				PatternProperties: map[string]*Schema{
-					".*": {Type: "string"},
-				},
-				AdditionalProperties: &falseVal,
-			},
 			"global": {
 				Type:        "boolean",
 				Description: "If true, variables are shared across all files instead of being file-scoped.",
@@ -251,18 +243,7 @@ func fieldDescription(f reflect.StructField) string {
 		"Devices":       "Device configurations",
 		"Description":   "Resource description",
 		"Image":         "Image source for instances (e.g., images:debian/12, docker:caddy)",
-		"Setup":         "Setup actions to run against an instance after create, update, or on every apply",
-		"Action":        "Setup action type",
-		"When":          "When to run the setup action: create, update, or always",
-		"Required":      "If false, setup failures are reported and apply continues with later setup actions",
-		"Skip":          "If true, the setup action is skipped",
-		"Script":        "Shell script to execute inside the instance",
-		"CWD":           "Working directory to use for an exec setup action",
-		"Path":          "Absolute destination path inside the instance for a file_push action",
-		"Content":       "Inline file content to push into the instance",
-		"UID":           "File owner uid to set when pushing a file",
-		"GID":           "File owner gid to set when pushing a file",
-		"Mode":          "File mode to set when pushing a file",
+		"After":         "List of instance names that must be applied before this one",
 		"VM":            "Create a virtual machine instead of a container",
 		"Empty":         "Create an empty instance (no image)",
 		"Profiles":      "Profiles to apply to the instance",
@@ -273,9 +254,9 @@ func fieldDescription(f reflect.StructField) string {
 		"Ports":         "Optional network forward port rules in the same shape as incus network forward edit",
 		"NetworkType":   "Network type (bridge, ovn, macvlan, sriov, physical)",
 		"Driver":        "Storage driver (dir, zfs, btrfs, lvm, ceph)",
-		"Source":        "Source path or device for a storage pool, or a local file path for file_push setup actions",
-		"Recursive":     "Pass --recursive to incus file push for a file_push setup action",
-		"Force":         "Force the instance to restart without a clean shutdown (restart action only)",
+		"Source":        "Source path or device for a storage pool",
+		"Force":         "Force the action without a clean shutdown",
+		"Timeout":       "Timeout in seconds passed as --timeout to the incus command",
 		"Ingress":       "Ingress firewall rules",
 		"Egress":        "Egress firewall rules",
 	}
@@ -286,21 +267,5 @@ func fieldDescription(f reflect.StructField) string {
 }
 
 func fieldEnum(f reflect.StructField) []string {
-	enums := map[string][]string{
-		"Action": {
-			string(config.SetupActionExec),
-			string(config.SetupActionPushFile),
-			string(config.SetupActionRestart),
-			string(config.SetupActionStop),
-		},
-		"When": {
-			string(config.SetupWhenCreate),
-			string(config.SetupWhenUpdate),
-			string(config.SetupWhenAlways),
-		},
-	}
-	if vals, ok := enums[f.Name]; ok {
-		return vals
-	}
 	return nil
 }

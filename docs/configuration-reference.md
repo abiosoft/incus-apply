@@ -15,65 +15,27 @@ This page contains the full field reference for `incus-apply` resource documents
 
 ## Instance Fields
 
-| Field       | Type   | Description                                                        |
-| ----------- | ------ | ------------------------------------------------------------------ |
-| `image`     | string | Image to use (for example `images:debian/12`)                      |
-| `vm`        | bool   | Create a VM instead of a container                                 |
-| `empty`     | bool   | Create an empty instance                                           |
-| `ephemeral` | bool   | Create an ephemeral instance (deleted when it stops)               |
-| `profiles`  | list   | Profiles to apply                                                  |
-| `storage`   | string | Storage pool for the root disk                                     |
-| `network`   | string | Network to attach                                                  |
-| `target`    | string | Cluster member target                                              |
-| `after`     | list   | Instance names (same project) that must be applied before this one |
-| `setup`     | list   | Post-create and post-update actions to run inside the instance     |
+| Field         | Type   | Description                                                        |
+| ------------- | ------ | ------------------------------------------------------------------ |
+| `image`       | string | Image to use (for example `images:debian/12`)                      |
+| `vm`          | bool   | Create a VM instead of a container                                 |
+| `empty`       | bool   | Create an empty instance                                           |
+| `ephemeral`   | bool   | Create an ephemeral instance (deleted when it stops)               |
+| `profiles`    | list   | Profiles to apply                                                  |
+| `storage`     | string | Storage pool for the root disk                                     |
+| `network`     | string | Network to attach                                                  |
+| `target`      | string | Cluster member target                                              |
+| `apply.after` | list   | Instance names (same project) that must be applied before this one |
 
-### Instance Setup Actions
+### Cloud-Init
 
-Use `setup` to run imperative instance actions after Incus resource changes are applied.
+When an instance has `config."cloud-init.vendor-data"` or `config."cloud-init.user-data"`,
+`incus-apply` automatically waits for cloud-init to finish after creating the instance by
+running `cloud-init status --wait` inside it. For VMs, the incus agent is waited for first.
 
-- `when: create` runs only when the instance is created or recreated.
-- `when: update` runs on create and on later applies when the instance changes.
-- `when: always` runs on every apply, even when the instance config itself is unchanged.
-- `when` defaults to `create` if omitted.
-- `required` defaults to `true`; set `required: false` to continue with later setup actions when one fails.
-- `skip: true` keeps the action in config but prevents execution.
-
-Supported actions:
-
-| Field       | Type    | Description                                                                                |
-| ----------- | ------- | ------------------------------------------------------------------------------------------ |
-| `action`    | string  | **Required.** `exec`, `file_push`, `restart`, or `stop`                                    |
-| `when`      | string  | `create`, `update`, or `always` (defaults to `create`)                                     |
-| `required`  | boolean | Optional; defaults to `true`. Set to `false` to continue when this setup action fails      |
-| `skip`      | boolean | Skip the action without removing it from config                                            |
-| `force`     | boolean | For `restart` and `stop`: pass `--force` to `incus restart`/`incus stop`                   |
-| `script`    | string  | Required for `action: exec`; executed as root using `sh -c <script>`                       |
-| `cwd`       | string  | Optional working directory for `action: exec`; passed to `incus exec --cwd`                |
-| `path`      | string  | Required for `action: file_push`; absolute path inside the instance                        |
-| `content`   | string  | Inline file content for `file_push`                                                        |
-| `source`    | string  | Local source path for `file_push`; relative paths are resolved from the owning config file |
-| `recursive` | boolean | Optional for `file_push`; passes `--recursive` to `incus file push` when `source` is used  |
-| `uid`       | integer | Optional file owner uid for `file_push`                                                    |
-| `gid`       | integer | Optional file owner gid for `file_push`                                                    |
-| `mode`      | string  | Optional file mode for `file_push`                                                         |
-
-Notes:
-
-- `file_push` accepts `content`, `source`, or neither. When both are omitted, an empty file is created at `path`.
-- `file_push.source` is passed to `incus file push` as-is after relative-path resolution. `incus-apply` validates that it exists when the action executes, but does not read it.
-- Use `recursive: true` with `file_push.source` when pushing directories or when you want `incus file push --recursive`.
-- `exec` actions run as the root user inside the instance unless Incus defaults are changed elsewhere.
-- `exec` actions always run non-interactively and use `sh -c`, so multi-line shell scripts work as expected.
-- `required: false` allows apply to continue after a setup failure; failed optional actions are reported as warnings.
-- VM setup waits for `incus wait <instance> agent` before executing `exec` or `file_push` actions.
-- After a `restart` action on a VM, `incus-apply` waits for the incus agent to come back online before continuing.
-- `stop` stops the instance and does not start it again. Use `force: true` to pass `--force` to `incus stop`.
-- `restart` restarts the instance. Use `force: true` to pass `--force` to `incus restart`.
-- Relative `source` paths are resolved from the configuration file location. Absolute paths are also supported.
-- Relative `source` paths are not supported when applying config from stdin or a URL.
-- Changes to `when: create` actions are treated as recreate-required for managed instances, because those actions cannot be replayed on a normal update. The resource is skipped until you rerun with `--replace`.
-- For a full multi-service example, see [../examples/wordpress.yaml](../examples/wordpress.yaml), which provisions WordPress on Debian 13 with MariaDB and Caddy using setup actions.
+Use cloud-init's native `#cloud-config` format to install packages, write files, and run
+commands at instance creation time. See the [cloud-init documentation](https://cloudinit.readthedocs.io/)
+for the full set of available modules.
 
 ### Example
 
@@ -81,17 +43,22 @@ Notes:
 type: instance
 name: web
 image: images:debian/12
-setup:
-  - action: exec
-    when: create
-    script: apt-get update && apt-get install -y caddy
-  - action: file_push
-    when: update
-    path: /etc/caddy/Caddyfile
-    source: ./Caddyfile
-  - action: exec
-    when: always
-    script: systemctl restart caddy
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    package_update: true
+    packages:
+      - caddy
+    write_files:
+      - path: /etc/caddy/Caddyfile
+        content: |
+          :80 {
+            root * /var/www/html
+            file_server
+          }
+    runcmd:
+      - systemctl enable caddy
+      - systemctl restart caddy
 ```
 
 ## Storage Pool Fields
@@ -165,10 +132,6 @@ vars:
   DB_NAME: myapp
   DB_USER: appuser
   DB_PASS: ${MYSQL_PASSWORD}
-files:
-  - secrets.env
-commands:
-  DB_VERSION: "mysql --version | awk '{print $3}'"
 ---
 type: instance
 name: db
@@ -177,7 +140,6 @@ config:
   environment.MYSQL_DATABASE: $DB_NAME
   environment.MYSQL_USER: $DB_USER
   environment.MYSQL_PASSWORD: $DB_PASS
-  environment.MYSQL_VERSION: $DB_VERSION
 ```
 
 ### Scoping
@@ -210,23 +172,20 @@ config:
 
 In this example, `environment.APP_NAME` becomes `myapp`, while `environment.HOME_DIR` remains `$HOME` because `HOME` was not declared in `type: vars`.
 
-### Commands
+### Built-in Incus Variables
 
-The `commands` key maps variable names to shell command strings. Each command is passed as a single argument to `sh -c`. The trimmed stdout of the command becomes the variable value.
+Variables with the `incus.` prefix are resolved automatically by `incus-apply` without
+declaring them in `type: vars`. They provide values from the current Incus environment.
 
-```yaml
-type: vars
-commands:
-  GIT_SHA: "git rev-parse --short HEAD"
-  HOSTNAME: "hostname -f"
-```
+| Variable                                        | Description                                            |
+| ----------------------------------------------- | ------------------------------------------------------ |
+| `${incus.remote.get-client-certificate}`        | PEM client certificate from the current remote         |
+| `${incus.remote.get-client-certificate-base64}` | Base64-encoded PEM client certificate (no line breaks) |
 
-Resolution order (later sources win):
-1. `files` — env files, in listed order
-2. `vars` — inline values
-3. `commands` — shell command output
+These variables are available in all resource documents and can use the `:-` default syntax:
+`${incus.remote.get-client-certificate:-none}`.
 
-A non-zero exit code from any command is a fatal error.
+Use the `-base64` variant with cloud-init's `write_files` `encoding: b64` to safely embed the PEM certificate, which is a multi-line value that would otherwise break YAML structure.
 
 ### Preview Redaction
 
@@ -239,6 +198,7 @@ A non-zero exit code from any command is a fatal error.
 - `$VAR` uses the value of `VAR`.
 - `${VAR}` uses the value of `VAR`.
 - `${VAR:-default}` uses `default` when `VAR` is unset or empty.
+- `${incus.<name>}` resolves a built-in Incus variable.
 - `$$` produces a literal `$`.
 
 ## Notes

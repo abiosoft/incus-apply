@@ -1,10 +1,7 @@
 package config
 
 import (
-	"bytes"
-	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -15,7 +12,6 @@ import (
 // Resolution order (later sources win):
 //  1. Each path in Files, loaded in order via godotenv
 //  2. Each entry in Vars, applied in declaration order
-//  3. Each entry in Commands, executed via sh -c and stdout used as the value
 //
 // Within this function, shell environment variables may be referenced
 // via $VAR / ${VAR} syntax in files paths and in vars values.
@@ -47,28 +43,7 @@ func ResolveVars(v Vars) (map[string]string, error) {
 		merged[k] = string(resolved)
 	}
 
-	// Commands: run each value via sh -c and use stdout as the variable value
-	for k, cmdStr := range v.Commands {
-		out, err := runCommand(cmdStr)
-		if err != nil {
-			return nil, &CommandError{Key: k, Command: cmdStr, Err: err}
-		}
-		merged[k] = out
-	}
-
 	return merged, nil
-}
-
-// runCommand executes cmdStr as a single argument to sh -c and returns
-// the trimmed stdout output.
-func runCommand(cmdStr string) (string, error) {
-	var buf bytes.Buffer
-	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Stdout = &buf
-	if err := cmd.Run(); err != nil {
-		return "", err
-	}
-	return strings.TrimRight(buf.String(), "\n"), nil
 }
 
 // shellEnvironment returns the current process environment as a map.
@@ -92,16 +67,3 @@ func (e *EnvFileError) Error() string {
 }
 
 func (e *EnvFileError) Unwrap() error { return e.Err }
-
-// CommandError is returned when a commands entry fails to execute.
-type CommandError struct {
-	Key     string
-	Command string
-	Err     error
-}
-
-func (e *CommandError) Error() string {
-	return fmt.Sprintf("running command for %q (%s): %s", e.Key, e.Command, e.Err.Error())
-}
-
-func (e *CommandError) Unwrap() error { return e.Err }

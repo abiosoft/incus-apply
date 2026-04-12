@@ -51,8 +51,8 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			if resource.Type(res.Type) == resource.TypeInstance && opts.Launch {
 				item.Note = "launch"
 			}
-			if hasSetupForCreate(res) {
-				item.Note = appendNote(item.Note, "setup")
+			if hasCloudInit(res) {
+				item.Note = appendNote(item.Note, "cloud-init")
 			}
 			creates = append(creates, item)
 			preview.created++
@@ -82,9 +82,7 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			if opts.Stop && resource.Type(res.Type) == resource.TypeInstance && client.Running(res) {
 				item.Note = "restart"
 			}
-			if hasSetupForUpdate(res) {
-				item.Note = appendNote(item.Note, "setup")
-			}
+
 			if !status.Managed && status.Warning != "" {
 				printWarning(opts.Quiet, "Warning: %s was not created by incus-apply; falling back to live-state diff and update behavior.", resourceID)
 				item.Note = appendNote(item.Note, status.Warning)
@@ -111,10 +109,6 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 			updates = append(updates, item)
 			preview.updated++
 			plans = append(plans, upsertPlan{res: res, action: upsertUpdate})
-		} else if hasSetupForAlways(res) {
-			updates = append(updates, OutputItem{ResourceID: resourceID, Note: "setup"})
-			preview.updated++
-			plans = append(plans, upsertPlan{res: res, action: upsertSetupOnly})
 		} else {
 			unchanged = append(unchanged, OutputItem{ResourceID: resourceID})
 			preview.unchanged++
@@ -203,18 +197,6 @@ func shouldRedactPreviewPath(path string, prefixes []string) bool {
 	return false
 }
 
-func hasSetupForCreate(res *config.Resource) bool {
-	return hasSetupForAction(res, upsertCreate)
-}
-
-func hasSetupForUpdate(res *config.Resource) bool {
-	return hasSetupForAction(res, upsertUpdate)
-}
-
-func hasSetupForAlways(res *config.Resource) bool {
-	return hasSetupForAction(res, upsertSetupOnly)
-}
-
 // computeResetDiff builds a combined diff for the reset operation.
 // deleteResources must be sorted for delete; createResources sorted for apply.
 // The delete half reuses computeDeleteDiff. The create half builds plans directly
@@ -233,8 +215,8 @@ func computeResetDiff(opts *Options, client incus.Client, deleteResources, creat
 		if resource.Type(res.Type) == resource.TypeInstance && opts.Launch {
 			item.Note = "launch"
 		}
-		if hasSetupForCreate(res) {
-			item.Note = appendNote(item.Note, "setup")
+		if hasCloudInit(res) {
+			item.Note = appendNote(item.Note, "cloud-init")
 		}
 		createItems = append(createItems, item)
 		createPreview.created++
@@ -256,30 +238,4 @@ func computeResetDiff(opts *Options, client incus.Client, deleteResources, creat
 	output.AddGroup(ActionCreate, createItems)
 	output.Summary = resetSummary(delPreview, createPreview)
 	return output, delPreview, delPlans, createPreview, createPlans
-}
-
-func hasSetupForAction(res *config.Resource, action upsertAction) bool {
-	if resource.Type(res.Type) != resource.TypeInstance {
-		return false
-	}
-	for _, setup := range res.Setup {
-		if setup.Skip {
-			continue
-		}
-		switch action {
-		case upsertCreate, upsertReplace:
-			if setup.When == config.SetupWhenCreate || setup.When == config.SetupWhenUpdate || setup.When == config.SetupWhenAlways {
-				return true
-			}
-		case upsertUpdate:
-			if setup.When == config.SetupWhenUpdate || setup.When == config.SetupWhenAlways {
-				return true
-			}
-		case upsertSetupOnly:
-			if setup.When == config.SetupWhenAlways {
-				return true
-			}
-		}
-	}
-	return false
 }

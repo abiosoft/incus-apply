@@ -1,6 +1,6 @@
-# WordPress on a single container with setup actions
+# WordPress on a single container with cloud-init
 #
-# Sets up MariaDB, Caddy, and WordPress on a Debian container using setup actions.
+# Provisions MariaDB, Caddy, and WordPress on a Debian container using cloud-init.
 # WordPress will be available on port 80 of the container.
 ---
 type: vars
@@ -22,92 +22,84 @@ image: images:debian/13
 config:
   limits.cpu: "2"
   limits.memory: 2GiB
+  cloud-init.user-data: |
+    #cloud-config
+    package_update: true
+    packages:
+      - mariadb-server
+      - php-fpm
+      - php-mysql
+      - php-curl
+      - php-gd
+      - php-xml
+      - php-mbstring
+      - curl
+      - gpg
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+
+    write_files:
+      - path: /etc/caddy/Caddyfile
+        content: |
+          :80 {
+            root * /var/www/html
+            php_fastcgi unix//run/php/php-fpm.sock
+            file_server
+            log {
+              output file /var/log/caddy/access.log
+            }
+          }
+
+    runcmd:
+      # Install Caddy
+      - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      - apt-get update
+      - apt-get install -y caddy
+
+      # Start services
+      - systemctl enable mariadb
+      - systemctl start mariadb
+
+      # Detect PHP-FPM socket and create a stable symlink
+      - |
+        PHP_FPM_SERVICE="$(systemctl list-unit-files 'php*-fpm.service' --no-legend | awk 'NR==1 {print $1}')"
+        PHP_FPM_SOCKET="$(find /run/php -maxdepth 1 -type s -name 'php*-fpm.sock' | head -n 1)"
+        test -n "$PHP_FPM_SERVICE"
+        test -n "$PHP_FPM_SOCKET"
+        ln -sf "$PHP_FPM_SOCKET" /run/php/php-fpm.sock
+        systemctl enable "$PHP_FPM_SERVICE"
+        systemctl restart "$PHP_FPM_SERVICE"
+
+      # Configure MariaDB
+      - |
+        mariadb <<SQL
+        CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
+        CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'localhost' IDENTIFIED BY '${MARIADB_PASSWORD}';
+        GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'localhost';
+        FLUSH PRIVILEGES;
+        SQL
+
+      # Install WordPress
+      - mkdir -p /var/www/html
+      - curl -sL https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
+      - cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+      - sed -i "s/database_name_here/${MARIADB_DATABASE}/" /var/www/html/wp-config.php
+      - sed -i "s/username_here/${MARIADB_USER}/" /var/www/html/wp-config.php
+      - sed -i "s/password_here/${MARIADB_PASSWORD}/" /var/www/html/wp-config.php
+      - curl -sL https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts.php
+      - sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php
+      - sed -i "/That's all, stop editing/r /tmp/wp-salts.php" /var/www/html/wp-config.php
+      - chown -R www-data:www-data /var/www/html
+
+      # Start Caddy
+      - systemctl enable caddy
+      - systemctl restart caddy
 devices:
   mariadb-data:
     type: disk
     pool: default
     source: mariadb-data
     path: /var/lib/mysql
-
-setup:
-  - action: exec
-    when: create
-    script: |
-      set -e
-      export DEBIAN_FRONTEND=noninteractive
-
-      apt-get update
-      apt-get install -y \
-        mariadb-server \
-        php-fpm \
-        php-mysql \
-        php-curl \
-        php-gd \
-        php-xml \
-        php-mbstring \
-        curl \
-        gpg \
-        debian-keyring \
-        debian-archive-keyring \
-        apt-transport-https
-
-      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
-      apt-get update
-      apt-get install -y caddy
-
-      systemctl enable mariadb
-      systemctl start mariadb
-
-      PHP_FPM_SERVICE="$(systemctl list-unit-files 'php*-fpm.service' --no-legend | awk 'NR==1 {print $1}')"
-      PHP_FPM_SOCKET="$(find /run/php -maxdepth 1 -type s -name 'php*-fpm.sock' | head -n 1)"
-      test -n "$PHP_FPM_SERVICE"
-      test -n "$PHP_FPM_SOCKET"
-      ln -sf "$PHP_FPM_SOCKET" /run/php/php-fpm.sock
-
-      mariadb <<SQL
-      CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
-      CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'localhost' IDENTIFIED BY '${MARIADB_PASSWORD}';
-      GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'localhost';
-      FLUSH PRIVILEGES;
-      SQL
-
-      mkdir -p /var/www/html
-      curl -sL https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
-
-      cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-      sed -i "s/database_name_here/$MARIADB_DATABASE/" /var/www/html/wp-config.php
-      sed -i "s/username_here/$MARIADB_USER/" /var/www/html/wp-config.php
-      sed -i "s/password_here/$MARIADB_PASSWORD/" /var/www/html/wp-config.php
-
-      curl -sL https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts.php
-      sed -i "/put your unique phrase here/d" /var/www/html/wp-config.php
-      sed -i "/That's all, stop editing/r /tmp/wp-salts.php" /var/www/html/wp-config.php
-
-      chown -R www-data:www-data /var/www/html
-
-      systemctl enable "$PHP_FPM_SERVICE"
-      systemctl restart "$PHP_FPM_SERVICE"
-      systemctl enable caddy
-
-  # Keep the Caddyfile in sync after the base setup is in place.
-  - action: file_push
-    when: always
-    path: /etc/caddy/Caddyfile
-    mode: "0644"
-    content: |
-      :80 {
-        root * /var/www/html
-        php_fastcgi unix//run/php/php-fpm.sock
-        file_server
-        log {
-          output file /var/log/caddy/access.log
-        }
-      }
-
-  # Reload Caddy after its config has been written.
-  - action: exec
-    when: always
-    script: systemctl restart caddy
-
 description: WordPress with Caddy and MariaDB on a single Debian container

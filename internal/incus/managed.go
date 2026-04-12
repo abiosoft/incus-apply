@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
-	"strconv"
 	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
@@ -139,17 +138,6 @@ func managedSnapshot(res *config.Resource) (string, error) {
 	}
 	if res.Ports != nil {
 		state["ports"] = res.Ports
-	}
-	if len(res.Setup) > 0 {
-		setupState := make([]any, 0, len(res.Setup))
-		for _, action := range res.Setup {
-			entry, err := config.SetupActionSnapshot(action, res.SourceFile)
-			if err != nil {
-				return "", fmt.Errorf("encoding setup state: %w", err)
-			}
-			setupState = append(setupState, entry)
-		}
-		state["setup"] = setupState
 	}
 
 	data, err := json.Marshal(state)
@@ -340,14 +328,14 @@ func applyTrackingState(current map[string]any, snapshot string) {
 
 func unsupportedChanges(resourceType string, changes []DiffChange, previousState, desiredState map[string]any) []DiffChange {
 	fields := createOnlyFields(resourceType)
-	if len(fields) == 0 && resourceType != "instance" {
+	if len(fields) == 0 {
 		return nil
 	}
 
 	var unsupported []DiffChange
 	for _, change := range changes {
 		root := rootPath(change.Path)
-		if fields[root] || isCreateOnlySetupChange(change.Path, previousState, desiredState) {
+		if fields[root] {
 			unsupported = append(unsupported, change)
 		}
 	}
@@ -363,43 +351,6 @@ func rootPath(path string) string {
 		end = idx
 	}
 	return path[:end]
-}
-
-func isCreateOnlySetupChange(path string, previousState, desiredState map[string]any) bool {
-	if rootPath(path) != "setup" {
-		return false
-	}
-	index, ok := setupIndex(path)
-	if !ok {
-		return false
-	}
-	return setupWhen(previousState, index) == string(config.SetupWhenCreate) || setupWhen(desiredState, index) == string(config.SetupWhenCreate)
-}
-
-func setupIndex(path string) (int, bool) {
-	if !strings.HasPrefix(path, "setup[") {
-		return 0, false
-	}
-	start := len("setup[")
-	end := strings.Index(path[start:], "]")
-	if end < 0 {
-		return 0, false
-	}
-	index, err := strconv.Atoi(path[start : start+end])
-	if err != nil {
-		return 0, false
-	}
-	return index, true
-}
-
-func setupWhen(state map[string]any, index int) string {
-	entries, _ := state["setup"].([]any)
-	if index < 0 || index >= len(entries) {
-		return ""
-	}
-	entry, _ := entries[index].(map[string]any)
-	when, _ := entry["when"].(string)
-	return when
 }
 
 func createOnlyFields(resourceType string) map[string]bool {

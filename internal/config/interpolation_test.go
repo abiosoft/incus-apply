@@ -5,7 +5,7 @@ import (
 )
 
 func TestInterpolate(t *testing.T) {
-	env := map[string]string{"NAME": "world", "EMPTY": ""}
+	env := map[string]string{"NAME": "world", "EMPTY": "", "incus.remote.get-client-certificate": "FAKECERT", "incus.remote.get-client-certificate-base64": "RkFLRUNFUlQ="}
 
 	tests := []struct {
 		name    string
@@ -32,6 +32,13 @@ func TestInterpolate(t *testing.T) {
 		// Errors
 		{"unclosed brace", "${NAME", "", true},
 		{"invalid name in braces", "${123}", "", true},
+
+		// incus.* variables
+		{"incus dotted var", "${incus.remote.get-client-certificate}", "FAKECERT", false},
+		{"incus dotted var with default uses value", "${incus.remote.get-client-certificate:-default}", "FAKECERT", false},
+		{"incus dotted unset uses default", "${incus.other.var:-fallback}", "fallback", false},
+		{"incus dotted unset resolves empty", "${incus.other.var}", "", false},
+		{"incus dotted base64 var", "${incus.remote.get-client-certificate-base64}", "RkFLRUNFUlQ=", false},
 	}
 
 	for _, tt := range tests {
@@ -75,7 +82,7 @@ func TestInterpolateStrict(t *testing.T) {
 }
 
 func TestInterpolateDeclared(t *testing.T) {
-	env := map[string]string{"NAME": "world", "EMPTY": ""}
+	env := map[string]string{"NAME": "world", "EMPTY": "", "incus.remote.get-client-certificate": "FAKECERT", "incus.remote.get-client-certificate-base64": "RkFLRUNFUlQ="}
 
 	tests := []struct {
 		name    string
@@ -92,6 +99,13 @@ func TestInterpolateDeclared(t *testing.T) {
 		{"escaped dollar", "price $$1", "price $1", false},
 		{"unclosed brace", "${NAME", "", true},
 		{"invalid name in braces", "${123}", "", true},
+
+		// incus.* variables
+		{"incus declared resolved", "${incus.remote.get-client-certificate}", "FAKECERT", false},
+		{"incus undeclared preserved", "${incus.unknown.var}", "${incus.unknown.var}", false},
+		{"incus undeclared default preserved", "${incus.unknown.var:-fallback}", "${incus.unknown.var:-fallback}", false},
+		{"incus declared default uses value", "${incus.remote.get-client-certificate:-fallback}", "FAKECERT", false},
+		{"incus declared base64 resolved", "${incus.remote.get-client-certificate-base64}", "RkFLRUNFUlQ=", false},
 	}
 
 	for _, tt := range tests {

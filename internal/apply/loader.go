@@ -1,8 +1,10 @@
 package apply
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
@@ -105,10 +107,14 @@ func resolveAndInterpolate(results []*config.FileResult) ([]*config.Resource, er
 	}
 
 	// Pass 2: for each file, merge global + file-scoped vars, then interpolate resources
+	incusVars := resolveIncusVars()
 	var allResources []*config.Resource
 	for _, r := range results {
-		// Build file-scoped env: start with global, then overlay file-scoped vars
-		fileEnv := make(map[string]string, len(globalEnv))
+		// Build file-scoped env: start with incus vars, then global, then file-scoped vars
+		fileEnv := make(map[string]string, len(globalEnv)+len(incusVars))
+		for k, v := range incusVars {
+			fileEnv[k] = v
+		}
 		for k, v := range globalEnv {
 			fileEnv[k] = v
 		}
@@ -213,4 +219,19 @@ func setPreviewRedaction(res *config.Resource) {
 		return
 	}
 	res.PreviewRedactPrefixes = nil
+}
+
+// resolveIncusVars resolves built-in ${incus.*} variables by running
+// incus commands. Supported variables:
+//   - incus.remote.get-client-certificate       — PEM certificate
+//   - incus.remote.get-client-certificate-base64 — PEM certificate base64-encoded
+func resolveIncusVars() map[string]string {
+	vars := map[string]string{}
+	out, err := exec.Command("incus", "remote", "get-client-certificate").Output()
+	if err == nil {
+		cert := strings.TrimRight(string(out), "\n")
+		vars["incus.remote.get-client-certificate"] = cert
+		vars["incus.remote.get-client-certificate-base64"] = base64.StdEncoding.EncodeToString([]byte(cert))
+	}
+	return vars
 }

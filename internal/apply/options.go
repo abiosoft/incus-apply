@@ -13,16 +13,17 @@ type Options struct {
 	CommandTimeout time.Duration
 
 	// Operation modes
-	Delete   bool
-	Reset    bool
-	Select   bool
-	Yes      bool
-	Diff     string
-	Replace  bool
-	ShowEnv  bool
-	Stop     bool
-	Launch   bool
-	FailFast bool
+	Delete          bool
+	Reset           bool
+	Select          bool
+	Yes             bool
+	Diff            string
+	Replace         bool
+	ShowEnv         bool
+	Stop            bool
+	Launch          bool
+	FailFast        bool
+	NoWaitCloudInit bool
 
 	// Internal state (not flags)
 	FileCount int

@@ -76,55 +76,6 @@ func TestResolveVars_missingEnvFile(t *testing.T) {
 	}
 }
 
-func TestResolveVars_commandOutput(t *testing.T) {
-	got, err := ResolveVars(Vars{
-		Commands: map[string]string{"GREETING": "echo hello"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got["GREETING"] != "hello" {
-		t.Errorf("GREETING = %q, want %q", got["GREETING"], "hello")
-	}
-}
-
-func TestResolveVars_commandOverridesVars(t *testing.T) {
-	got, err := ResolveVars(Vars{
-		Vars:     map[string]string{"KEY": "from_vars"},
-		Commands: map[string]string{"KEY": "echo from_command"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got["KEY"] != "from_command" {
-		t.Errorf("KEY = %q, want %q (commands should win over vars)", got["KEY"], "from_command")
-	}
-}
-
-func TestResolveVars_commandFailure(t *testing.T) {
-	_, err := ResolveVars(Vars{
-		Commands: map[string]string{"BAD": "exit 1"},
-	})
-	if err == nil {
-		t.Fatal("expected error for failing command, got nil")
-	}
-	if _, ok := err.(*CommandError); !ok {
-		t.Errorf("expected *CommandError, got %T: %v", err, err)
-	}
-}
-
-func TestResolveVars_commandTrailingNewlineStripped(t *testing.T) {
-	got, err := ResolveVars(Vars{
-		Commands: map[string]string{"VAL": "printf 'no-newline'"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got["VAL"] != "no-newline" {
-		t.Errorf("VAL = %q, want %q", got["VAL"], "no-newline")
-	}
-}
-
 // writeTempEnv writes content to a temp env file and returns its path.
 func writeTempEnv(t *testing.T, content string) string {
 	t.Helper()

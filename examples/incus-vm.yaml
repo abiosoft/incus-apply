@@ -1,0 +1,57 @@
+# Ubuntu VM with Incus installed
+#
+# Creates a VM running Ubuntu 24.04 with a full Incus installation.
+# The host's client certificate is trusted automatically via cloud-init.
+#
+# ${incus.remote.get-client-certificate-base64} is a built-in variable that
+# resolves the current remote's client certificate and base64-encodes it so
+# it can be safely embedded in cloud-init write_files (encoding: b64).
+type: instance
+name: incus-vm
+image: images:ubuntu/24.04
+vm: true
+config:
+  limits.cpu: "4"
+  limits.memory: 4GiB
+  cloud-init.user-data: |
+    #cloud-config
+    package_update: true
+    packages:
+      - curl
+      - gpg
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+    write_files:
+      - path: /tmp/client.crt
+        encoding: b64
+        content: ${incus.remote.get-client-certificate-base64}
+    runcmd:
+      - |
+        set -e
+        mkdir -p /etc/apt/keyrings/
+        curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc
+        . /etc/os-release
+        cat <<EOF > /etc/apt/sources.list.d/zabbly-incus-stable.sources
+        Enabled: yes
+        Types: deb
+        URIs: https://pkgs.zabbly.com/incus/stable
+        Suites: ${VERSION_CODENAME}
+        Components: main
+        Architectures: $(dpkg --print-architecture)
+        Signed-By: /etc/apt/keyrings/zabbly.asc
+
+        EOF
+        apt-get update
+        apt-get install -y incus incus-extra incus-ui-canonical zfsutils-linux
+        incus admin init --auto --storage-backend=zfs --storage-pool=default --storage-create-loop=40
+        incus config trust add-certificate /tmp/client.crt
+        rm /tmp/client.crt
+        incus config set core.https_address :8443
+devices:
+  root:
+    path: /
+    pool: default
+    type: disk
+    size: 50GiB
+description: VM with Incus

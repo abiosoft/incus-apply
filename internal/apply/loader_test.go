@@ -113,15 +113,14 @@ func TestResolveAndInterpolate_AllowsYAMLContentInSingleLineScalar(t *testing.T)
 			},
 			Resources: []*config.Resource{
 				{
-					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.yaml"},
+					Base: config.Base{
+						Type:       "instance",
+						Name:       "app",
+						SourceFile: "app.yaml",
+						Config:     map[string]string{"cloud-init.user-data": "$SEED"},
+					},
 					InstanceFields: config.InstanceFields{
 						Image: "images:alpine/3.19",
-						Setup: []config.SetupAction{{
-							Action:  config.SetupActionPushFile,
-							When:    config.SetupWhenCreate,
-							Path:    "/seed/incus.yaml",
-							Content: "$SEED",
-						}},
 					},
 				},
 			},
@@ -135,11 +134,8 @@ func TestResolveAndInterpolate_AllowsYAMLContentInSingleLineScalar(t *testing.T)
 	if len(resources) != 1 {
 		t.Fatalf("expected 1 resource, got %d", len(resources))
 	}
-	if got := resources[0].Setup[0].Content; got != seed {
-		t.Fatalf("setup content = %q, want %q", got, seed)
-	}
-	if got := resources[0].Setup[0].Path; got != "/seed/incus.yaml" {
-		t.Fatalf("setup path = %q, want %q", got, "/seed/incus.yaml")
+	if got := resources[0].Config["cloud-init.user-data"]; got != seed {
+		t.Fatalf("cloud-init.user-data = %q, want %q", got, seed)
 	}
 }
 
@@ -153,15 +149,14 @@ func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T)
 			},
 			Resources: []*config.Resource{
 				{
-					Base: config.Base{Type: "instance", Name: "app", SourceFile: "app.yaml"},
+					Base: config.Base{
+						Type:       "instance",
+						Name:       "app",
+						SourceFile: "app.yaml",
+						Config:     map[string]string{"user.data": "$SEED"},
+					},
 					InstanceFields: config.InstanceFields{
 						Image: "images:alpine/3.19",
-						Setup: []config.SetupAction{{
-							Action:  config.SetupActionPushFile,
-							When:    config.SetupWhenCreate,
-							Path:    "/seed/data.json",
-							Content: "$SEED",
-						}},
 					},
 				},
 			},
@@ -175,7 +170,7 @@ func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T)
 	if len(resources) != 1 {
 		t.Fatalf("expected 1 resource, got %d", len(resources))
 	}
-	if got := resources[0].Setup[0].Content; got != seed {
-		t.Fatalf("setup content = %q, want %q", got, seed)
+	if got := resources[0].Config["user.data"]; got != seed {
+		t.Fatalf("user.data = %q, want %q", got, seed)
 	}
 }

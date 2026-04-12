@@ -1,7 +1,6 @@
 package incus
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -87,23 +86,12 @@ func newTerminalSpinnerWriter() *progressWriter {
 	return w
 }
 
-func setupProgressLabel(current, total int) string {
-	if current <= 0 || total <= 0 {
-		return "  └─ running setup "
-	}
-	return fmt.Sprintf("  └─ running setup %d of %d: ", current, total)
-}
-
 func waitForAgentProgressLabel() string {
 	return "  └─ waiting for incus agent "
 }
 
-func restartProgressLabel() string {
-	return "  └─ restarting "
-}
-
-func stopProgressLabel() string {
-	return "  └─ stopping "
+func cloudInitProgressLabel() string {
+	return "  └─ waiting for cloud-init: "
 }
 
 func (w *progressWriter) Write(p []byte) (int, error) {
