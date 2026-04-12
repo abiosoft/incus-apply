@@ -3,22 +3,22 @@
 # Provisions MariaDB, Caddy, and WordPress on a Debian container using cloud-init.
 # WordPress will be available on port 80 of the container.
 ---
-type: vars
+kind: vars
 vars:
   MARIADB_DATABASE: wordpress
   MARIADB_USER: wordpress
   MARIADB_PASSWORD: ${MARIADB_PASSWORD:-wordpresspassword}
 ---
-type: storage-volume
+kind: storage-volume
 name: mariadb-data
 pool: default
 config:
   size: 10GiB
 description: Persistent storage for MariaDB data
 ---
-type: instance
+kind: instance
 name: wordpress
-image: images:debian/13
+image: images:debian/13/cloud
 config:
   limits.cpu: "2"
   limits.memory: 2GiB
@@ -56,7 +56,7 @@ config:
       - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
       - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
       - apt-get update
-      - apt-get install -y caddy
+      - apt-get install -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" -y caddy
 
       # Start services
       - systemctl enable mariadb

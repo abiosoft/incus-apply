@@ -1,5 +1,5 @@
 # Alpine virtual machine
-type: instance
+kind: instance
 name: gateway
 image: images:alpine/edge
 vm: true

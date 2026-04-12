@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json",
   "title": "incus-apply configuration",
-  "description": "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `type`) or a vars declaration. Documents without a recognized `type` value are unconstrained.",
+  "description": "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `kind`) or a vars declaration. Documents without a recognized `kind` value are unconstrained.",
   "if": {
     "properties": {
-      "type": {
+      "kind": {
         "enum": [
           "instance",
           "profile",
@@ -23,7 +23,7 @@
       }
     },
     "required": [
-      "type"
+      "kind"
     ]
   },
   "then": {
@@ -101,73 +101,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "instance"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -242,73 +242,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "profile"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -383,73 +383,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "network"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -524,6 +524,13 @@
                   }
                 }
               },
+              "kind": {
+                "description": "Resource kind",
+                "type": "string",
+                "enum": [
+                  "network-forward"
+                ]
+              },
               "listen_address": {
                 "description": "External listen address for a network forward",
                 "type": "string"
@@ -577,20 +584,13 @@
                 "description": "Cluster member target",
                 "type": "string"
               },
-              "type": {
-                "description": "Resource type",
-                "type": "string",
-                "enum": [
-                  "network-forward"
-                ]
-              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "listen_address",
               "network"
             ]
@@ -666,73 +666,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "network-acl"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -807,73 +807,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "network-zone"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -948,73 +948,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "storage-pool"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -1089,73 +1089,81 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "storage-volume"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Storage content type (passed as --type to incus storage volume/bucket create).",
+                "type": "string",
+                "enum": [
+                  "block",
+                  "filesystem"
+                ]
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -1230,73 +1238,81 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "storage-bucket"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "type": {
+                "description": "Storage content type (passed as --type to incus storage volume/bucket create).",
+                "type": "string",
+                "enum": [
+                  "block",
+                  "filesystem"
+                ]
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -1371,73 +1387,73 @@
                   }
                 }
               },
-              "listen_address": {
-                "description": "External listen address for a network forward",
-                "type": "string"
-              },
-              "name": {
-                "description": "Resource name (unique within type)",
-                "type": "string"
-              },
-              "network": {
-                "description": "Network name (for instances or the parent network of a network forward)",
-                "type": "string"
-              },
-              "networkType": {
-                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
-                "type": "string"
-              },
-              "pool": {
-                "description": "Storage pool name (required for storage volumes/buckets)",
-                "type": "string"
-              },
-              "ports": {
-                "description": "Optional network forward port rules in the same shape as incus network forward edit",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "patternProperties": {
-                    ".*": {}
-                  }
-                }
-              },
-              "profiles": {
-                "description": "Profiles to apply to the instance",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
-              "source": {
-                "description": "Source path or device for a storage pool",
-                "type": "string"
-              },
-              "storage": {
-                "description": "Storage pool for the instance root disk",
-                "type": "string"
-              },
-              "target": {
-                "description": "Cluster member target",
-                "type": "string"
-              },
-              "type": {
-                "description": "Resource type",
+              "kind": {
+                "description": "Resource kind",
                 "type": "string",
                 "enum": [
                   "project"
                 ]
               },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "project": {
+                "description": "Incus project (can be overridden by --project flag)",
+                "type": "string"
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           },
@@ -1512,6 +1528,13 @@
                   }
                 }
               },
+              "kind": {
+                "description": "Resource kind",
+                "type": "string",
+                "enum": [
+                  "cluster-group"
+                ]
+              },
               "listen_address": {
                 "description": "External listen address for a network forward",
                 "type": "string"
@@ -1565,20 +1588,13 @@
                 "description": "Cluster member target",
                 "type": "string"
               },
-              "type": {
-                "description": "Resource type",
-                "type": "string",
-                "enum": [
-                  "cluster-group"
-                ]
-              },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
                 "type": "boolean"
               }
             },
             "required": [
-              "type",
+              "kind",
               "name"
             ]
           }
@@ -1627,7 +1643,7 @@
             "description": "If true, variables are shared across all files instead of being file-scoped.",
             "type": "boolean"
           },
-          "type": {
+          "kind": {
             "description": "Must be 'vars' for variable declarations.",
             "type": "string",
             "enum": [
@@ -1646,7 +1662,7 @@
           }
         },
         "required": [
-          "type"
+          "kind"
         ],
         "additionalProperties": false
       }

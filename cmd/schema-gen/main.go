@@ -50,21 +50,21 @@ func generateRootSchema() Schema {
 	resourceTypes := collectResourceTypes()
 	allTypes := append(resourceTypes, "vars")
 
-	// The schema only enforces constraints when `type` is present and matches a
+	// The schema only enforces constraints when `kind` is present and matches a
 	// known incus-apply value. This allows the schema to be applied broadly
 	// (e.g. to all *.yaml files) without flagging unrelated YAML documents.
 	return Schema{
 		Schema:      "https://json-schema.org/draft/2020-12/schema",
 		ID:          "https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json",
 		Title:       "incus-apply configuration",
-		Description: "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `type`) or a vars declaration. Documents without a recognized `type` value are unconstrained.",
+		Description: "Schema for incus-apply configuration files. Each YAML document in the file is either a resource definition (identified by a supported `kind`) or a vars declaration. Documents without a recognized `kind` value are unconstrained.",
 		If: &Schema{
 			Properties: map[string]*Schema{
-				"type": {
+				"kind": {
 					Enum: allTypes,
 				},
 			},
-			Required: []string{"type"},
+			Required: []string{"kind"},
 		},
 		Then: &Schema{
 			OneOf: []Schema{
@@ -95,21 +95,38 @@ func collectResourceTypes() []string {
 	return types
 }
 
+// storageContentTypeEnum is the set of valid --type values for storage volume / bucket create.
+var storageContentTypeEnum = []string{"block", "filesystem"}
+
 func generateResourceSchema(resourceTypes []string) Schema {
 	properties := structProperties(reflect.TypeOf(config.Resource{}))
+	// Remove the ContentType field (yaml:"type") from the base properties;
+	// it is added only to storage-volume and storage-bucket variants below.
+	delete(properties, "type")
 
 	var variants []Schema
 	for _, resourceType := range resourceTypes {
-		required := []string{"type", "name"}
+		required := []string{"kind", "name"}
 		if resourceType == string(resource.TypeNetworkForward) {
-			required = []string{"type", "listen_address", "network"}
+			required = []string{"kind", "listen_address", "network"}
 		}
 
 		variantProperties := cloneProperties(properties)
-		variantProperties["type"] = &Schema{
+		variantProperties["kind"] = &Schema{
 			Type:        "string",
-			Description: "Resource type",
+			Description: "Resource kind",
 			Enum:        []string{resourceType},
+		}
+
+		// storage-volume and storage-bucket accept an optional `type` field that
+		// maps to the --type flag of `incus storage volume create`.
+		switch resource.Type(resourceType) {
+		case resource.TypeStorageVolume, resource.TypeStorageBucket:
+			variantProperties["type"] = &Schema{
+				Type:        "string",
+				Description: "Storage content type (passed as --type to incus storage volume/bucket create).",
+				Enum:        storageContentTypeEnum,
+			}
 		}
 
 		variants = append(variants, Schema{
@@ -140,7 +157,7 @@ func generateVarsSchema() Schema {
 		Type:        "object",
 		Description: "Variable declarations for interpolation in resource configs.",
 		Properties: map[string]*Schema{
-			"type": {
+			"kind": {
 				Type:        "string",
 				Description: "Must be 'vars' for variable declarations.",
 				Enum:        []string{"vars"},
@@ -171,7 +188,7 @@ func generateVarsSchema() Schema {
 				Description: "If true, variables are shared across all files instead of being file-scoped.",
 			},
 		},
-		Required:             []string{"type"},
+		Required:             []string{"kind"},
 		AdditionalProperties: &falseVal,
 	}
 }

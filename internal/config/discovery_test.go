@@ -10,8 +10,8 @@ func TestDiscoveryFindsPlainYAMLFiles(t *testing.T) {
 	dir := t.TempDir()
 
 	files := map[string]string{
-		"instance.yaml":       "type: instance\nname: web\n",
-		"network.yml":         "type: network\nname: net0\n",
+		"instance.yaml":       "kind: instance\nname: web\n",
+		"network.yml":         "kind: network\nname: net0\n",
 		"stack.json":          `{"type":"profile","name":"base"}`,
 		"README.md":           "# not a config file",
 		"docker-compose.yaml": "version: \"3\"\nservices:\n  web:\n    image: nginx\n",
@@ -42,7 +42,7 @@ func TestDiscoveryFindsPlainYAMLFiles(t *testing.T) {
 func TestDiscoveryExplicitFilePassedRegardlessOfExtension(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "myconfig")
-	if err := os.WriteFile(path, []byte("type: instance\nname: app\n"), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte("kind: instance\nname: app\n"), 0o644); err != nil {
 		t.Fatalf("os.WriteFile: %v", err)
 	}
 

@@ -28,7 +28,7 @@ make && sudo make install
 1. Create a config file `debian.yaml`:
 
 ```yaml
-type: instance
+kind: instance
 name: debian
 image: images:debian/12
 profiles:
@@ -80,13 +80,13 @@ incus-apply . --project myproject
 
 ## Configuration Format
 
-Configuration files can be any `.yaml`, `.yml`, or `.json` file. When scanning a directory, `incus-apply` reads all YAML and JSON files and processes only the documents whose `type` matches a supported incus resource type, skipping everything else.
+Configuration files can be any `.yaml`, `.yml`, or `.json` file. When scanning a directory, `incus-apply` reads all YAML and JSON files and processes only the documents whose `kind` matches a supported incus resource type, skipping everything else.
 
 ### Basic Example
 
 ```yaml
 # web-server.yaml
-type: instance
+kind: instance
 name: web-server
 image: images:debian/12
 profiles:
@@ -110,19 +110,19 @@ Multiple resources can be defined in a single file using YAML document separator
 ```yaml
 # stack.yaml
 ---
-type: profile
+kind: profile
 name: app-profile
 config:
   limits.memory: 512MiB
 ---
-type: instance
+kind: instance
 name: app-1
 image: images:alpine/3.19
 profiles:
   - default
   - app-profile
 ---
-type: instance
+kind: instance
 name: app-2
 image: images:alpine/3.19
 profiles:
@@ -132,16 +132,16 @@ profiles:
 
 ## Variables
 
-Declare variables with `type: vars` and reference them with `$VAR` or `${VAR}` in resource documents.
+Declare variables with `kind: vars` and reference them with `$VAR` or `${VAR}` in resource documents.
 
 ```yaml
 ---
-type: vars
+kind: vars
 vars:
   NODE_ENV: production
   MYSQL_DATABASE: app
 ---
-type: instance
+kind: instance
 name: api
 image: docker:node:20
 config:

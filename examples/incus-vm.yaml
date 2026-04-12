@@ -7,13 +7,11 @@
 # `incus remote get-client-certificate` and base64-encoding the output
 # so it can be safely embedded in cloud-init write_files (encoding: b64).
 ---
-type: vars
+kind: vars
 computed:
-  INCUS_CLIENT_CERT:
-    incus: remote get-client-certificate
-    format: base64
+  INCUS_CLIENT_CERT: { incus: remote get-client-certificate, format: base64 }
 ---
-type: instance
+kind: instance
 name: incus-vm
 image: images:ubuntu/24.04
 vm: true

@@ -134,7 +134,7 @@ func writeConfigFile(t *testing.T, dir, name, content string) string {
 
 func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}
@@ -162,7 +162,7 @@ func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 
 func TestExecutorUpsertPlanningErrorPreventsApply(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	client.existsErr["default:instance/web"] = errors.New("boom")
@@ -186,7 +186,7 @@ func TestExecutorUpsertPlanningErrorPreventsApply(t *testing.T) {
 
 func TestExecutorDeleteRemovesExistingResource(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -348,7 +348,7 @@ func TestComputeUpsertDiff_DoesNotRedactNonMatchingPaths(t *testing.T) {
 func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T) {
 	dir := t.TempDir()
 	// Image changed (create-only) + config changed (normal) — entire resource skipped.
-	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -378,7 +378,7 @@ func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T
 
 func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 	dir := t.TempDir()
-	path := writeConfigFile(t, dir, "instance.yaml", "type: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
 
 	client := newFakeClient()
 	client.exists["default:instance/web"] = true
@@ -414,8 +414,8 @@ func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 
 func TestExecutorUpsert_DuplicateResourcesSameProjectFails(t *testing.T) {
 	dir := t.TempDir()
-	writeConfigFile(t, dir, "one.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
-	writeConfigFile(t, dir, "two.yaml", "type: instance\nname: web\nimage: images:alpine/3.19\n")
+	writeConfigFile(t, dir, "one.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
+	writeConfigFile(t, dir, "two.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
 	renderer := &captureRenderer{}

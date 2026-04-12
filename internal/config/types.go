@@ -3,7 +3,8 @@ package config
 
 // Base contains fields common to all Incus resource types.
 type Base struct {
-	Type        string                    `yaml:"type" json:"type"`                                   // Resource type: instance, profile, network, etc.
+	Kind        string                    `yaml:"kind,omitempty" json:"kind,omitempty"`               // Resource kind: instance, profile, network, etc.
+	Type        string                    `yaml:"-" json:"-"`                                         // Resolved kind (set by parser); not read from YAML
 	Name        string                    `yaml:"name" json:"name"`                                   // Resource name (unique within type)
 	Project     string                    `yaml:"project,omitempty" json:"project,omitempty"`         // --project flag (can be overridden by CLI)
 	Config      map[string]string         `yaml:"config,omitempty" json:"config,omitempty"`           // Key-value config options
@@ -48,7 +49,8 @@ type StoragePoolFields struct {
 
 // StorageResourceFields captures the fields specific to storage volumes and buckets.
 type StorageResourceFields struct {
-	Pool string `yaml:"pool,omitempty" json:"pool,omitempty"`
+	Pool        string `yaml:"pool,omitempty" json:"pool,omitempty"`
+	ContentType string `yaml:"type,omitempty" json:"type,omitempty"` // --type flag for storage volume create (block or filesystem)
 }
 
 // NetworkFields captures the fields specific to networks.
@@ -109,7 +111,7 @@ func (r *Resource) applyDefaults() {
 // Validate checks if required fields are present in the resource configuration.
 func (r Resource) Validate() error {
 	if r.Type == "" {
-		return &ValidationError{Field: "type", Message: "type is required"}
+		return &ValidationError{Field: "kind", Message: "kind is required"}
 	}
 	if len(r.After) > 0 && r.Type != "instance" {
 		return &ValidationError{Field: "apply.after", Message: "apply.after is only supported for instances"}
@@ -118,7 +120,7 @@ func (r Resource) Validate() error {
 		if r.ListenAddress == "" {
 			return &ValidationError{Field: "listen_address", Message: "listen_address is required"}
 		}
-	} else if r.Type != "vars" && r.Name == "" {
+	} else if r.Name == "" {
 		return &ValidationError{Field: "name", Message: "name is required"}
 	}
 	return nil

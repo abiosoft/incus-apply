@@ -10,11 +10,11 @@ import (
 
 func TestParseStdinSetsSourceFile(t *testing.T) {
 	input := `---
-type: vars
+kind: vars
 vars:
   NAME: world
 ---
-type: instance
+kind: instance
 name: web
 image: images:alpine/3.19
 `
@@ -36,7 +36,7 @@ image: images:alpine/3.19
 
 func TestParseURL(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("type: instance\nname: web\nimage: images:alpine/3.19\n"))
+		_, _ = w.Write([]byte("kind: instance\nname: web\nimage: images:alpine/3.19\n"))
 	}))
 	defer server.Close()
 
@@ -55,7 +55,7 @@ func TestParseURL(t *testing.T) {
 func TestParseURLTimeout(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(100 * time.Millisecond)
-		_, _ = w.Write([]byte("type: instance\nname: web\nimage: images:alpine/3.19\n"))
+		_, _ = w.Write([]byte("kind: instance\nname: web\nimage: images:alpine/3.19\n"))
 	}))
 	defer server.Close()
 
@@ -66,7 +66,7 @@ func TestParseURLTimeout(t *testing.T) {
 }
 
 func TestParseNetworkForwardFields(t *testing.T) {
-	input := `type: network-forward
+	input := `kind: network-forward
 listen_address: 198.51.100.10
 network: uplink
 config:
@@ -97,7 +97,7 @@ ports:
 }
 
 func TestParseInstanceApplyAfterField(t *testing.T) {
-	input := "type: instance\n" +
+	input := "kind: instance\n" +
 		"name: web\n" +
 		"image: images:alpine/3.19\n" +
 		"apply.after:\n" +
@@ -121,7 +121,7 @@ kind: Deployment
 metadata:
   name: nginx
 ---
-type: instance
+kind: instance
 name: web
 image: images:alpine/3.19
 ---
@@ -149,7 +149,7 @@ func TestParseSkipsEmptyTypeDocuments(t *testing.T) {
 name: something
 value: 42
 ---
-type: profile
+kind: profile
 name: default
 `
 

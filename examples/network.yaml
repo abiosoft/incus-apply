@@ -1,5 +1,5 @@
 # Bridge network
-type: network
+kind: network
 name: webnet
 networkType: bridge
 config:

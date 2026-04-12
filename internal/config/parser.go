@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/abiosoft/incus-apply/internal/terminal"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,14 +96,14 @@ func (p Parser) ParseFile(path string) (*FileResult, error) {
 }
 
 // parseYAML parses YAML content, supporting multiple documents separated by '---'.
-// Separates type:vars documents from resource documents.
+// Separates kind:vars documents from resource documents.
 // No interpolation is done here — the caller handles that.
 func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 	result := &FileResult{}
 	decoder := yaml.NewDecoder(strings.NewReader(string(data)))
 
 	for {
-		// Decode into a generic map first to inspect the type
+		// Decode into a generic map first to inspect the kind
 		var raw map[string]any
 		err := decoder.Decode(&raw)
 		if err == io.EOF {
@@ -117,8 +118,9 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 			continue
 		}
 
-		typ, _ := raw["type"].(string)
-		if typ == "vars" {
+		kind, deprecated := resolveKind(raw)
+
+		if kind == "vars" {
 			var vc Vars
 			if err := remarshal(raw, &vc); err != nil {
 				return nil, fmt.Errorf("parsing vars document: %w", err)
@@ -127,15 +129,26 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 			continue
 		}
 
-		// Skip documents that don't have a recognized incus resource type.
-		if !isKnownResourceType(typ) {
+		// Skip documents that don't have a recognized incus resource kind.
+		if !isKnownResourceType(kind) {
 			continue
 		}
+
+		if deprecated {
+			fmt.Fprintf(os.Stderr, terminal.ColorYellow+"warning: use `kind: %s` instead of `type: %s` — `type` is deprecated for resource identification and will be removed in a future version"+terminal.ColorReset+"\n", kind, kind)
+			// Remove type from raw so it doesn't populate ContentType
+			delete(raw, "type")
+		}
+		// Inject the resolved kind so remarshal populates res.Kind
+		raw["kind"] = kind
 
 		var res Resource
 		if err := remarshal(raw, &res); err != nil {
 			return nil, err
 		}
+
+		// Set the internal Type field used by all downstream code
+		res.Type = res.Kind
 
 		res.applyDefaults()
 
@@ -146,6 +159,24 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 	}
 
 	return result, nil
+}
+
+// resolveKind extracts the resource kind from a raw document map.
+// It returns the kind and whether the deprecated `type` field was used as fallback.
+//
+// Resolution order:
+//  1. `kind` field — the canonical identifier
+//  2. `type` field — deprecated fallback; only accepted when it matches a known
+//     resource kind or "vars", so that storage-volume's content-type `type: block`
+//     is never misidentified as a resource kind.
+func resolveKind(raw map[string]any) (kind string, deprecated bool) {
+	if k, _ := raw["kind"].(string); k != "" {
+		return k, false
+	}
+	if t, _ := raw["type"].(string); t != "" && (isKnownResourceType(t) || t == "vars") {
+		return t, true
+	}
+	return "", false
 }
 
 func (r *FileResult) setSourceFile(source string) {
