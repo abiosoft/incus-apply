@@ -4,7 +4,7 @@
 # WordPress will be available on port 80 of the container.
 ---
 type: vars
-basic:
+vars:
   MARIADB_DATABASE: wordpress
   MARIADB_USER: wordpress
   MARIADB_PASSWORD: ${MARIADB_PASSWORD:-wordpresspassword}

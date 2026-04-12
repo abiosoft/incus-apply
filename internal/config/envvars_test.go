@@ -42,7 +42,7 @@ func TestResolveVars_inlineVarsOverrideEnvFile(t *testing.T) {
 
 	got, err := ResolveVars(Vars{
 		Files: []string{envFile},
-		Basic: map[string]string{"KEY": "from_vars"},
+		Vars:  map[string]string{"KEY": "from_vars"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -56,7 +56,7 @@ func TestResolveVars_shellEnvInVarsValues(t *testing.T) {
 	t.Setenv("MY_SECRET", "s3cret")
 
 	got, err := ResolveVars(Vars{
-		Basic: map[string]string{"DB_PASS": "${MY_SECRET}"},
+		Vars: map[string]string{"DB_PASS": "${MY_SECRET}"},
 	})
 	if err != nil {
 		t.Fatal(err)

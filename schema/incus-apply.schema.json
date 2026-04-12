@@ -1588,16 +1588,6 @@
         "description": "Variable declarations for interpolation in resource configs.",
         "type": "object",
         "properties": {
-          "basic": {
-            "description": "Inline variable definitions (key-value pairs).",
-            "type": "object",
-            "patternProperties": {
-              ".*": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          },
           "computed": {
             "description": "Computed variable definitions resolved at load time by running a command or reading a file.",
             "type": "object",
@@ -1643,6 +1633,16 @@
             "enum": [
               "vars"
             ]
+          },
+          "vars": {
+            "description": "Inline variable definitions (key-value pairs).",
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [

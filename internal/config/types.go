@@ -127,7 +127,7 @@ func (r Resource) Validate() error {
 // Vars represents a `type: vars` document that declares variables
 // for interpolation in resource configs within the same file (or globally).
 type Vars struct {
-	Basic    map[string]string       `yaml:"basic,omitempty"`
+	Vars     map[string]string       `yaml:"vars,omitempty"`
 	Computed map[string]DynamicEntry `yaml:"computed,omitempty"` // computed (dynamically resolved) variables
 	Files    []string                `yaml:"files,omitempty"`    // .env files to load
 	Global   bool                    `yaml:"global,omitempty"`

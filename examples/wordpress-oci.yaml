@@ -4,7 +4,7 @@
 #   incus remote add docker https://docker.io --protocol=oci
 ---
 type: vars
-basic:
+vars:
   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
   MYSQL_DATABASE: wordpress
   MYSQL_USER: wordpress

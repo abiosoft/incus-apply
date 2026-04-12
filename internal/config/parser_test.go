@@ -11,7 +11,7 @@ import (
 func TestParseStdinSetsSourceFile(t *testing.T) {
 	input := `---
 type: vars
-basic:
+vars:
   NAME: world
 ---
 type: instance

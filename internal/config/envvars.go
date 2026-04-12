@@ -37,8 +37,8 @@ func ResolveVars(v Vars) (map[string]string, error) {
 		}
 	}
 
-	// Basic vars declared inline; values can reference shell env
-	for k, raw := range v.Basic {
+	// Vars declared inline; values can reference shell env
+	for k, raw := range v.Vars {
 		resolved, err := Interpolate([]byte(raw), shellEnv)
 		if err != nil {
 			return nil, err

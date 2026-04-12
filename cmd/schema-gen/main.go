@@ -145,7 +145,7 @@ func generateVarsSchema() Schema {
 				Description: "Must be 'vars' for variable declarations.",
 				Enum:        []string{"vars"},
 			},
-			"basic": {
+			"vars": {
 				Type:        "object",
 				Description: "Inline variable definitions (key-value pairs).",
 				PatternProperties: map[string]*Schema{

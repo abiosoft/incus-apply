@@ -128,7 +128,7 @@ Variables are declared with a `type: vars` document and referenced from resource
 ```yaml
 ---
 type: vars
-basic:
+vars:
   DB_NAME: myapp
   DB_USER: appuser
   DB_PASS: ${MYSQL_PASSWORD}
@@ -159,7 +159,7 @@ Example:
 ```yaml
 ---
 type: vars
-basic:
+vars:
   APP_NAME: myapp
 ---
 type: instance

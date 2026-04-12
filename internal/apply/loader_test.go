@@ -11,13 +11,13 @@ func TestResolveAndInterpolateScopesVarsPerFile(t *testing.T) {
 		{
 			SourceFile: "shared.yaml",
 			Vars: []*config.Vars{
-				{Basic: map[string]string{"GLOBAL": "global"}, Global: true, SourceFile: "shared.yaml"},
+				{Vars: map[string]string{"GLOBAL": "global"}, Global: true, SourceFile: "shared.yaml"},
 			},
 		},
 		{
 			SourceFile: "one.yaml",
 			Vars: []*config.Vars{
-				{Basic: map[string]string{"NAME": "one"}, SourceFile: "one.yaml"},
+				{Vars: map[string]string{"NAME": "one"}, SourceFile: "one.yaml"},
 			},
 			Resources: []*config.Resource{
 				{Base: config.Base{Type: "instance", Name: "one", SourceFile: "one.yaml", Config: map[string]string{
@@ -30,7 +30,7 @@ func TestResolveAndInterpolateScopesVarsPerFile(t *testing.T) {
 		{
 			SourceFile: "two.yaml",
 			Vars: []*config.Vars{
-				{Basic: map[string]string{"NAME": "two"}, SourceFile: "two.yaml"},
+				{Vars: map[string]string{"NAME": "two"}, SourceFile: "two.yaml"},
 			},
 			Resources: []*config.Resource{
 				{Base: config.Base{Type: "instance", Name: "two", SourceFile: "two.yaml", Config: map[string]string{
@@ -109,7 +109,7 @@ func TestResolveAndInterpolate_AllowsYAMLContentInSingleLineScalar(t *testing.T)
 		{
 			SourceFile: "app.yaml",
 			Vars: []*config.Vars{
-				{Basic: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
 			},
 			Resources: []*config.Resource{
 				{
@@ -145,7 +145,7 @@ func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T)
 		{
 			SourceFile: "app.yaml",
 			Vars: []*config.Vars{
-				{Basic: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
+				{Vars: map[string]string{"SEED": seed}, SourceFile: "app.yaml"},
 			},
 			Resources: []*config.Resource{
 				{
