@@ -145,11 +145,19 @@ func generateVarsSchema() Schema {
 				Description: "Must be 'vars' for variable declarations.",
 				Enum:        []string{"vars"},
 			},
-			"vars": {
+			"basic": {
 				Type:        "object",
 				Description: "Inline variable definitions (key-value pairs).",
 				PatternProperties: map[string]*Schema{
 					".*": {Type: "string"},
+				},
+				AdditionalProperties: &falseVal,
+			},
+			"computed": {
+				Type:        "object",
+				Description: "Computed variable definitions resolved at load time by running a command or reading a file.",
+				PatternProperties: map[string]*Schema{
+					".*": generateComputedEntrySchema(),
 				},
 				AdditionalProperties: &falseVal,
 			},
@@ -164,6 +172,29 @@ func generateVarsSchema() Schema {
 			},
 		},
 		Required:             []string{"type"},
+		AdditionalProperties: &falseVal,
+	}
+}
+
+func generateComputedEntrySchema() *Schema {
+	falseVal := false
+	return &Schema{
+		Type: "object",
+		Properties: map[string]*Schema{
+			"file": {
+				Type:        "string",
+				Description: "Read the file at this path as the variable value.",
+			},
+			"incus": {
+				Type:        "string",
+				Description: "Run `incus <args>` and use stdout as the variable value.",
+			},
+			"format": {
+				Type:        "string",
+				Description: "Optional output format transformation. Supported: base64.",
+				Enum:        []string{"base64"},
+			},
+		},
 		AdditionalProperties: &falseVal,
 	}
 }

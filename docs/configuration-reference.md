@@ -128,7 +128,7 @@ Variables are declared with a `type: vars` document and referenced from resource
 ```yaml
 ---
 type: vars
-vars:
+basic:
   DB_NAME: myapp
   DB_USER: appuser
   DB_PASS: ${MYSQL_PASSWORD}
@@ -159,7 +159,7 @@ Example:
 ```yaml
 ---
 type: vars
-vars:
+basic:
   APP_NAME: myapp
 ---
 type: instance
@@ -172,20 +172,57 @@ config:
 
 In this example, `environment.APP_NAME` becomes `myapp`, while `environment.HOME_DIR` remains `$HOME` because `HOME` was not declared in `type: vars`.
 
-### Built-in Incus Variables
+### Computed Variables
 
-Variables with the `incus.` prefix are resolved automatically by `incus-apply` without
-declaring them in `type: vars`. They provide values from the current Incus environment.
+Computed variables are resolved at load time by running a command or reading a file.
+They are declared under the `computed:` key in a `type: vars` document.
 
-| Variable                                        | Description                                            |
-| ----------------------------------------------- | ------------------------------------------------------ |
-| `${incus.remote.get-client-certificate}`        | PEM client certificate from the current remote         |
-| `${incus.remote.get-client-certificate-base64}` | Base64-encoded PEM client certificate (no line breaks) |
+```yaml
+type: vars
+computed:
+  KEY:
+    file: path/to/file       # read file contents as the value
+  KEY2:
+    incus: remote get-client-certificate   # run: incus remote get-client-certificate
+    format: base64           # optional: encode the output as base64
+```
 
-These variables are available in all resource documents and can use the `:-` default syntax:
-`${incus.remote.get-client-certificate:-none}`.
+**Source processors:**
 
-Use the `-base64` variant with cloud-init's `write_files` `encoding: b64` to safely embed the PEM certificate, which is a multi-line value that would otherwise break YAML structure.
+| Key     | Description                                    |
+| ------- | ---------------------------------------------- |
+| `file`  | Read the file at the given path as the value   |
+| `incus` | Run `incus <args>` and use stdout as the value |
+
+**`format`** (optional): Transform the raw output. Supported values:
+
+| Value     | Description                   |
+| --------- | ----------------------------- |
+| *(unset)* | Raw output, no transformation |
+| `base64`  | Base64-encode the output      |
+
+Trailing newlines are stripped from all source outputs before formatting is applied.
+
+**Example** — embed the host's client certificate in cloud-init:
+
+```yaml
+---
+type: vars
+computed:
+  INCUS_CLIENT_CERT:
+    incus: remote get-client-certificate
+    format: base64
+---
+type: instance
+name: incus-vm
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    write_files:
+      - path: /tmp/client.crt
+        encoding: b64
+        content: ${INCUS_CLIENT_CERT}
+```
 
 ### Preview Redaction
 
@@ -198,7 +235,6 @@ Use the `-base64` variant with cloud-init's `write_files` `encoding: b64` to saf
 - `$VAR` uses the value of `VAR`.
 - `${VAR}` uses the value of `VAR`.
 - `${VAR:-default}` uses `default` when `VAR` is unset or empty.
-- `${incus.<name>}` resolves a built-in Incus variable.
 - `$$` produces a literal `$`.
 
 ## Notes

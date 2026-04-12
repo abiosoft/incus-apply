@@ -42,7 +42,7 @@ func TestResolveVars_inlineVarsOverrideEnvFile(t *testing.T) {
 
 	got, err := ResolveVars(Vars{
 		Files: []string{envFile},
-		Vars:  map[string]string{"KEY": "from_vars"},
+		Basic: map[string]string{"KEY": "from_vars"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -56,7 +56,7 @@ func TestResolveVars_shellEnvInVarsValues(t *testing.T) {
 	t.Setenv("MY_SECRET", "s3cret")
 
 	got, err := ResolveVars(Vars{
-		Vars: map[string]string{"DB_PASS": "${MY_SECRET}"},
+		Basic: map[string]string{"DB_PASS": "${MY_SECRET}"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -84,4 +84,80 @@ func writeTempEnv(t *testing.T, content string) string {
 		t.Fatal(err)
 	}
 	return path
+}
+
+func TestResolveVars_computedFile(t *testing.T) {
+	tmp := filepath.Join(t.TempDir(), "cert.pem")
+	if err := os.WriteFile(tmp, []byte("MYCERT\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ResolveVars(Vars{
+		Computed: map[string]DynamicEntry{
+			"CERT": {File: tmp},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["CERT"] != "MYCERT" {
+		t.Errorf("CERT = %q, want %q", got["CERT"], "MYCERT")
+	}
+}
+
+func TestResolveVars_computedFileBase64(t *testing.T) {
+	tmp := filepath.Join(t.TempDir(), "cert.pem")
+	if err := os.WriteFile(tmp, []byte("MYCERT\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ResolveVars(Vars{
+		Computed: map[string]DynamicEntry{
+			"CERT_B64": {File: tmp, Format: "base64"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// base64("MYCERT") = "TVlDRVJU"
+	if got["CERT_B64"] != "TVlDRVJU" {
+		t.Errorf("CERT_B64 = %q, want %q", got["CERT_B64"], "TVlDRVJU")
+	}
+}
+
+func TestResolveVars_computedMissingFile(t *testing.T) {
+	_, err := ResolveVars(Vars{
+		Computed: map[string]DynamicEntry{
+			"X": {File: "/nonexistent/file.txt"},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for missing dynamic file, got nil")
+	}
+}
+
+func TestResolveVars_computedNoSource(t *testing.T) {
+	_, err := ResolveVars(Vars{
+		Computed: map[string]DynamicEntry{
+			"X": {Format: "base64"},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for dynamic entry with no source, got nil")
+	}
+}
+
+func TestResolveVars_computedUnsupportedFormat(t *testing.T) {
+	tmp := filepath.Join(t.TempDir(), "data.txt")
+	if err := os.WriteFile(tmp, []byte("value"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := ResolveVars(Vars{
+		Computed: map[string]DynamicEntry{
+			"X": {File: tmp, Format: "hex"},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for unsupported format, got nil")
+	}
 }
