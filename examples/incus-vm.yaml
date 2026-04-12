@@ -3,9 +3,16 @@
 # Creates a VM running Ubuntu 24.04 with a full Incus installation.
 # The host's client certificate is trusted automatically via cloud-init.
 #
-# ${incus.remote.get-client-certificate-base64} is a built-in variable that
-# resolves the current remote's client certificate and base64-encodes it so
-# it can be safely embedded in cloud-init write_files (encoding: b64).
+# INCUS_CLIENT_CERT is resolved dynamically by running
+# `incus remote get-client-certificate` and base64-encoding the output
+# so it can be safely embedded in cloud-init write_files (encoding: b64).
+---
+type: vars
+computed:
+  INCUS_CLIENT_CERT:
+    incus: remote get-client-certificate
+    format: base64
+---
 type: instance
 name: incus-vm
 image: images:ubuntu/24.04
@@ -25,7 +32,7 @@ config:
     write_files:
       - path: /tmp/client.crt
         encoding: b64
-        content: ${incus.remote.get-client-certificate-base64}
+        content: ${INCUS_CLIENT_CERT}
     runcmd:
       - |
         set -e

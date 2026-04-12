@@ -137,7 +137,7 @@ Declare variables with `type: vars` and reference them with `$VAR` or `${VAR}` i
 ```yaml
 ---
 type: vars
-vars:
+basic:
   NODE_ENV: production
   MYSQL_DATABASE: app
 ---

@@ -1588,6 +1588,44 @@
         "description": "Variable declarations for interpolation in resource configs.",
         "type": "object",
         "properties": {
+          "basic": {
+            "description": "Inline variable definitions (key-value pairs).",
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "computed": {
+            "description": "Computed variable definitions resolved at load time by running a command or reading a file.",
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "description": "Read the file at this path as the variable value.",
+                    "type": "string"
+                  },
+                  "format": {
+                    "description": "Optional output format transformation. Supported: base64.",
+                    "type": "string",
+                    "enum": [
+                      "base64"
+                    ]
+                  },
+                  "incus": {
+                    "description": "Run `incus \u003cargs\u003e` and use stdout as the variable value.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
           "files": {
             "description": "Paths to .env files to load variables from.",
             "type": "array",
@@ -1605,16 +1643,6 @@
             "enum": [
               "vars"
             ]
-          },
-          "vars": {
-            "description": "Inline variable definitions (key-value pairs).",
-            "type": "object",
-            "patternProperties": {
-              ".*": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
           }
         },
         "required": [

@@ -127,11 +127,21 @@ func (r Resource) Validate() error {
 // Vars represents a `type: vars` document that declares variables
 // for interpolation in resource configs within the same file (or globally).
 type Vars struct {
-	Vars   map[string]string `yaml:"vars,omitempty"`
-	Files  []string          `yaml:"files,omitempty"` // .env files to load
-	Global bool              `yaml:"global,omitempty"`
+	Basic    map[string]string       `yaml:"basic,omitempty"`
+	Computed map[string]DynamicEntry `yaml:"computed,omitempty"` // computed (dynamically resolved) variables
+	Files    []string                `yaml:"files,omitempty"`    // .env files to load
+	Global   bool                    `yaml:"global,omitempty"`
 
 	SourceFile string `yaml:"-"`
+}
+
+// DynamicEntry defines how to resolve a single dynamic variable.
+// Exactly one source processor (File, Incus) must be set.
+// Format is applied to the raw output after resolution.
+type DynamicEntry struct {
+	File   string `yaml:"file,omitempty"`   // read the file at this path as the value
+	Incus  string `yaml:"incus,omitempty"`  // run: incus <args> and use stdout as the value
+	Format string `yaml:"format,omitempty"` // output format: "" (raw) or "base64"
 }
 
 // ValidationError represents a field-level configuration validation error.

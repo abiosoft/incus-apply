@@ -1,7 +1,10 @@
 package config
 
 import (
+	"encoding/base64"
+	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -34,8 +37,8 @@ func ResolveVars(v Vars) (map[string]string, error) {
 		}
 	}
 
-	// Vars declared inline; values can reference shell env
-	for k, raw := range v.Vars {
+	// Basic vars declared inline; values can reference shell env
+	for k, raw := range v.Basic {
 		resolved, err := Interpolate([]byte(raw), shellEnv)
 		if err != nil {
 			return nil, err
@@ -43,7 +46,53 @@ func ResolveVars(v Vars) (map[string]string, error) {
 		merged[k] = string(resolved)
 	}
 
+	// Computed entries: resolved last so they always win
+	for key, entry := range v.Computed {
+		val, err := resolveDynamicEntry(entry)
+		if err != nil {
+			return nil, fmt.Errorf("resolving computed var %q: %w", key, err)
+		}
+		merged[key] = val
+	}
+
 	return merged, nil
+}
+
+// resolveDynamicEntry executes the source processor for a DynamicEntry and
+// applies any requested output format transformation.
+func resolveDynamicEntry(entry DynamicEntry) (string, error) {
+	var raw string
+	switch {
+	case entry.File != "":
+		data, err := os.ReadFile(entry.File)
+		if err != nil {
+			return "", fmt.Errorf("reading file: %w", err)
+		}
+		raw = strings.TrimRight(string(data), "\n")
+	case entry.Incus != "":
+		args := strings.Fields(entry.Incus)
+		out, err := exec.Command("incus", args...).Output() // #nosec G204 -- args from trusted config file
+		if err != nil {
+			return "", fmt.Errorf("running incus %s: %w", entry.Incus, err)
+		}
+		raw = strings.TrimRight(string(out), "\n")
+	default:
+		return "", fmt.Errorf("computed entry has no source processor (file, incus)")
+	}
+	return applyDynamicFormat(raw, entry.Format)
+}
+
+// applyDynamicFormat transforms raw into the requested format.
+// Supported formats: "" (raw, no-op) and "base64".
+func applyDynamicFormat(val, format string) (string, error) {
+	switch format {
+	case "":
+		return val, nil
+	case "base64":
+		return base64.StdEncoding.EncodeToString([]byte(val)), nil
+	default:
+		return "", fmt.Errorf("unsupported format %q (supported: base64)", format)
+	}
 }
 
 // shellEnvironment returns the current process environment as a map.
