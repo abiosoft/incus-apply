@@ -171,7 +171,9 @@ func interpolateResource(res *config.Resource, env map[string]string) (*config.R
 	if err := yaml.Unmarshal(data, &result); err != nil {
 		return nil, err
 	}
+	// Restore internal-only fields that are excluded from YAML serialisation.
 	result.SourceFile = res.SourceFile
+	result.Type = res.Type
 	return &result, nil
 }
 

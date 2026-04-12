@@ -113,6 +113,9 @@ func (c client) buildStorageResourceCreateArgs(args []string, res *config.Resour
 		args = append(args, res.Pool)
 	}
 	args = append(args, res.Name)
+	if res.ContentType != "" {
+		args = append(args, "--type", res.ContentType)
+	}
 	return args
 }
 

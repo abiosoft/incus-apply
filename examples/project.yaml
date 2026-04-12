@@ -1,5 +1,5 @@
 # Project for isolating example resources
-type: project
+kind: project
 name: example
 config:
   features.images: "true"

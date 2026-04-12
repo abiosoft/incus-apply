@@ -178,6 +178,7 @@ func cloneResource(res *config.Resource) (*config.Resource, error) {
 		return nil, fmt.Errorf("cloning resource: %w", err)
 	}
 	clone.SourceFile = res.SourceFile
+	clone.Type = res.Type
 	return &clone, nil
 }
 

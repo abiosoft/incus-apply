@@ -1,5 +1,5 @@
 # Custom storage volume
-type: storage-volume
+kind: storage-volume
 name: data
 pool: default
 config:

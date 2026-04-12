@@ -1,4 +1,4 @@
-type: network-forward
+kind: network-forward
 listen_address: 198.51.100.10
 network: public
 description: Shared external IP for web services

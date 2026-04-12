@@ -6,7 +6,7 @@ This page contains the full field reference for `incus-apply` resource documents
 
 | Field         | Type   | Description                                    |
 | ------------- | ------ | ---------------------------------------------- |
-| `type`        | string | **Required.** Resource type                    |
+| `kind`        | string | **Required.** Resource kind                    |
 | `name`        | string | **Required.** Resource name                    |
 | `project`     | string | Incus project (overridden by `--project` flag) |
 | `config`      | map    | Resource configuration options                 |
@@ -40,7 +40,7 @@ for the full set of available modules.
 ### Example
 
 ```yaml
-type: instance
+kind: instance
 name: web
 image: images:debian/12
 config:
@@ -70,9 +70,10 @@ config:
 
 ## Storage Volume And Bucket Fields
 
-| Field  | Type   | Description                     |
-| ------ | ------ | ------------------------------- |
-| `pool` | string | **Required.** Storage pool name |
+| Field  | Type   | Description                                                     |
+| ------ | ------ | --------------------------------------------------------------- |
+| `pool` | string | **Required.** Storage pool name                                 |
+| `type` | string | Storage content type passed as `--type` (`block`, `filesystem`) |
 
 ## Network Fields
 
@@ -82,7 +83,7 @@ config:
 
 ## Network Forward Fields
 
-For `type: network-forward`, `listen_address` is the external address and `network` selects the parent network.
+For `kind: network-forward`, `listen_address` is the external address and `network` selects the parent network.
 
 | Field            | Type   | Description                                                                      |
 | ---------------- | ------ | -------------------------------------------------------------------------------- |
@@ -95,7 +96,7 @@ Use `config.target_address` to set the default target address for unmatched traf
 ### Example
 
 ```yaml
-type: network-forward
+kind: network-forward
 listen_address: 198.51.100.10
 network: public
 description: Shared external IP for web services
@@ -121,19 +122,19 @@ ports:
 
 ## Variables
 
-Variables are declared with a `type: vars` document and referenced from resource documents with `$VAR` or `${VAR}`.
+Variables are declared with a `kind: vars` document and referenced from resource documents with `$VAR` or `${VAR}`.
 
 ### Example
 
 ```yaml
 ---
-type: vars
+kind: vars
 vars:
   DB_NAME: myapp
   DB_USER: appuser
   DB_PASS: ${MYSQL_PASSWORD}
 ---
-type: instance
+kind: instance
 name: db
 image: docker:mysql
 config:
@@ -151,18 +152,18 @@ config:
 ### Shell Environment
 
 - Shell environment variables can be referenced only inside the `vars` document.
-- Resource documents expand only variables declared through `type: vars`.
-- If a referenced variable is not declared in `type: vars`, it is left unchanged in the resource document.
+- Resource documents expand only variables declared through `kind: vars`.
+- If a referenced variable is not declared in `kind: vars`, it is left unchanged in the resource document.
 
 Example:
 
 ```yaml
 ---
-type: vars
+kind: vars
 vars:
   APP_NAME: myapp
 ---
-type: instance
+kind: instance
 name: web
 image: images:debian/12
 config:
@@ -170,15 +171,15 @@ config:
   environment.HOME_DIR: $HOME
 ```
 
-In this example, `environment.APP_NAME` becomes `myapp`, while `environment.HOME_DIR` remains `$HOME` because `HOME` was not declared in `type: vars`.
+In this example, `environment.APP_NAME` becomes `myapp`, while `environment.HOME_DIR` remains `$HOME` because `HOME` was not declared in `kind: vars`.
 
 ### Computed Variables
 
 Computed variables are resolved at load time by running a command or reading a file.
-They are declared under the `computed:` key in a `type: vars` document.
+They are declared under the `computed:` key in a `kind: vars` document.
 
 ```yaml
-type: vars
+kind: vars
 computed:
   KEY:
     file: path/to/file       # read file contents as the value
@@ -222,13 +223,13 @@ dots (`.`), hyphens (`-`), and underscores (`_`).
 
 ```yaml
 ---
-type: vars
+kind: vars
 computed:
   INCUS_CLIENT_CERT:
     incus: remote get-client-certificate
     format: base64
 ---
-type: instance
+kind: instance
 name: incus-vm
 config:
   cloud-init.user-data: |
@@ -255,5 +256,6 @@ config:
 ## Notes
 
 - Configuration files may contain multiple YAML documents separated by `---`.
-- Variables are declared with `type: vars` and are not resource documents.
+- Variables are declared with `kind: vars` and are not resource documents.
+- The legacy `type:` field is still accepted as a deprecated alias for `kind:` for backward compatibility, but will be removed in a future version.
 - See [../README.md](../README.md) for quick start and common usage.

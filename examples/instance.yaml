@@ -1,5 +1,5 @@
 # Basic Debian container
-type: instance
+kind: instance
 name: app
 image: images:debian/13
 config:

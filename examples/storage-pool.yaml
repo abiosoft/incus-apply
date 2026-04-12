@@ -1,6 +1,6 @@
 # Storage pool
 # Note: storage pools are global (not project-scoped)
-type: storage-pool
+kind: storage-pool
 name: data
 driver: dir
 description: Data storage pool

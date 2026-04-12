@@ -3,21 +3,21 @@
 # Requires the docker remote:
 #   incus remote add docker https://docker.io --protocol=oci
 ---
-type: vars
+kind: vars
 vars:
   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
   MYSQL_DATABASE: wordpress
   MYSQL_USER: wordpress
   MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpresspassword}
 ---
-type: storage-volume
+kind: storage-volume
 name: mysql-oci-data
 pool: default
 config:
   size: 10GiB
 description: Persistent storage for MySQL data
 ---
-type: instance
+kind: instance
 name: mysql-oci
 image: docker:mysql
 config:
@@ -33,7 +33,7 @@ devices:
     path: /var/lib/mysql
 description: MySQL database for WordPress
 ---
-type: instance
+kind: instance
 name: wordpress-oci
 image: docker:wordpress
 config:
