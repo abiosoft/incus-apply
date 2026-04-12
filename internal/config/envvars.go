@@ -70,8 +70,11 @@ func resolveDynamicEntry(entry DynamicEntry) (string, error) {
 		}
 		raw = strings.TrimRight(string(data), "\n")
 	case entry.Incus != "":
-		args := strings.Fields(entry.Incus)
-		out, err := exec.Command("incus", args...).Output() // #nosec G204 -- args from trusted config file
+		args, err := validateIncusCommand(entry.Incus)
+		if err != nil {
+			return "", err
+		}
+		out, err := exec.Command("incus", args...).Output()
 		if err != nil {
 			return "", fmt.Errorf("running incus %s: %w", entry.Incus, err)
 		}
@@ -80,6 +83,70 @@ func resolveDynamicEntry(entry DynamicEntry) (string, error) {
 		return "", fmt.Errorf("computed entry has no source processor (file, incus)")
 	}
 	return applyDynamicFormat(raw, entry.Format)
+}
+
+// allowedIncusPatterns defines the commands permitted in computed.incus entries.
+// Each pattern matches against the space-split tokens of the incus argument string.
+// tokenMatch is the fixed prefix tokens that must match exactly; extraArgs is
+// the number of additional safe arguments permitted (0 = none, -1 = exactly 1 required).
+//
+// To extend: add a new incusPattern entry below.
+var allowedIncusPatterns = []incusPattern{
+	// incus remote get-<subcommand>   (e.g. get-client-certificate, get-default)
+	// The first token is "remote", second must start with "get-". No extra args.
+	{matchFn: matchRemoteGet},
+	// incus config get <key>   — exactly one extra safe argument required
+	{matchFn: matchConfigGet},
+}
+
+type incusPattern struct {
+	// matchFn validates the token slice and returns the final arg list if valid.
+	matchFn func(tokens []string) ([]string, bool)
+}
+
+func matchRemoteGet(tokens []string) ([]string, bool) {
+	if len(tokens) == 2 &&
+		tokens[0] == "remote" &&
+		strings.HasPrefix(tokens[1], "get-") &&
+		isSafeArg(tokens[1]) {
+		return tokens, true
+	}
+	return nil, false
+}
+
+func matchConfigGet(tokens []string) ([]string, bool) {
+	if len(tokens) == 3 &&
+		tokens[0] == "config" &&
+		tokens[1] == "get" &&
+		isSafeArg(tokens[2]) {
+		return tokens, true
+	}
+	return nil, false
+}
+
+// validateIncusCommand checks that cmd matches an allowed incus pattern and
+// returns the split argument slice ready to pass to exec.Command.
+func validateIncusCommand(cmd string) ([]string, error) {
+	tokens := strings.Fields(strings.TrimSpace(cmd))
+	for _, p := range allowedIncusPatterns {
+		if args, ok := p.matchFn(tokens); ok {
+			return args, nil
+		}
+	}
+	return nil, fmt.Errorf("incus command not allowed: %q", cmd)
+}
+
+// isSafeArg reports whether s is a safe single argument: only alphanumeric
+// characters, dots, hyphens, and underscores.
+func isSafeArg(s string) bool {
+	for _, c := range s {
+		if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
+			('0' <= c && c <= '9') || c == '.' || c == '-' || c == '_' {
+			continue
+		}
+		return false
+	}
+	return len(s) > 0
 }
 
 // applyDynamicFormat transforms raw into the requested format.

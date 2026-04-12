@@ -189,10 +189,10 @@ computed:
 
 **Source processors:**
 
-| Key     | Description                                    |
-| ------- | ---------------------------------------------- |
-| `file`  | Read the file at the given path as the value   |
-| `incus` | Run `incus <args>` and use stdout as the value |
+| Key     | Description                                                |
+| ------- | ---------------------------------------------------------- |
+| `file`  | Read the file at the given path as the value               |
+| `incus` | Run an allowed `incus` command and use stdout as the value |
 
 **`format`** (optional): Transform the raw output. Supported values:
 
@@ -202,6 +202,21 @@ computed:
 | `base64`  | Base64-encode the output      |
 
 Trailing newlines are stripped from all source outputs before formatting is applied.
+
+#### Allowed `incus` commands
+
+For security, the `incus` processor only permits read-only retrieval commands.
+Arbitrary `incus` commands are rejected.
+
+| Pattern                         | Description                                      |
+| ------------------------------- | ------------------------------------------------ |
+| `remote get-client-certificate` | PEM client certificate for the current remote    |
+| `remote get-client-token`       | Client token derived from the client certificate |
+| `remote get-default`            | Name of the default remote                       |
+| `config get <key>`              | Value of a single Incus configuration key        |
+
+The `<key>` argument for `config get` must consist only of alphanumeric characters,
+dots (`.`), hyphens (`-`), and underscores (`_`).
 
 **Example** — embed the host's client certificate in cloud-init:
 

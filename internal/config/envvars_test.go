@@ -161,3 +161,57 @@ func TestResolveVars_computedUnsupportedFormat(t *testing.T) {
 		t.Fatal("expected error for unsupported format, got nil")
 	}
 }
+
+func TestValidateIncusCommand(t *testing.T) {
+	tests := []struct {
+		cmd     string
+		want    []string
+		wantErr bool
+	}{
+		// allowed: incus remote get-* (no extra args)
+		{"remote get-client-certificate", []string{"remote", "get-client-certificate"}, false},
+		{"remote get-client-token", []string{"remote", "get-client-token"}, false},
+		{"remote get-default", []string{"remote", "get-default"}, false},
+
+		// allowed: incus config get <key>
+		{"config get core.https_address", []string{"config", "get", "core.https_address"}, false},
+		{"config get user.foo-bar_123", []string{"config", "get", "user.foo-bar_123"}, false},
+
+		// rejected: remote get-* with extra arg
+		{"remote get-client-certificate extra", nil, true},
+
+		// rejected: config get with no key
+		{"config get", nil, true},
+
+		// rejected: config get with unsafe key
+		{"config get key; rm -rf /", nil, true},
+		{"config get key1 key2", nil, true},
+
+		// rejected: arbitrary commands
+		{"admin init", nil, true},
+		{"exec myvm -- bash", nil, true},
+		{"launch images:ubuntu/24.04", nil, true},
+
+		// rejected: attempt to escape via subcommand
+		{"remote get-client-certificate; echo pwned", nil, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.cmd, func(t *testing.T) {
+			got, err := validateIncusCommand(tt.cmd)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("validateIncusCommand(%q) error = %v, wantErr %v", tt.cmd, err, tt.wantErr)
+			}
+			if err == nil {
+				if len(got) != len(tt.want) {
+					t.Fatalf("args = %v, want %v", got, tt.want)
+				}
+				for i := range got {
+					if got[i] != tt.want[i] {
+						t.Fatalf("args[%d] = %q, want %q", i, got[i], tt.want[i])
+					}
+				}
+			}
+		})
+	}
+}
