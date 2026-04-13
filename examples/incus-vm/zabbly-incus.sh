@@ -4,10 +4,13 @@
 KERNEL_DONE_FILE="/var/lib/zabbly-kernel-done"
 DONE_FILE="/var/lib/zabbly-incus-done"
 
-# check if kernel is done, if not, exit with an error message
-if [ ! -f "$KERNEL_DONE_FILE" ]; then
-    echo "Zabbly Kernel provisioning not completed yet. Please run zabbly-kernel.sh first."
-    exit 0 # Exit with 0 to allow cloud-init to continue normally.
+# check if kernel install is not skipped
+if [ -z "$SKIP_KERNEL_INSTALL" ]; then
+    # check if kernel is done, if not, exit with an error message
+    if [ ! -f "$KERNEL_DONE_FILE" ]; then
+        echo "Zabbly Kernel provisioning not completed yet. Please run zabbly-kernel.sh first."
+        exit 0 # Exit with 0 to allow cloud-init to continue normally.
+    fi
 fi
 
 # check if a custom file exists that marks it as done, if not, run the script

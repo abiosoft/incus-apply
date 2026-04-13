@@ -242,7 +242,7 @@ Incus Global Flags (passed through):
 The [examples](./examples/) directory contains ready-to-run configurations covering a range of real-world use cases:
 
 - **[resources](./examples/resources/)** — Individual resource definitions to get started quickly: containers, VMs, OCI instances, networks, storage, profiles, projects, and more.
-- **[incus-vm](./examples/incus-vm/)** — Spin up a nested Incus environment inside a Debian VM, complete with the Zabbly kernel and ZFS storage, trusted automatically by the host.
+- **[incus-vm](./examples/incus-vm/)** — Spin up a nested Incus environment inside a VM. Choose between an Ubuntu 24.04 variant or a Debian 13 VM with the Zabbly kernel — both use ZFS storage and are trusted by the host automatically.
 - **[wordpress](./examples/wordpress/)** — Deploy a full WordPress stack three ways: OCI application containers, a Debian system container, or a virtual machine — all provisioned via cloud-init in a single `incus-apply` run.
 - **[incus-os](./examples/incus-os/)** — Download Incus OS iso and create an [Incus OS](https://github.com/lxc/incus-os) installation.
 - **[windows](./examples/windows/)** — Download Windows 11 iso and create a Windows 11 AMD64 VM installation.

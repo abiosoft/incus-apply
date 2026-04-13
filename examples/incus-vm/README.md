@@ -1,28 +1,49 @@
 # Incus VM
 
-Example for running Incus inside a Debian virtual machine, using the [Zabbly](https://github.com/zabbly/linux) kernel and ZFS as the storage backend.
+Examples for running Incus inside a virtual machine. Two variants are provided depending on your preferred distro and kernel setup.
 
-The host's client certificate is trusted automatically so the nested Incus instance can be managed from the host immediately after provisioning.
-
-## How it works
-
-- A Debian 13 cloud VM is created with 4 CPUs and 4 GiB of memory.
-- cloud-init installs the Zabbly kernel (`zabbly-kernel.sh`) and Zabbly Incus (`zabbly-incus.sh`)
-- ZFS is configured as the default storage pool
-- The host's client certificate (resolved via `incus remote get-client-certificate`) is added as a trusted client
-
-The two shell scripts (`zabbly-kernel.sh` and `zabbly-incus.sh`) are embedded into the VM via cloud-init `write_files` and executed during first boot.
+In both cases the host's client certificate is trusted automatically, so the nested Incus instance can be managed from the host immediately after provisioning.
 
 ## Usage
+
+```sh
+incus-apply <yaml file>
+```
+
+## Examples
+
+### Ubuntu (`incus-vm.yaml`)
+
+Creates an Ubuntu 24.04 VM with Incus installed from the Zabbly repository and ZFS as the default storage pool.
+
+- Ubuntu 24.04 cloud VM
+- Incus installed via `zabbly-incus.sh`
+- ZFS storage pool configured
+- Host client certificate trusted automatically
 
 ```sh
 incus-apply incus-vm.yaml
 ```
 
-## Examples
+### Debian + Zabbly Kernel (`incus-zabbly.yaml`)
 
-| File               | Description                                                                              |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| `incus-vm.yaml`    | Debian 13 VM with Incus installed, Zabbly kernel, and ZFS storage                        |
-| `zabbly-kernel.sh` | Script to install the Zabbly kernel (embedded into the VM via cloud-init)                |
-| `zabbly-incus.sh`  | Script to install Incus from the Zabbly repository (embedded into the VM via cloud-init) |
+Creates a Debian 13 VM with the [Zabbly](https://github.com/zabbly/linux) kernel and Incus installed, with ZFS as the default storage pool.
+
+- Debian 13 cloud VM
+- Zabbly kernel installed via `zabbly-kernel.sh`
+- Incus installed via `zabbly-incus.sh`
+- ZFS storage pool configured
+- Host client certificate trusted automatically
+
+```sh
+incus-apply incus-zabbly.yaml
+```
+
+## Files
+
+| File                | Description                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `incus-vm.yaml`     | Ubuntu 24.04 VM with Incus and ZFS storage                                               |
+| `incus-zabbly.yaml` | Debian 13 VM with Incus, Zabbly kernel, and ZFS storage                                  |
+| `zabbly-kernel.sh`  | Script to install the Zabbly kernel (embedded into the VM via cloud-init)                |
+| `zabbly-incus.sh`   | Script to install Incus from the Zabbly repository (embedded into the VM via cloud-init) |

@@ -16,6 +16,6 @@ incus-apply <yaml file>
 | ------------------------ | ---------------------------------------------------------------------------------------- |
 | [resources/](resources/) | Individual Incus resource definitions (instances, networks, storage, profiles, and more) |
 | [incus-os/](incus-os/)   | Incus OS virtual-machine with an ephemeral ISO downloader instance                       |
-| [incus-vm/](incus-vm/)   | Incus installed inside a Debian VM with the Zabbly kernel and ZFS                        |
+| [incus-vm/](incus-vm/)   | Incus installed inside a VM — Ubuntu variant or Debian with the Zabbly kernel and ZFS    |
 | [windows/](windows/)     | Windows 11 AMD64 virtual machine with an ephemeral ISO downloader instance               |
 | [wordpress/](wordpress/) | WordPress stack in three variants: OCI containers, system container, and VM              |
