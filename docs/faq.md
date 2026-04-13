@@ -103,16 +103,16 @@ Yes. `incus-apply` supports local files, recursive directory discovery, `-` for 
 
 ## Can I control the order instances are applied?
 
-Yes. Use `after` to list instance names that should be applied before the current one:
+Yes. Use `apply.after` to list instance names that should be applied before the current one:
 
 ```yaml
 type: instance
 name: app
-after:
+apply.after:
   - database
 ```
 
-The `after` field is scoped to the same project. Cyclic dependencies are detected and cause an error.
+The `apply.after` field is scoped to the same project. Cyclic dependencies are detected and cause an error.
 
 ## Where can I find example configs?
 
