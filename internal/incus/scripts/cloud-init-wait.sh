@@ -9,6 +9,9 @@ TAIL_PID=$!
 cloud-init status --wait >/dev/null 2>&1
 CI_RC=$?
 
+# Exit code 2 is not a failure, rather a soft success.
+[ "$CI_RC" -eq 2 ] && CI_RC=0
+
 kill $TAIL_PID 2>/dev/null
 wait $TAIL_PID 2>/dev/null
 
