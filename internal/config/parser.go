@@ -103,13 +103,26 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 	decoder := yaml.NewDecoder(strings.NewReader(string(data)))
 
 	for {
-		// Decode into a generic map first to inspect the kind
-		var raw map[string]any
-		err := decoder.Decode(&raw)
+		// Decode into a yaml.Node first so we can normalize cloud-init config
+		// values before converting to a generic map. This preserves YAML
+		// comments (e.g. #cloud-config) that would otherwise be lost.
+		var docNode yaml.Node
+		err := decoder.Decode(&docNode)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
+			return nil, err
+		}
+
+		// Convert cloud-init mapping/sequence values to string scalars while
+		// there is still node metadata (comments) available.
+		normalizeCloudInitConfig(&docNode)
+
+		// Decode the (possibly modified) node into a generic map for kind
+		// detection and the rest of the parsing pipeline.
+		var raw map[string]any
+		if err := docNode.Decode(&raw); err != nil {
 			return nil, err
 		}
 
@@ -186,6 +199,59 @@ func (r *FileResult) setSourceFile(source string) {
 	}
 	for _, c := range r.Resources {
 		c.SourceFile = source
+	}
+}
+
+// normalizeCloudInitConfig walks the top-level mapping of a YAML document and
+// converts any cloud-init config values that are YAML mappings or sequences
+// into their string (YAML-text) representations. This lets users write
+// cloud-init blocks as native YAML — including comments like #cloud-config
+// (stored as a YAML HeadComment on the mapping node) — while the rest of the
+// application only ever sees plain strings in config maps.
+func normalizeCloudInitConfig(docNode *yaml.Node) {
+	root := docNode
+	if root.Kind == yaml.DocumentNode && len(root.Content) > 0 {
+		root = root.Content[0]
+	}
+	if root.Kind != yaml.MappingNode {
+		return
+	}
+	for i := 0; i+1 < len(root.Content); i += 2 {
+		if root.Content[i].Value != "config" {
+			continue
+		}
+		configMap := root.Content[i+1]
+		if configMap.Kind != yaml.MappingNode {
+			return
+		}
+		for j := 0; j+1 < len(configMap.Content); j += 2 {
+			keyNode := configMap.Content[j]
+			valueNode := configMap.Content[j+1]
+			if keyNode.Kind != yaml.ScalarNode {
+				continue
+			}
+			if !strings.HasPrefix(keyNode.Value, "cloud-init.") {
+				continue
+			}
+			if valueNode.Kind == yaml.ScalarNode {
+				continue // already a plain string
+			}
+			// Re-encode the mapping/sequence node to a YAML string.
+			// yaml.Marshal preserves HeadComment/LineComment/FootComment on
+			// the node, so #cloud-config (written as a YAML comment) is
+			// correctly included as the first line of the output string.
+			b, err := yaml.Marshal(valueNode)
+			if err != nil {
+				continue
+			}
+			configMap.Content[j+1] = &yaml.Node{
+				Kind:  yaml.ScalarNode,
+				Tag:   "!!str",
+				Style: yaml.LiteralStyle,
+				Value: strings.TrimRight(string(b), "\n"),
+			}
+		}
+		return
 	}
 }
 

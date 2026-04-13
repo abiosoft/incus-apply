@@ -45,8 +45,20 @@
                 "description": "Key-value configuration options",
                 "type": "object",
                 "patternProperties": {
-                  ".*": {
+                  "^(?!cloud-init\\.)": {
+                    "description": "Configuration value",
                     "type": "string"
+                  },
+                  "^cloud-init\\.": {
+                    "description": "cloud-init configuration value — may be a plain string or an inline YAML mapping/sequence. incus-apply converts inline YAML to the string form that Incus expects, preserving comments such as #cloud-config.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ]
                   }
                 }
               },
@@ -186,8 +198,20 @@
                 "description": "Key-value configuration options",
                 "type": "object",
                 "patternProperties": {
-                  ".*": {
+                  "^(?!cloud-init\\.)": {
+                    "description": "Configuration value",
                     "type": "string"
+                  },
+                  "^cloud-init\\.": {
+                    "description": "cloud-init configuration value — may be a plain string or an inline YAML mapping/sequence. incus-apply converts inline YAML to the string form that Incus expects, preserving comments such as #cloud-config.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ]
                   }
                 }
               },

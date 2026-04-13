@@ -37,6 +37,36 @@ Use cloud-init's native `#cloud-config` format to install packages, write files,
 commands at instance creation time. See the [cloud-init documentation](https://cloudinit.readthedocs.io/)
 for the full set of available modules.
 
+Cloud-init config values can be written in two equivalent ways:
+
+**Block scalar string** — the traditional form, identical to what you would pass directly to Incus:
+
+```yaml
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - caddy
+```
+
+**Inline YAML mapping** — write the cloud-init document as native YAML under the config key.
+`incus-apply` converts it to the string form Incus expects. The `#cloud-config` header is
+written as a YAML comment on the first line and is preserved in the output:
+
+```yaml
+config:
+  cloud-init.user-data:
+    #cloud-config
+    packages:
+      - caddy
+    runcmd:
+      - systemctl enable caddy
+```
+
+Both forms are equivalent. The inline YAML form benefits from editor validation and auto-complete
+when a JSON Schema is configured (for example, `cloud-init.user-data` will be validated as a
+mapping rather than an opaque string).
+
 ### Example
 
 ```yaml
@@ -44,7 +74,7 @@ kind: instance
 name: web
 image: images:debian/12
 config:
-  cloud-init.user-data: |
+  cloud-init.user-data:
     #cloud-config
     package_update: true
     packages:

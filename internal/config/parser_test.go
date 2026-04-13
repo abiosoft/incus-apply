@@ -161,3 +161,81 @@ name: default
 		t.Fatalf("resources = %v, want [profile/default]", result.Resources)
 	}
 }
+
+func TestCloudInitYAMLMappingConvertedToString(t *testing.T) {
+	// cloud-init.user-data written as inline YAML mapping — the parser must
+	// convert it to a plain string so the rest of the pipeline sees a string.
+	input := `kind: instance
+name: web
+image: images:debian/13/cloud
+config:
+  cloud-init.user-data:
+    #cloud-config
+    packages:
+      - nginx
+    runcmd:
+      - systemctl enable nginx
+`
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v", err)
+	}
+	if len(result.Resources) != 1 {
+		t.Fatalf("resources = %d, want 1", len(result.Resources))
+	}
+	got := result.Resources[0].Config["cloud-init.user-data"]
+	if got == "" {
+		t.Fatal("cloud-init.user-data = empty, want non-empty string")
+	}
+	// The YAML comment #cloud-config must appear as an actual text line.
+	if !strings.Contains(got, "#cloud-config") {
+		t.Errorf("cloud-init.user-data does not contain #cloud-config:\n%s", got)
+	}
+	if !strings.Contains(got, "nginx") {
+		t.Errorf("cloud-init.user-data does not contain package 'nginx':\n%s", got)
+	}
+}
+
+func TestCloudInitPlainStringUnchanged(t *testing.T) {
+	// A cloud-init value written as a plain block scalar must pass through
+	// unchanged; the normalizer must not alter it.
+	input := `kind: instance
+name: web
+image: images:debian/13/cloud
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - nginx
+`
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v", err)
+	}
+	got := result.Resources[0].Config["cloud-init.user-data"]
+	if !strings.HasPrefix(got, "#cloud-config\n") {
+		t.Errorf("cloud-init.user-data = %q, want prefix '#cloud-config\\n'", got)
+	}
+}
+
+func TestNonCloudInitConfigKeyUnchanged(t *testing.T) {
+	// Non-cloud-init keys in config must not be affected by normalisation.
+	input := `kind: instance
+name: web
+image: images:debian/13
+config:
+  limits.cpu: "2"
+  limits.memory: 1GiB
+`
+	result, err := NewParser(0).ParseStdin(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseStdin() error = %v", err)
+	}
+	res := result.Resources[0]
+	if res.Config["limits.cpu"] != "2" {
+		t.Errorf("limits.cpu = %q, want '2'", res.Config["limits.cpu"])
+	}
+	if res.Config["limits.memory"] != "1GiB" {
+		t.Errorf("limits.memory = %q, want '1GiB'", res.Config["limits.memory"])
+	}
+}

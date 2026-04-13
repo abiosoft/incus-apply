@@ -35,6 +35,29 @@ type Schema struct {
 	AdditionalProperties *bool `json:"additionalProperties,omitempty"`
 }
 
+// cloudInitConfigSchema is the schema for the `config` map on resource types
+// that support cloud-init (instance, profile). Keys beginning with
+// "cloud-init." accept either a plain string or an inline YAML mapping/sequence
+// (which incus-apply serialises to a string at parse time); all other keys
+// must be strings.
+var cloudInitConfigSchema = &Schema{
+	Type:        "object",
+	Description: "Key-value configuration options",
+	PatternProperties: map[string]*Schema{
+		`^cloud-init\.`: {
+			Description: "cloud-init configuration value — may be a plain string or an inline YAML mapping/sequence. incus-apply converts inline YAML to the string form that Incus expects, preserving comments such as #cloud-config.",
+			OneOf: []Schema{
+				{Type: "string"},
+				{Type: "object"},
+			},
+		},
+		`^(?!cloud-init\.)`: {
+			Type:        "string",
+			Description: "Configuration value",
+		},
+	},
+}
+
 func main() {
 	schema := generateRootSchema()
 
@@ -127,6 +150,14 @@ func generateResourceSchema(resourceTypes []string) Schema {
 				Description: "Storage content type (passed as --type to incus storage volume/bucket create).",
 				Enum:        storageContentTypeEnum,
 			}
+		}
+
+		// instance and profile support cloud-init config keys whose values may
+		// be inline YAML mappings in addition to plain strings.
+		switch resource.Type(resourceType) {
+		case resource.TypeInstance, resource.TypeProfile:
+			cp := *cloudInitConfigSchema
+			variantProperties["config"] = &cp
 		}
 
 		variants = append(variants, Schema{
