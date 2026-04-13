@@ -45,7 +45,7 @@ kind: instance
 name: windows11
 vm: true
 empty: true
-after:
+apply.after:
   - windows11-downloader
 config:
   limits.cpu: "4"
