@@ -1,0 +1,28 @@
+kind: instance
+name: cloud-init-reboot-test
+image: images:alpine/edge/cloud
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - htop
+
+    runcmd:
+      - echo "[cloud-init] first boot $(date)"
+      - sleep 5
+      - echo "[cloud-init] first boot done $(date)"
+
+    power_state:
+      mode: reboot
+      message: "Rebooting to verify post-reboot cloud-init"
+
+    write_files:
+      - path: /var/lib/cloud/scripts/per-boot/log-boot.sh
+        permissions: "0755"
+        content: |
+          #!/bin/sh
+          echo "[cloud-init] per-boot $(date)"
+          sleep 5
+          echo "[cloud-init] per-boot done $(date)"
+
+    final_message: "cloud-init finished at $TIMESTAMP — uptime $UPTIME seconds"

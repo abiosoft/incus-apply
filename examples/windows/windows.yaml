@@ -1,0 +1,77 @@
+kind: vars
+vars:
+  # Credit: https://www.windowscentral.com/microsoft/windows-11/microsofts-official-windows-11-version-25h2-rtm-iso-media-is-now-available-download-all-28-languages-here-for-x64-or-arm64
+  WINDOWS_URL: https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_en-us.iso
+  VIRTIO_URL: https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
+
+  # File and directory paths
+  ISO_DIR: "/tmp/windows-iso"
+  WINDOWS_ISO: "windows11.iso"
+  VIRTIO_ISO: "virtio-win.iso"
+---
+kind: instance
+name: windows11-downloader
+image: images:alpine/edge/cloud
+ephemeral: true
+devices:
+  windows11-iso:
+    type: disk
+    source: /tmp
+    path: /host-tmp
+    shift: "true"
+config:
+  limits.cpu: "2"
+  limits.memory: 2GiB
+  cloud-init.user-data:
+    #cloud-config
+    packages:
+      - curl
+      - ca-certificates
+    runcmd:
+      - |
+        set -e
+        cd /host-tmp
+
+        DIR=$(basename $ISO_DIR)
+        mkdir -p $DIR && cd $DIR
+        stat $WINDOWS_ISO || curl -L -o $WINDOWS_ISO $WINDOWS_URL
+        stat $VIRTIO_ISO || curl -L -o $VIRTIO_ISO $VIRTIO_URL
+    power_state:
+      mode: poweroff
+      message: "Shutting down after downloading ISOs"
+description: ISO Downloader
+---
+kind: instance
+name: windows11
+vm: true
+empty: true
+after:
+  - windows11-downloader
+config:
+  limits.cpu: "4"
+  limits.memory: 6GiB
+  security.secureboot: "true"
+  image.os: Windows11
+devices:
+  root:
+    path: /
+    pool: default
+    type: disk
+    size: 60GiB
+    io.bus: nvme
+  tpm:
+    type: tpm
+  install:
+    type: disk
+    source: $ISO_DIR/$WINDOWS_ISO
+    boot.priority: "10"
+    io.bus: usb
+  virtio:
+    type: disk
+    source: $ISO_DIR/$VIRTIO_ISO
+    boot.priority: "5"
+    io.bus: usb
+  agent:
+    type: disk
+    source: agent:config
+description: Windows 11

@@ -1,0 +1,46 @@
+# WordPress stack: MySQL + WordPress as OCI containers
+#
+# Requires the docker remote:
+#   incus remote add docker https://docker.io --protocol=oci
+---
+kind: vars
+vars:
+  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+  MYSQL_DATABASE: wordpress
+  MYSQL_USER: wordpress
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpresspassword}
+---
+kind: storage-volume
+name: mysql-data-oci
+pool: default
+config:
+  size: 10GiB
+description: Persistent storage for MySQL data
+---
+kind: instance
+name: mysql-oci
+image: docker:mysql
+config:
+  environment.MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+  environment.MYSQL_DATABASE: $MYSQL_DATABASE
+  environment.MYSQL_USER: $MYSQL_USER
+  environment.MYSQL_PASSWORD: $MYSQL_PASSWORD
+devices:
+  data:
+    type: disk
+    pool: default
+    source: mysql-data-oci
+    path: /var/lib/mysql
+description: MySQL database for WordPress
+---
+kind: instance
+name: wordpress-oci
+image: docker:wordpress
+config:
+  environment.WORDPRESS_DB_HOST: mysql-oci
+  environment.WORDPRESS_DB_NAME: $MYSQL_DATABASE
+  environment.WORDPRESS_DB_USER: $MYSQL_USER
+  environment.WORDPRESS_DB_PASSWORD: $MYSQL_PASSWORD
+  limits.memory: 1GiB
+  limits.cpu: "2"
+description: WordPress application server
