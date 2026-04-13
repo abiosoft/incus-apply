@@ -123,3 +123,284 @@ func TestBuildInstanceCreateArgsEphemeral(t *testing.T) {
 		t.Fatalf("command = %q, want --ephemeral flag", cmd)
 	}
 }
+
+func TestCloudInitPowerStateMode(t *testing.T) {
+	cases := []struct {
+		name   string
+		config map[string]string
+		want   string
+	}{
+		{
+			name:   "user-data poweroff",
+			config: map[string]string{"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: poweroff\n"},
+			want:   "poweroff",
+		},
+		{
+			name:   "vendor-data reboot",
+			config: map[string]string{"cloud-init.vendor-data": "#cloud-config\npower_state:\n  mode: reboot\n"},
+			want:   "reboot",
+		},
+		{
+			name:   "no power_state",
+			config: map[string]string{"cloud-init.user-data": "#cloud-config\npackages:\n  - nginx\n"},
+			want:   "",
+		},
+		{
+			name:   "empty config",
+			config: map[string]string{},
+			want:   "",
+		},
+		{
+			name:   "invalid yaml",
+			config: map[string]string{"cloud-init.user-data": "{{not yaml}}"},
+			want:   "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+			res.Config = tc.config
+			if got := cloudInitPowerStateMode(res); got != tc.want {
+				t.Fatalf("cloudInitPowerStateMode() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestWaitCloudInitRebootWaitsAndRetries(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary — happy reboot path:
+	//   status --wait: fails (connection severed by reboot)
+	//   exec true: succeeds (instance still up before reboot)
+	//   test -f boot-finished: succeeds (first boot completed)
+	//   waitRunning / list: always running
+	//   test -f boot-finished (poll after reboot): succeeds again
+	//   cat result.json: no errors
+	dir := t.TempDir()
+	callFile := filepath.Join(dir, "exec_calls")
+	script := `#!/bin/sh
+case "$1" in
+  exec)
+    for arg in "$@"; do
+      case "$arg" in
+        sh)
+          # cloud-init status --wait call
+          count=$(cat "` + callFile + `" 2>/dev/null || echo 0)
+          echo $((count + 1)) > "` + callFile + `"
+          exit 1  # connection severed by reboot
+          ;;
+        /var/lib/cloud/instance/boot-finished)
+          exit 0  # present from first boot (and again after second boot)
+          ;;
+        /var/lib/cloud/data/result.json)
+          printf '{"v1":{"datasource":"DataSourceNoCloud","errors":[]}}'
+          exit 0
+          ;;
+      esac
+    done
+    exit 0
+    ;;
+  list) printf "running\n" ;;
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: reboot\n  message: Rebooting after kernel installation\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error != nil {
+		t.Fatalf("WaitCloudInit() error = %v, want nil (reboot, result.json shows no errors)", result.Error)
+	}
+	// status --wait was called only once (before the reboot).
+	data, _ := os.ReadFile(callFile)
+	if string(data) != "1\n" {
+		t.Fatalf("cloud-init status --wait call count = %q, want 1", string(data))
+	}
+}
+
+func TestWaitCloudInitRebootFallsBackToStatusWait(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary — fallback path:
+	//   status --wait: 1st call fails (reboot severs exec) → 2nd call succeeds
+	//   exec true: fails (instance not reachable, reboot in progress)
+	//   test -f boot-finished: always fails (not yet written on new boot)
+	//   list: always running
+	dir := t.TempDir()
+	callFile := filepath.Join(dir, "exec_calls")
+	script := `#!/bin/sh
+case "$1" in
+  exec)
+    for arg in "$@"; do
+      case "$arg" in
+        sh)
+          count=$(cat "` + callFile + `" 2>/dev/null || echo 0)
+          echo $((count + 1)) > "` + callFile + `"
+          if [ "$count" -eq 0 ]; then exit 1; fi  # first call fails (reboot)
+          exit 0                                   # second call succeeds (fallback)
+          ;;
+        /var/lib/cloud/instance/boot-finished) exit 1 ;;  # never found
+        /var/lib/cloud/data/result.json)        exit 1 ;;  # never found
+        true) exit 1 ;;  # not reachable (in reboot)
+      esac
+    done
+    exit 0
+    ;;
+  list) printf "running\n" ;;
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: reboot\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error != nil {
+		t.Fatalf("WaitCloudInit() error = %v, want nil (fallback status --wait succeeded)", result.Error)
+	}
+	// status --wait called twice: first (fails/reboot), second (fallback/succeeds).
+	data, _ := os.ReadFile(callFile)
+	if string(data) != "2\n" {
+		t.Fatalf("cloud-init status --wait call count = %q, want 2", string(data))
+	}
+}
+
+func TestWaitCloudInitRebootAbortsWhenInstanceStops(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary — abort path:
+	//   all exec calls fail (instance not reachable, went down and never came back)
+	//   list: always empty (instance stopped)
+	dir := t.TempDir()
+	script := `#!/bin/sh
+case "$1" in
+  exec) exit 1 ;;
+  list) printf "" ;;
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: reboot\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error == nil {
+		t.Fatal("WaitCloudInit() error = nil, want error (instance stopped after reboot)")
+	}
+}
+
+func TestWaitCloudInitSuppressesErrorWhenInstanceStopped(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary: exec fails (simulates power_state shutdown),
+	// but list reports the instance as stopped (not "running").
+	dir := t.TempDir()
+	script := `#!/bin/sh
+case "$1" in
+  exec) exit 1 ;;
+  list) printf "" ;;  # empty output → not running
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{
+		Base:           config.Base{Type: "instance", Name: "web"},
+		InstanceFields: config.InstanceFields{},
+	}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: poweroff\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error != nil {
+		t.Fatalf("WaitCloudInit() error = %v, want nil (power_state set, instance stopped)", result.Error)
+	}
+}
+
+func TestWaitCloudInitPreservesErrorWhenInstanceStillRunning(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary: exec fails AND instance is still running → real failure.
+	dir := t.TempDir()
+	script := `#!/bin/sh
+case "$1" in
+  exec) exit 1 ;;
+  list) printf "running\n" ;;
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npower_state:\n  mode: poweroff\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error == nil {
+		t.Fatal("WaitCloudInit() error = nil, want error (instance still running)")
+	}
+}
+
+func TestWaitCloudInitPreservesErrorWhenNoPowerState(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+
+	// Fake incus binary: exec fails, instance is stopped, but no power_state
+	// declared → treat as real cloud-init failure.
+	dir := t.TempDir()
+	script := `#!/bin/sh
+case "$1" in
+  exec) exit 1 ;;
+  list) printf "" ;;
+esac
+`
+	scriptPath := filepath.Join(dir, "incus")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("os.WriteFile() error = %v", err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
+	res.Config = map[string]string{
+		"cloud-init.user-data": "#cloud-config\npackages:\n  - nginx\n",
+	}
+	result := client{}.WaitCloudInit(res)
+	if result.Error == nil {
+		t.Fatal("WaitCloudInit() error = nil, want error (no power_state, stopped unexpectedly)")
+	}
+}

@@ -8,6 +8,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// instanceExecArgs builds the base argument slice for an `incus exec` command
+// against an instance. The returned slice already includes the "--" separator;
+// callers append the in-instance command directly.
+//
+//	args := c.instanceExecArgs(res, "test", "-f", "/path")
+func (c client) instanceExecArgs(res *config.Resource, cmd ...string) []string {
+	args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
+	args = append(args, c.globalFlags...)
+	args = c.appendProjectFlag(args, res.Project)
+	return append(append(args, "--"), cmd...)
+}
+
 // buildCommand constructs a standard incus CLI command.
 func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *config.Resource, force bool) []string {
 	args := make([]string, len(cmdParts))

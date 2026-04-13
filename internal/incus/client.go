@@ -251,17 +251,3 @@ func (c client) WaitInstanceAgent(res *config.Resource) *Result {
 	args = c.appendProjectFlag(args, res.Project)
 	return c.runWithProgress(args, nil, waitForAgentProgressLabel())
 }
-
-func (c client) WaitCloudInit(res *config.Resource) *Result {
-	// Tail the cloud-init output log while waiting; discard cloud-init output.
-	// tail is killed once cloud-init --wait exits.
-	script := "tail -f /var/log/cloud-init-output.log & TAIL_PID=$!; cloud-init status --wait >/dev/null 2>&1; CI_RC=$?; kill $TAIL_PID 2>/dev/null; wait $TAIL_PID 2>/dev/null; exit $CI_RC"
-	args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
-	args = append(args, c.globalFlags...)
-	args = c.appendProjectFlag(args, res.Project)
-	args = append(args, "--", "sh", "-c", script)
-	if c.verbose {
-		return c.runVerbose(args, nil)
-	}
-	return c.runWithProgress(args, nil, cloudInitProgressLabel())
-}
