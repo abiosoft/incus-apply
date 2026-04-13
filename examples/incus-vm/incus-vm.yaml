@@ -1,0 +1,57 @@
+# Debian VM with Incus installed
+#
+# Creates a VM running Debian 13 with a full Incus installation with Zabbly Kernel and ZFS.
+# The host's client certificate is trusted automatically via cloud-init.
+#
+# INCUS_CLIENT_CERT is resolved dynamically by running
+# `incus remote get-client-certificate` and base64-encoding the output
+# so it can be safely embedded in cloud-init write_files (encoding: b64).
+---
+kind: vars
+computed:
+  INCUS_CLIENT_CERT: { incus: remote get-client-certificate, format: base64 }
+  ZABBLY_KERNEL_SCRIPT: { file: ./zabbly-kernel.sh, format: base64 }
+  ZABBLY_INCUS_SCRIPT: { file: ./zabbly-incus.sh, format: base64 }
+---
+kind: instance
+name: incus-vm
+image: images:debian/13/cloud
+vm: true
+devices:
+  root:
+    path: /
+    pool: default
+    type: disk
+    size: 50GiB
+config:
+  limits.cpu: "4"
+  limits.memory: 4GiB
+  security.secureboot: "false"
+  cloud-init.user-data:
+    #cloud-config
+    package_update: true
+    packages:
+      - curl
+      - gpg
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+    write_files:
+      - path: /root/install/client.crt
+        encoding: b64
+        content: ${INCUS_CLIENT_CERT}
+      - path: /root/install/zabbly-kernel.sh
+        encoding: b64
+        content: ${ZABBLY_KERNEL_SCRIPT}
+        permissions: "0755"
+      - path: /var/lib/cloud/scripts/per-boot/zabbly-incus.sh
+        encoding: b64
+        permissions: "0755"
+        content: ${ZABBLY_INCUS_SCRIPT}
+    runcmd:
+      - /bin/bash /root/install/zabbly-kernel.sh
+    power_state:
+      mode: reboot
+      message: "Rebooting after kernel installation"
+
+description: VM with Incus
