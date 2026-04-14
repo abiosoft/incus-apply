@@ -4,14 +4,45 @@ This page contains the full field reference for `incus-apply` resource documents
 
 ## Common Fields
 
-| Field         | Type   | Description                                    |
-| ------------- | ------ | ---------------------------------------------- |
-| `kind`        | string | **Required.** Resource kind                    |
-| `name`        | string | **Required.** Resource name                    |
-| `project`     | string | Incus project (overridden by `--project` flag) |
-| `config`      | map    | Resource configuration options                 |
-| `devices`     | map    | Device configurations                          |
-| `description` | string | Resource description                           |
+| Field         | Type   | Description                                                                        |
+| ------------- | ------ | ---------------------------------------------------------------------------------- |
+| `kind`        | string | **Required.** Resource kind                                                        |
+| `name`        | string | **Required.** Resource name. May include a remote prefix (see [Remotes](#remotes)) |
+| `project`     | string | Incus project (overridden by `--project` flag)                                     |
+| `config`      | map    | Resource configuration options                                                     |
+| `devices`     | map    | Device configurations                                                              |
+| `description` | string | Resource description                                                               |
+
+## Remotes
+
+Incus supports named remote servers. By default `incus-apply` targets whichever
+remote is configured as the default for the `incus` CLI.
+
+You can target a specific remote in two ways:
+
+### CLI argument (all resources)
+
+Pass the remote name with a trailing colon as the **last** positional argument:
+
+```sh
+incus-apply instance.yaml server-a:
+```
+
+Every resource in the run is applied to `server-a`. This is the simplest way to
+point an entire run at a remote server.
+
+### Inline name prefix (per-resource override)
+
+Prefix a resource's `name` with the remote:
+
+```yaml
+kind: instance
+name: server-a:ubuntu
+image: images:ubuntu/24.04
+```
+
+This applies only to that resource and takes precedence over a CLI-level remote.
+This syntax is supported for all resource types.
 
 ## Instance Fields
 

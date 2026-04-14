@@ -118,6 +118,32 @@ The `apply.after` field is scoped to the same project. Cyclic dependencies are d
 
 See [../examples/](../examples/) for sample configurations.
 
+## Can I apply configs to a remote Incus server?
+
+Yes. Incus supports named remote servers, and `incus-apply` can target any
+remote that the `incus` CLI has access to.
+
+**Apply everything to a single remote** by appending the remote name (with a
+trailing colon) as the last positional argument:
+
+```sh
+incus-apply instance.yaml server-a:
+```
+
+**Override the remote for a specific resource** by prefixing its `name` with
+the remote:
+
+```yaml
+kind: instance
+name: server-a:ubuntu
+image: images:ubuntu/24.04
+```
+
+The per-resource prefix takes precedence over the CLI-level remote. Both forms
+work for all resource types.
+
+`--force-local` and a remote target are mutually exclusive.
+
 ## Is there editor schema support?
 
 Yes. A generated schema file is available for editor validation and autocomplete. See [editor-schema.md](./editor-schema.md).

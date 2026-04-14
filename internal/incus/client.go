@@ -47,15 +47,20 @@ type Client interface {
 
 type client struct {
 	globalFlags []string
-	stop        bool
-	verbose     bool
-	timeout     time.Duration
+	// remote is the Incus remote server to target. Empty means the default remote
+	// configured for the incus client. Used for Ping; per-resource remotes are
+	// stored on config.Resource and applied when building individual commands.
+	remote  string
+	stop    bool
+	verbose bool
+	timeout time.Duration
 }
 
-// New creates a new Incus client.
-func New(globalFlags []string, stop, verbose bool, timeout time.Duration) Client {
+// New creates a new Incus client. remote is the target Incus remote (empty = default).
+func New(globalFlags []string, remote string, stop, verbose bool, timeout time.Duration) Client {
 	return &client{
 		globalFlags: globalFlags,
+		remote:      remote,
 		stop:        stop,
 		verbose:     verbose,
 		timeout:     timeout,
@@ -74,8 +79,17 @@ type Result struct {
 // --- Public Operations ---
 
 // Ping verifies connectivity to the Incus daemon by querying the server API.
+// When a remote is configured it queries that remote; otherwise it queries the
+// default (local) daemon.
 func (c client) Ping() error {
-	result := c.runQuiet(append(c.globalFlags, "query", "/1.0"), nil)
+	// The incus query command accepts an optional remote prefix on the path:
+	// "incus query /1.0" targets the default remote, while
+	// "incus query remote:/1.0" targets a named remote server.
+	path := "/1.0"
+	if c.remote != "" {
+		path = c.remote + ":" + path
+	}
+	result := c.runQuiet(append(c.globalFlags, "query", path), nil)
 	if result.Error != nil {
 		return fmt.Errorf("cannot connect to Incus daemon: %w", result.Error)
 	}
@@ -213,7 +227,7 @@ func (c client) MergedConfig(res *config.Resource) (string, error) {
 
 // Start starts an instance.
 func (c client) Start(res *config.Resource) *Result {
-	args := []string{"start", res.Name}
+	args := []string{"start", res.QualifiedName()}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
 	return c.runQuiet(args, nil)
@@ -221,7 +235,7 @@ func (c client) Start(res *config.Resource) *Result {
 
 // Stop stops an instance with --force flag.
 func (c client) Stop(res *config.Resource) *Result {
-	args := []string{"stop", res.Name, "--force"}
+	args := []string{"stop", res.QualifiedName(), "--force"}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
 	return c.runQuiet(args, nil)
@@ -232,7 +246,14 @@ func (c client) Running(res *config.Resource) bool {
 	// Use anchored regex to match the exact instance name, avoiding partial
 	// matches against instances whose names share a common prefix (e.g.
 	// "wordpress" matching both "wordpress" and "wordpress-db").
-	args := []string{"list", fmt.Sprintf("^%s$", res.Name), "--format=csv", "-c", "s"}
+	//
+	// When a remote is set, pass it as a positional "remote:" argument before
+	// the filter; incus list accepts [remote:] [filter...] in that order.
+	args := []string{"list"}
+	if res.Remote != "" {
+		args = append(args, res.Remote+":")
+	}
+	args = append(args, fmt.Sprintf("^%s$", res.Name), "--format=csv", "-c", "s")
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
 	result := c.runQuiet(args, nil)
@@ -243,7 +264,7 @@ func (c client) Running(res *config.Resource) bool {
 }
 
 func (c client) WaitInstanceAgent(res *config.Resource) *Result {
-	args := []string{"wait", res.Name, "agent", "--interval", "1"}
+	args := []string{"wait", res.QualifiedName(), "agent", "--interval", "1"}
 	if c.timeout > 0 {
 		args = append(args, "--timeout", strconv.Itoa(int(math.Ceil(c.timeout.Seconds()))))
 	}
