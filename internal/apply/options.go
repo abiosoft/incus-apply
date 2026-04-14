@@ -29,7 +29,11 @@ type Options struct {
 	FileCount int
 
 	// Incus flags (passed through to incus commands)
-	Project    string
+	Project string
+	// Remote is the target Incus remote server. Empty means the default remote configured
+	// for the incus client is used. A remote specified per-resource (via "remote:name" in the
+	// resource's name field) takes precedence over this value.
+	Remote     string
 	Verbose    bool
 	Quiet      bool
 	ForceLocal bool

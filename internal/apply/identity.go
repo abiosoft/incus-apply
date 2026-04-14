@@ -9,6 +9,8 @@ import (
 )
 
 // formatResourceID creates a scope-aware display identifier for a resource.
+// The format is: [remote:][project:]type[/scope]/name
+// where the remote and project segments are only shown when set.
 func formatResourceID(res *config.Resource) string {
 	resourcePath := res.Type
 	if usesNetworkScope(resource.Type(res.Type)) && res.Network != "" {
@@ -20,7 +22,10 @@ func formatResourceID(res *config.Resource) string {
 	resourcePath += "/" + resourceIdentifier(res)
 
 	if project := displayProject(res); project != "" {
-		return project + ":" + resourcePath
+		resourcePath = project + ":" + resourcePath
+	}
+	if res.Remote != "" {
+		resourcePath = res.Remote + ":" + resourcePath
 	}
 	return resourcePath
 }

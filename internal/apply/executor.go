@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
 	"github.com/abiosoft/incus-apply/internal/incus"
@@ -58,6 +59,7 @@ func (a *defaultExecutor) loadAndValidate() ([]*config.Resource, error) {
 		return nil, nil
 	}
 	a.applyProjectOverride(resources)
+	a.applyRemoteOverride(resources)
 	if err := validateUniqueResources(resources); err != nil {
 		return nil, err
 	}
@@ -256,6 +258,39 @@ func (a defaultExecutor) applyProjectOverride(resources []*config.Resource) {
 			res.Project = a.opts.Project
 		}
 	}
+}
+
+// applyRemoteOverride resolves the effective Incus remote for each resource.
+//
+// A resource may specify its remote inline by prefixing its name with the
+// remote, e.g. "name: server-a:ubuntu". When such a prefix is present the
+// remote is extracted from the name and stored in res.Remote, and the
+// bare name is kept in res.Name. This per-resource remote takes precedence
+// over the CLI-level remote passed via the trailing "remote:" argument.
+//
+// If no per-resource remote is found and a CLI remote was specified, that
+// remote is applied as the fallback for every resource.
+func (a defaultExecutor) applyRemoteOverride(resources []*config.Resource) {
+	for _, res := range resources {
+		if remote, name, ok := splitRemoteName(res.Name); ok {
+			// Resource-level remote: strip the prefix from the name and store it.
+			res.Remote = remote
+			res.Name = name
+		} else if a.opts.Remote != "" {
+			// CLI-level remote: apply as fallback when no resource-level remote is present.
+			res.Remote = a.opts.Remote
+		}
+	}
+}
+
+// splitRemoteName parses a "remote:name" string into its remote and name
+// components. Returns ok=false when no remote prefix is present.
+func splitRemoteName(name string) (remote, resourceName string, ok bool) {
+	before, after, ok := strings.Cut(name, ":")
+	if !ok {
+		return "", "", false
+	}
+	return before, after, true
 }
 
 // doMultiSelect shows an interactive multi-select UI and returns only the

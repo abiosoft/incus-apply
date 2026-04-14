@@ -12,9 +12,12 @@ import (
 // against an instance. The returned slice already includes the "--" separator;
 // callers append the in-instance command directly.
 //
+// The instance is addressed as [remote:]name so that the command targets the
+// correct remote server when one is configured.
+//
 //	args := c.instanceExecArgs(res, "test", "-f", "/path")
 func (c client) instanceExecArgs(res *config.Resource, cmd ...string) []string {
-	args := []string{"exec", res.Name, "--disable-stdin", "--force-noninteractive"}
+	args := []string{"exec", res.QualifiedName(), "--disable-stdin", "--force-noninteractive"}
 	args = append(args, c.globalFlags...)
 	args = c.appendProjectFlag(args, res.Project)
 	return append(append(args, "--"), cmd...)
@@ -26,12 +29,16 @@ func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *con
 	copy(args, cmdParts)
 
 	if meta.PrependNetwork && res.Network != "" {
-		args = append(args, res.Network)
+		// Network-scoped resources (e.g. network-forward) use the network name
+		// as the primary scope locator. The remote (if any) travels on the network name.
+		args = append(args, res.QualifiedNetwork())
 	}
 
 	// Storage resources require pool name before the resource name
 	if meta.PrependPool && res.Pool != "" {
-		args = append(args, res.Pool)
+		// For pool-scoped resources (storage volumes / buckets) the remote
+		// prefix travels on the pool name argument.
+		args = append(args, res.QualifiedPool())
 	}
 
 	args = append(args, resourceIdentifier(res))
@@ -87,7 +94,7 @@ func (c client) buildInstanceCreateArgs(args []string, res *config.Resource) []s
 	if !res.Empty && res.Image != "" {
 		args = append(args, res.Image)
 	}
-	args = append(args, res.Name)
+	args = append(args, res.QualifiedName())
 	if res.VM {
 		args = append(args, "--vm")
 	}
@@ -110,7 +117,7 @@ func (c client) buildInstanceCreateArgs(args []string, res *config.Resource) []s
 }
 
 func (c client) buildStoragePoolCreateArgs(args []string, res *config.Resource) []string {
-	args = append(args, res.Name)
+	args = append(args, res.QualifiedName())
 	if res.Driver != "" {
 		args = append(args, res.Driver)
 	}
@@ -122,7 +129,9 @@ func (c client) buildStoragePoolCreateArgs(args []string, res *config.Resource) 
 
 func (c client) buildStorageResourceCreateArgs(args []string, res *config.Resource) []string {
 	if res.Pool != "" {
-		args = append(args, res.Pool)
+		// Storage volumes and buckets are scoped under a pool. The remote (if any)
+		// goes on the pool name; the volume/bucket name itself stays bare.
+		args = append(args, res.QualifiedPool())
 	}
 	args = append(args, res.Name)
 	if res.ContentType != "" {
@@ -132,7 +141,7 @@ func (c client) buildStorageResourceCreateArgs(args []string, res *config.Resour
 }
 
 func (c client) buildNetworkCreateArgs(args []string, res *config.Resource) []string {
-	args = append(args, res.Name)
+	args = append(args, res.QualifiedName())
 	if res.NetworkType != "" {
 		args = append(args, "--type="+res.NetworkType)
 	}
@@ -141,17 +150,29 @@ func (c client) buildNetworkCreateArgs(args []string, res *config.Resource) []st
 
 func (c client) buildNetworkForwardCreateArgs(args []string, res *config.Resource) []string {
 	if res.Network != "" {
-		args = append(args, res.Network)
+		// Network forwards are scoped under a network. The remote (if any) goes
+		// on the network name; the listen address itself stays bare.
+		args = append(args, res.QualifiedNetwork())
 	}
 	args = append(args, res.ListenAddress)
 	return args
 }
 
 func resourceIdentifier(res *config.Resource) string {
-	if resource.Type(res.Type) == resource.TypeNetworkForward {
+	switch resource.Type(res.Type) {
+	case resource.TypeNetworkForward:
+		// Network-forward resources are identified by their listen address.
+		// The remote is carried on the preceding network name argument, not here.
 		return res.ListenAddress
+	case resource.TypeStorageVolume, resource.TypeStorageBucket:
+		// Pool-scoped resources are identified by bare name.
+		// The remote is carried on the preceding pool name argument, not here.
+		return res.Name
+	default:
+		// For all other resource types the remote prefix travels on the resource
+		// name itself: incus accepts "[remote:]name" throughout its CLI.
+		return res.QualifiedName()
 	}
-	return res.Name
 }
 
 // --- Helper Methods ---

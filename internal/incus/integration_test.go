@@ -11,7 +11,7 @@ func TestPingIntegration(t *testing.T) {
 		t.Skip("set INCUS_APPLY_INTEGRATION=1 to run live Incus integration tests")
 	}
 
-	client := New(nil, false, false, 30*time.Second)
+	client := New(nil, "", false, false, 30*time.Second)
 	if err := client.Ping(); err != nil {
 		t.Fatalf("Ping() error = %v", err)
 	}

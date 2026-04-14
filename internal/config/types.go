@@ -6,6 +6,7 @@ type Base struct {
 	Kind        string                    `yaml:"kind,omitempty" json:"kind,omitempty"`               // Resource kind: instance, profile, network, etc.
 	Type        string                    `yaml:"-" json:"-"`                                         // Resolved kind (set by parser); not read from YAML
 	Name        string                    `yaml:"name" json:"name"`                                   // Resource name (unique within type)
+	Remote      string                    `yaml:"-" json:"-"`                                         // Incus remote name (set by executor; not read from YAML directly)
 	Project     string                    `yaml:"project,omitempty" json:"project,omitempty"`         // --project flag (can be overridden by CLI)
 	Config      map[string]string         `yaml:"config,omitempty" json:"config,omitempty"`           // Key-value config options
 	Devices     map[string]map[string]any `yaml:"devices,omitempty" json:"devices,omitempty"`         // Device configurations. Kept here for simplicity, only instances and profiles support devices.
@@ -68,6 +69,36 @@ type NetworkACLFields struct {
 type NetworkForwardFields struct {
 	ListenAddress string           `yaml:"listen_address,omitempty" json:"listen_address,omitempty"`
 	Ports         []map[string]any `yaml:"ports,omitempty" json:"ports,omitempty"`
+}
+
+// qualifyWithRemote prepends "remote:" to s when remote is non-empty.
+// If either argument is empty the original s is returned unchanged.
+func qualifyWithRemote(remote, s string) string {
+	if remote == "" || s == "" {
+		return s
+	}
+	return remote + ":" + s
+}
+
+// QualifiedName returns the remote-qualified resource name ("remote:name" or
+// just "name" when no remote is set). Use this wherever the incus CLI accepts
+// "[remote:]name" as the primary resource identifier.
+func (r *Resource) QualifiedName() string {
+	return qualifyWithRemote(r.Remote, r.Name)
+}
+
+// QualifiedPool returns the remote-qualified storage pool name ("remote:pool"
+// or just "pool"). Use this for storage volume and bucket commands where the
+// remote travels on the pool argument rather than the resource name.
+func (r *Resource) QualifiedPool() string {
+	return qualifyWithRemote(r.Remote, r.Pool)
+}
+
+// QualifiedNetwork returns the remote-qualified network name ("remote:network"
+// or just "network"). Use this for network-forward commands where the remote
+// travels on the network argument rather than the listen address.
+func (r *Resource) QualifiedNetwork() string {
+	return qualifyWithRemote(r.Remote, r.Network)
 }
 
 // Stdin represents configuration data passed to incus commands via stdin.

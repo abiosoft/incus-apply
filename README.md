@@ -76,6 +76,12 @@ incus-apply . -d -y
 
 # Apply to a specific project
 incus-apply . --project myproject
+
+# Apply to a specific remote server (append remote name with trailing colon)
+incus-apply instance.yaml server-a:
+
+# Apply to a specific project on a remote server
+incus-apply instance.yaml --project myproject server-a:
 ```
 
 ## Configuration Format
@@ -202,10 +208,13 @@ For the full per-resource field reference, see [docs/configuration-reference.md]
 
 ```
 Usage:
-  incus-apply [flags] [file...]
+  incus-apply [flags] [file...] [remote:]
 
 Arguments:
   file...   Config files, directories, URLs, or '-' for stdin
+  remote:   Optional Incus remote server (trailing colon required, e.g. server-a:).
+            Must be the last argument. Applies to all resources unless a resource
+            specifies its own remote inline (e.g. name: server-a:myinstance).
 
 Flags:
   -r, --recursive        Recursively find .yaml/.yml/.json files in directories
@@ -234,7 +243,7 @@ Incus Global Flags (passed through):
       --project string   Incus project to use
   -v, --verbose          Show verbose output: log each incus command and its output
   -q, --quiet            Suppress progress output
-      --force-local      Force using local unix socket
+      --force-local      Force using local unix socket (mutually exclusive with a remote target)
 ```
 
 ## Examples

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/apply"
 	"github.com/abiosoft/incus-apply/internal/config"
@@ -16,7 +17,7 @@ func NewRootCommand(version, commit, date string) *cobra.Command {
 	opts := &apply.Options{}
 
 	rootCmd := &cobra.Command{
-		Use:   "incus-apply [flags] [file...]",
+		Use:   "incus-apply [flags] [file...] [remote:]",
 		Short: "Declarative configuration management for Incus",
 		Long: `incus-apply is a declarative configuration management tool for Incus.
 
@@ -25,6 +26,11 @@ updates, or deletes Incus resources accordingly.
 
 By default, a diff is shown and you are prompted before changes are applied.
 
+An optional Incus remote can be specified as the last argument by appending a
+colon to the remote name (e.g. "server-a:"). This overrides the default remote
+configured for the incus client and is applied to all resources unless a
+resource specifies its own remote inline (e.g. "name: server-a:myinstance").
+
 Examples:
   # Apply configs in the current directory
   incus-apply .
@@ -32,6 +38,9 @@ Examples:
   # Apply from specific files or a URL
   incus-apply instance.yaml network.yaml
   incus-apply https://example.com/config.yaml
+
+  # Apply to a specific remote server
+  incus-apply instance.yaml server-a:
 
   # Show diff only (no apply)
   incus-apply . --diff
@@ -46,7 +55,13 @@ Examples:
   incus-apply . -d -y
 
   # Apply to a specific project
-  incus-apply . --project myproject`,
+  incus-apply . --project myproject
+
+  # Apply to a specific remote server
+  incus-apply instance.yaml server-a:
+
+  # Apply with a per-resource remote (inline in the config file)
+  # name: server-a:myinstance`,
 		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOptions(opts); err != nil {
@@ -56,7 +71,16 @@ Examples:
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				return cmd.Help()
+				// No arguments: print the minimal usage (no Long description).
+				// Use --help for the full description and examples.
+				return cmd.Usage()
+			}
+			// The last argument may be an Incus remote specifier (e.g. "server-a:").
+			// A trailing colon is the incus convention for naming a remote, and is
+			// never a valid file path, directory, or URL on its own.
+			if last := args[len(args)-1]; strings.HasSuffix(last, ":") {
+				opts.Remote = strings.TrimSuffix(last, ":")
+				args = args[:len(args)-1]
 			}
 			opts.Files = args
 			return runApply(opts)
@@ -141,6 +165,9 @@ func validateOptions(opts *apply.Options) error {
 	}
 	if opts.CommandTimeout < 0 {
 		return fmt.Errorf("--command-timeout must be >= 0")
+	}
+	if opts.ForceLocal && opts.Remote != "" {
+		return fmt.Errorf("--force-local and a remote target are mutually exclusive")
 	}
 	return nil
 }
