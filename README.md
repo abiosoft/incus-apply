@@ -46,42 +46,31 @@ incus-apply debian.yaml
 
 ## Usage
 
-```bash
-# Apply all configs in current directory
-incus-apply .
+```
+Usage:
+  incus-apply [flags] [file...] [remote:]
 
-# Apply specific files
-incus-apply instance.yaml network.yaml
-
-# Apply recursively from a directory
-incus-apply ./configs/ -r
-
-# Apply from stdin
-cat instance.yaml | incus-apply -
-
-# Apply from URL
-incus-apply https://example.com/instance.yaml
-
-# Show diff only (no apply)
-incus-apply . --diff
-
-# Auto-accept changes without prompting
-incus-apply . -y
-
-# Silent mode for CI (no prompt, no progress output)
-incus-apply . -yq
-
-# Delete resources defined in configs
-incus-apply . -d -y
-
-# Apply to a specific project
-incus-apply . --project myproject
-
-# Apply to a specific remote server (append remote name with trailing colon)
-incus-apply instance.yaml server-a:
-
-# Apply to a specific project on a remote server
-incus-apply instance.yaml --project myproject server-a:
+Flags:
+      --command-timeout duration   Timeout for individual incus commands (0 disables the timeout) (default 5m0s)
+  -d, --delete                     Delete resources instead of creating/updating
+      --diff string[="text"]       Show preview only without applying (values: text, json)
+      --fail-fast                  Stop on first error instead of continuing
+      --fetch-timeout duration     Timeout for fetching remote config URLs (0 disables the timeout) (default 30s)
+      --force-local                Force using local unix socket
+  -h, --help                       help for incus-apply
+      --launch                     Start newly created instances after creation (default true)
+      --no-wait-cloud-init         Skip waiting for cloud-init to complete after instance creation
+      --project string             Incus project to use
+  -q, --quiet                      Suppress progress output
+  -r, --recursive                  Recursively find .yaml/.json files in directories
+      --replace                    Delete and recreate managed resources when create-only fields change. Without this flag, resources with create-only field changes are skipped with a warning.
+      --reset                      Delete all resources then recreate them from configs
+      --select                     Interactively select which resources to include before applying
+      --show-env                   Show actual environment config values in preview output instead of redacting them
+      --stop                       Force-stop running instances before applying updates
+  -v, --verbose                    Show verbose output: print all setup command output and log each incus command
+      --version                    version for incus-apply
+  -y, --yes                        Auto-accept and apply changes without prompting
 ```
 
 ## Configuration Format
@@ -204,47 +193,6 @@ For deletion, the order is reversed.
 
 For the full per-resource field reference, see [docs/configuration-reference.md](./docs/configuration-reference.md).
 
-## CLI Flags
-
-```
-Usage:
-  incus-apply [flags] [file...] [remote:]
-
-Arguments:
-  file...   Config files, directories, URLs, or '-' for stdin
-  remote:   Optional Incus remote server (trailing colon required, e.g. server-a:).
-            Must be the last argument. Applies to all resources unless a resource
-            specifies its own remote inline (e.g. name: server-a:myinstance).
-
-Flags:
-  -r, --recursive        Recursively find .yaml/.yml/.json files in directories
-  -d, --delete           Delete resources instead of creating/updating
-      --reset            Delete all resources then recreate them from configs.
-                         Shows a combined diff and single confirmation before executing.
-                         Mutually exclusive with --delete and --diff.
-      --select           Open an interactive multi-select dialog to choose which resources
-                         to include before showing the diff. Mutually exclusive with --yes.
-  -y, --yes              Auto-accept and apply changes without prompting
-    --diff [text|json] Show preview only without applying
-      --replace          Delete and recreate managed resources when create-only fields change.
-                         Without this flag, resources with create-only field changes are skipped with a warning.
-      --show-env         Show actual environment config values in preview output instead of redacting them
-    --fetch-timeout duration
-             Timeout for fetching remote config URLs (default: 30s, 0 disables)
-      --stop             Force-stop running instances before applying updates
-      --launch           Start newly created instances after creation (default: true)
-      --fail-fast        Stop on first error instead of continuing
-  -h, --help             Help for incus-apply
-      --version          Print version information
-
-Incus Global Flags (passed through):
-    --command-timeout duration
-             Timeout for individual incus commands (default: 5m, 0 disables)
-      --project string   Incus project to use
-  -v, --verbose          Show verbose output: log each incus command and its output
-  -q, --quiet            Suppress progress output
-      --force-local      Force using local unix socket (mutually exclusive with a remote target)
-```
 
 ## Examples
 
@@ -255,6 +203,48 @@ The [examples](./examples/) directory contains ready-to-run configurations cover
 - **[wordpress](./examples/wordpress/)** — Deploy a full WordPress stack three ways: OCI application containers, a Debian system container, or a virtual machine — all provisioned via cloud-init in a single `incus-apply` run.
 - **[incus-os](./examples/incus-os/)** — Download Incus OS iso and create an [Incus OS](https://linuxcontainers.org/incus-os) installation.
 - **[windows](./examples/windows/)** — Download Windows 11 iso and create a Windows 11 AMD64 VM installation.
+
+## CLI Examples
+
+```bash
+# Apply all configs in current directory
+incus-apply .
+
+# Apply specific files
+incus-apply instance.yaml network.yaml
+
+# Apply recursively from a directory
+incus-apply ./configs/ -r
+
+# Apply from stdin
+cat instance.yaml | incus-apply -
+
+# Apply from URL
+incus-apply https://example.com/instance.yaml
+
+# Show diff only (no apply)
+incus-apply . --diff
+
+# Auto-accept changes without prompting
+incus-apply . -y
+
+# Silent mode for CI (no prompt, no progress output)
+incus-apply . -yq
+
+# Delete resources defined in configs
+incus-apply . -d -y
+
+# Apply to a specific project
+incus-apply . --project myproject
+
+# Apply to a specific remote server (append remote name with trailing colon)
+incus-apply instance.yaml server-a:
+
+# Apply to a specific project on a remote server
+incus-apply instance.yaml --project myproject server-a:
+```
+
+
 
 ## Advanced Notes
 
