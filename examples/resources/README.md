@@ -10,16 +10,14 @@ incus-apply <yaml file>
 
 ## Examples
 
-| File                   | Description                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| `instance.yaml`        | Basic Debian 13 system container with CPU and memory limits                           |
-| `vm.yaml`              | Alpine Edge virtual machine with resource limits                                      |
-| `oci.yaml`             | Caddy web server running as an OCI (Docker) container                                 |
-| `network.yaml`         | Bridge network with IPv4 DHCP and NAT                                                 |
-| `network-forward.yaml` | Network forward mapping an external IP to internal services with port forwarding      |
-| `profile.yaml`         | Shared profile with CPU and memory limits for web servers                             |
-| `project.yaml`         | Isolated project with selective feature flags                                         |
-| `storage-pool.yaml`    | Directory-backed storage pool                                                         |
-| `storage-volume.yaml`  | Custom 20 GiB persistent storage volume                                               |
-| `wordpress.yaml`       | WordPress on a single Debian container using cloud-init (MariaDB + Caddy + WordPress) |
-| `wordpress-oci.yaml`   | WordPress stack using OCI containers (MySQL + WordPress via the Docker remote)        |
+| File                   | Description                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `instance.yaml`        | Basic Debian 13 system container with CPU and memory limits                      |
+| `vm.yaml`              | Alpine Edge virtual machine with resource limits                                 |
+| `oci.yaml`             | Caddy web server running as an OCI (Docker) container                            |
+| `network.yaml`         | Bridge network with IPv4 DHCP and NAT                                            |
+| `network-forward.yaml` | Network forward mapping an external IP to internal services with port forwarding |
+| `profile.yaml`         | Shared profile with CPU and memory limits for web servers                        |
+| `project.yaml`         | Isolated project with selective feature flags                                    |
+| `storage-pool.yaml`    | Directory-backed storage pool                                                    |
+| `storage-volume.yaml`  | Custom 20 GiB persistent storage volume                                          |
