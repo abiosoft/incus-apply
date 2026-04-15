@@ -8,6 +8,57 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestCloneResource_PreservesYAMLDashFields(t *testing.T) {
+	res := &config.Resource{
+		Base: config.Base{
+			Type:       "instance",
+			Name:       "myinstance",
+			Remote:     "server-a",
+			SourceFile: "/some/path.yaml",
+		},
+		InstanceFields: config.InstanceFields{Image: "images:debian/13"},
+	}
+	res.PreviewRedactPrefixes = []string{"config.secret"}
+
+	clone, err := cloneResource(res)
+	if err != nil {
+		t.Fatalf("cloneResource() error = %v", err)
+	}
+	if clone.Remote != "server-a" {
+		t.Errorf("Remote = %q, want %q", clone.Remote, "server-a")
+	}
+	if clone.Type != "instance" {
+		t.Errorf("Type = %q, want %q", clone.Type, "instance")
+	}
+	if clone.SourceFile != "/some/path.yaml" {
+		t.Errorf("SourceFile = %q, want %q", clone.SourceFile, "/some/path.yaml")
+	}
+	if len(clone.PreviewRedactPrefixes) != 1 || clone.PreviewRedactPrefixes[0] != "config.secret" {
+		t.Errorf("PreviewRedactPrefixes = %v, want [config.secret]", clone.PreviewRedactPrefixes)
+	}
+}
+
+func TestDesiredForApply_PreservesRemote(t *testing.T) {
+	res := &config.Resource{
+		Base: config.Base{
+			Type:   "instance",
+			Name:   "myinstance",
+			Remote: "server-a",
+		},
+	}
+
+	prepared, _, err := desiredForApply(res)
+	if err != nil {
+		t.Fatalf("desiredForApply() error = %v", err)
+	}
+	if prepared.Remote != "server-a" {
+		t.Errorf("Remote = %q after desiredForApply, want %q", prepared.Remote, "server-a")
+	}
+	if prepared.QualifiedName() != "server-a:myinstance" {
+		t.Errorf("QualifiedName() = %q, want %q", prepared.QualifiedName(), "server-a:myinstance")
+	}
+}
+
 func TestDesiredForApply_AddsTrackingState(t *testing.T) {
 	res := &config.Resource{
 		Base: config.Base{

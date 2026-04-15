@@ -177,8 +177,11 @@ func cloneResource(res *config.Resource) (*config.Resource, error) {
 	if err := yaml.Unmarshal(data, &clone); err != nil {
 		return nil, fmt.Errorf("cloning resource: %w", err)
 	}
+	// Preserve fields tagged yaml:"-" that are not round-tripped through YAML.
 	clone.SourceFile = res.SourceFile
 	clone.Type = res.Type
+	clone.Remote = res.Remote
+	clone.PreviewRedactPrefixes = res.PreviewRedactPrefixes
 	return &clone, nil
 }
 
