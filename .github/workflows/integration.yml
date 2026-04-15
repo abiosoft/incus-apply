@@ -1,0 +1,143 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build incus-apply
+        run: make build
+
+      - name: Install Incus
+        run: curl https://pkgs.zabbly.com/get/incus-stable | sudo sh
+
+      - name: Initialize Incus
+        run: sudo incus admin init --auto
+
+      # --- profile ---
+      - name: "[profile] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/profile.yaml
+
+      - name: "[profile] Verify exists"
+        run: sudo incus profile show web
+
+      - name: "[profile] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/profile.yaml
+
+      - name: "[profile] Verify absent"
+        run: "! sudo incus profile show web 2>/dev/null"
+
+      # --- project ---
+      - name: "[project] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/project.yaml
+
+      - name: "[project] Verify exists"
+        run: sudo incus project show example
+
+      - name: "[project] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/project.yaml
+
+      - name: "[project] Verify absent"
+        run: "! sudo incus project show example 2>/dev/null"
+
+      # --- storage-pool ---
+      - name: "[storage-pool] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/storage-pool.yaml
+
+      - name: "[storage-pool] Verify exists"
+        run: sudo incus storage show data
+
+      - name: "[storage-pool] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/storage-pool.yaml
+
+      - name: "[storage-pool] Verify absent"
+        run: "! sudo incus storage show data 2>/dev/null"
+
+      # --- storage-volume ---
+      - name: "[storage-volume] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/storage-volume.yaml
+
+      - name: "[storage-volume] Verify exists"
+        run: sudo incus storage volume show default data
+
+      - name: "[storage-volume] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/storage-volume.yaml
+
+      - name: "[storage-volume] Verify absent"
+        run: "! sudo incus storage volume show default data 2>/dev/null"
+
+      # --- network ---
+      - name: Setup - create public network (required for network-forward)
+        run: sudo incus network create public
+
+      - name: "[network] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/network.yaml
+
+      - name: "[network] Verify exists"
+        run: sudo incus network show webnet
+
+      - name: "[network] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/network.yaml
+
+      - name: "[network] Verify absent"
+        run: "! sudo incus network show webnet 2>/dev/null"
+
+      # --- network-forward ---
+      - name: "[network-forward] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/network-forward.yaml
+
+      - name: "[network-forward] Verify exists"
+        run: sudo incus network forward show public 198.51.100.10
+
+      - name: "[network-forward] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/network-forward.yaml
+
+      - name: "[network-forward] Verify absent"
+        run: "! sudo incus network forward show public 198.51.100.10 2>/dev/null"
+
+      # --- instance (container) ---
+      - name: "[instance] Apply"
+        run: sudo ./incus-apply -y -q --no-wait-cloud-init examples/resources/instance.yaml
+
+      - name: "[instance] Verify exists"
+        run: sudo incus info app
+
+      - name: "[instance] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/instance.yaml
+
+      - name: "[instance] Verify absent"
+        run: "! sudo incus info app 2>/dev/null"
+
+      # --- oci ---
+      - name: Setup - add ghcr.io OCI remote
+        run: sudo incus remote add ghcr https://ghcr.io --protocol=oci
+
+      - name: "[oci] Apply"
+        run: sudo ./incus-apply -y -q --no-wait-cloud-init examples/resources/oci.yaml
+
+      - name: "[oci] Verify exists"
+        run: sudo incus info alpine-oci
+
+      - name: "[oci] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/oci.yaml
+
+      - name: "[oci] Verify absent"
+        run: "! sudo incus info alpine-oci 2>/dev/null"
