@@ -105,6 +105,29 @@ func TestResolveVars_computedFile(t *testing.T) {
 	}
 }
 
+func TestResolveVars_computedFileRelativeToSourceFile(t *testing.T) {
+	dir := t.TempDir()
+	certFile := filepath.Join(dir, "cert.pem")
+	if err := os.WriteFile(certFile, []byte("MYCERT\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	// SourceFile is a sibling of cert.pem; "cert.pem" should resolve relative to dir.
+	sourceFile := filepath.Join(dir, "vars.yaml")
+
+	got, err := ResolveVars(Vars{
+		SourceFile: sourceFile,
+		Computed: map[string]DynamicEntry{
+			"CERT": {File: "cert.pem"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["CERT"] != "MYCERT" {
+		t.Errorf("CERT = %q, want %q", got["CERT"], "MYCERT")
+	}
+}
+
 func TestResolveVars_computedFileBase64(t *testing.T) {
 	tmp := filepath.Join(t.TempDir(), "cert.pem")
 	if err := os.WriteFile(tmp, []byte("MYCERT\n"), 0600); err != nil {

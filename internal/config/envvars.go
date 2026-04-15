@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -47,8 +48,12 @@ func ResolveVars(v Vars) (map[string]string, error) {
 	}
 
 	// Computed entries: resolved last so they always win
+	sourceDir := ""
+	if v.SourceFile != "" {
+		sourceDir = filepath.Dir(v.SourceFile)
+	}
 	for key, entry := range v.Computed {
-		val, err := resolveDynamicEntry(entry)
+		val, err := resolveDynamicEntry(entry, sourceDir)
 		if err != nil {
 			return nil, fmt.Errorf("resolving computed var %q: %w", key, err)
 		}
@@ -60,11 +65,17 @@ func ResolveVars(v Vars) (map[string]string, error) {
 
 // resolveDynamicEntry executes the source processor for a DynamicEntry and
 // applies any requested output format transformation.
-func resolveDynamicEntry(entry DynamicEntry) (string, error) {
+// sourceDir is the directory of the vars document; relative File paths are
+// resolved against it. An empty sourceDir leaves relative paths as-is.
+func resolveDynamicEntry(entry DynamicEntry, sourceDir string) (string, error) {
 	var raw string
 	switch {
 	case entry.File != "":
-		data, err := os.ReadFile(entry.File)
+		path := entry.File
+		if sourceDir != "" && !filepath.IsAbs(path) {
+			path = filepath.Join(sourceDir, path)
+		}
+		data, err := os.ReadFile(path)
 		if err != nil {
 			return "", fmt.Errorf("reading file: %w", err)
 		}
