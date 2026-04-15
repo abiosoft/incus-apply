@@ -13,6 +13,7 @@ incus-apply <yaml file>
 | File                   | Description                                                                      |
 | ---------------------- | -------------------------------------------------------------------------------- |
 | `instance.yaml`        | Basic Debian 13 system container with CPU and memory limits                      |
+| `cloud-init.yaml`      | Alpine container with cloud-init: installs packages and writes a sentinel file   |
 | `vm.yaml`              | Alpine Edge virtual machine with resource limits                                 |
 | `oci.yaml`             | Alpine Linux OCI container from ghcr.io                                          |
 | `network.yaml`         | Bridge network with IPv4 DHCP and NAT                                            |
