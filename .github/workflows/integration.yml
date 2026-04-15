@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Integration
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   integration:
-    name: Integration Tests
+    name: Resources
     runs-on: ubuntu-latest
 
     steps:
