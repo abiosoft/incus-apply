@@ -179,6 +179,72 @@ func TestDiffResource_NetworkForwardNetworkChangeRequiresRecreate(t *testing.T) 
 	}
 }
 
+func TestDiffResource_CloudInitConfigChangeRequiresRecreate(t *testing.T) {
+	current := `
+config:
+  user.incus-apply.created: "true"
+  user.incus-apply.current: |
+    config:
+      cloud-init.user-data: "#cloud-config\npackages: [curl]\n"
+`
+	desired := &config.Resource{
+		Base: config.Base{
+			Type: "instance",
+			Name: "test",
+			Config: map[string]string{
+				"cloud-init.user-data": "#cloud-config\npackages: [curl, git]\n",
+			},
+		},
+	}
+
+	changes, status, err := DiffResource(current, desired)
+	if err != nil {
+		t.Fatalf("DiffResource() error = %v", err)
+	}
+	if !status.Managed {
+		t.Fatalf("expected managed status, got %#v", status)
+	}
+	if status.Warning != ManagementWarningRecreate {
+		t.Fatalf("warning = %q, want %q", status.Warning, ManagementWarningRecreate)
+	}
+	if len(status.UnsupportedChanges) != 1 {
+		t.Fatalf("unsupported changes = %#v, want one change", status.UnsupportedChanges)
+	}
+	if !strings.HasPrefix(status.UnsupportedChanges[0].Path, "config.cloud-init.") {
+		t.Fatalf("unsupported change path = %q, want config.cloud-init.* prefix", status.UnsupportedChanges[0].Path)
+	}
+	if len(changes) == 0 {
+		t.Fatal("expected diff to contain changes")
+	}
+}
+
+func TestDiffResource_CloudInitConfigChangeNotUnsupportedForNonInstance(t *testing.T) {
+	current := `
+config:
+  user.incus-apply.created: "true"
+  user.incus-apply.current: |
+    config:
+      cloud-init.user-data: "#cloud-config\npackages: [curl]\n"
+`
+	desired := &config.Resource{
+		Base: config.Base{
+			Type: "storage-pool",
+			Name: "test",
+			Config: map[string]string{
+				"cloud-init.user-data": "#cloud-config\npackages: [curl, git]\n",
+			},
+		},
+	}
+
+	_, status, err := DiffResource(current, desired)
+	if err != nil {
+		t.Fatalf("DiffResource() error = %v", err)
+	}
+	if status.Warning == ManagementWarningRecreate {
+		t.Fatal("expected no recreate warning for non-instance resource")
+	}
+}
+
 func TestDiff(t *testing.T) {
 	tests := []struct {
 		name           string

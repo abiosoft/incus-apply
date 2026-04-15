@@ -329,18 +329,27 @@ func applyTrackingState(current map[string]any, snapshot string) {
 
 func unsupportedChanges(resourceType string, changes []DiffChange, previousState, desiredState map[string]any) []DiffChange {
 	fields := createOnlyFields(resourceType)
-	if len(fields) == 0 {
-		return nil
-	}
 
 	var unsupported []DiffChange
 	for _, change := range changes {
 		root := rootPath(change.Path)
-		if fields[root] {
+		if fields[root] || isCloudInitConfigChange(resourceType, change.Path) {
 			unsupported = append(unsupported, change)
 		}
 	}
 	return unsupported
+}
+
+// isCloudInitConfigChange reports whether a diff path represents a cloud-init
+// config key (config.cloud-init.*) for a resource type that supports cloud-init.
+// cloud-init config is applied only at instance creation time by the cloud-init
+// service, so changing it on an existing resource has no effect without recreating.
+func isCloudInitConfigChange(resourceType, path string) bool {
+	switch resourceType {
+	case "instance", "profile":
+		return strings.HasPrefix(path, "config.cloud-init.")
+	}
+	return false
 }
 
 func rootPath(path string) string {
