@@ -1,5 +1,5 @@
 # Alpine container with cloud-init
-# Installs curl and jq, then writes a sentinel file to confirm cloud-init ran.
+# Writes files and runs a command to confirm cloud-init ran.
 kind: instance
 name: cloud-init-test
 image: images:alpine/edge/cloud
@@ -8,9 +8,9 @@ config:
   limits.memory: 512MiB
   cloud-init.user-data:
     #cloud-config
-    packages:
-      - curl
-      - jq
+    write_files:
+      - path: /etc/motd
+        content: "Provisioned by incus-apply\n"
     runcmd:
       - echo "cloud-init completed" > /run/cloud-init-done
 description: Alpine container with cloud-init validation
