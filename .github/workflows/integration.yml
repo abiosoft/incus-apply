@@ -141,8 +141,8 @@ jobs:
       - name: "[cloud-init] Verify cloud-init ran"
         run: sudo incus exec cloud-init-test -- cat /run/cloud-init-done
 
-      - name: "[cloud-init] Verify packages installed"
-        run: sudo incus exec cloud-init-test -- sh -c "curl --version && jq --version"
+      - name: "[cloud-init] Verify write_files ran"
+        run: sudo incus exec cloud-init-test -- grep "incus-apply" /etc/motd
 
       - name: "[cloud-init] Delete"
         run: sudo ./incus-apply -y -q -d examples/resources/cloud-init.yaml
