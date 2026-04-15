@@ -86,7 +86,7 @@ jobs:
 
       # --- network ---
       - name: Setup - create public network (required for network-forward)
-        run: sudo incus network create public
+        run: sudo incus network create public ipv4.address=10.42.0.1/24 ipv4.nat=true ipv6.address=none
 
       - name: "[network] Apply"
         run: sudo ./incus-apply -y -q examples/resources/network.yaml
