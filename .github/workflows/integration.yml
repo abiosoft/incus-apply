@@ -134,6 +134,22 @@ jobs:
       - name: "[instance] Verify absent"
         run: "! sudo incus info app 2>/dev/null"
 
+      # --- instance (cloud-init) ---
+      - name: "[cloud-init] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/cloud-init.yaml
+
+      - name: "[cloud-init] Verify cloud-init ran"
+        run: sudo incus exec cloud-init-test -- cat /run/cloud-init-done
+
+      - name: "[cloud-init] Verify packages installed"
+        run: sudo incus exec cloud-init-test -- sh -c "curl --version && jq --version"
+
+      - name: "[cloud-init] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/cloud-init.yaml
+
+      - name: "[cloud-init] Verify absent"
+        run: "! sudo incus info cloud-init-test 2>/dev/null"
+
       # --- oci ---
       - name: Setup - add ghcr.io OCI remote
         run: sudo incus remote add ghcr https://ghcr.io --protocol=oci
