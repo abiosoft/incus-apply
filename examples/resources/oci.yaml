@@ -1,5 +1,5 @@
-# Caddy web server as an OCI container
+# Alpine Linux as an OCI container from ghcr.io
 kind: instance
-name: caddy
-image: docker:caddy
-description: Caddy web server (OCI)
+name: alpine-oci
+image: ghcr:linuxcontainers/alpine
+description: Alpine Linux OCI container (ghcr.io)
