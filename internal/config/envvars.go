@@ -23,15 +23,24 @@ func ResolveVars(v Vars) (map[string]string, error) {
 	shellEnv := shellEnvironment()
 	merged := map[string]string{}
 
+	sourceDir := ""
+	if v.SourceFile != "" {
+		sourceDir = filepath.Dir(v.SourceFile)
+	}
+
 	for _, path := range v.Files {
 		// Interpolate shell env in the path itself (e.g., files: ["${HOME}/.env"])
 		resolved, err := Interpolate([]byte(path), shellEnv)
 		if err != nil {
 			return nil, err
 		}
-		vars, err := godotenv.Read(string(resolved))
+		envPath := string(resolved)
+		if sourceDir != "" && !filepath.IsAbs(envPath) {
+			envPath = filepath.Join(sourceDir, envPath)
+		}
+		vars, err := godotenv.Read(envPath)
 		if err != nil {
-			return nil, &EnvFileError{Path: string(resolved), Err: err}
+			return nil, &EnvFileError{Path: envPath, Err: err}
 		}
 		for k, val := range vars {
 			merged[k] = val
@@ -48,10 +57,6 @@ func ResolveVars(v Vars) (map[string]string, error) {
 	}
 
 	// Computed entries: resolved last so they always win
-	sourceDir := ""
-	if v.SourceFile != "" {
-		sourceDir = filepath.Dir(v.SourceFile)
-	}
 	for key, entry := range v.Computed {
 		val, err := resolveDynamicEntry(entry, sourceDir)
 		if err != nil {

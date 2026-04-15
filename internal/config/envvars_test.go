@@ -21,6 +21,25 @@ func TestResolveVars_envFile(t *testing.T) {
 	}
 }
 
+func TestResolveVars_envFileRelativeToSourceFile(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "secrets.env"), []byte("KEY=value\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	sourceFile := filepath.Join(dir, "config.yaml")
+
+	got, err := ResolveVars(Vars{
+		SourceFile: sourceFile,
+		Files:      []string{"secrets.env"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["KEY"] != "value" {
+		t.Errorf("KEY = %q, want %q", got["KEY"], "value")
+	}
+}
+
 func TestResolveVars_multipleEnvFilesLaterOverrides(t *testing.T) {
 	fileA := writeTempEnv(t, "KEY=from_a\nONLY_A=yes\n")
 	fileB := writeTempEnv(t, "KEY=from_b\nONLY_B=yes\n")
