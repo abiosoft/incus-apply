@@ -1,6 +1,7 @@
 # incus-apply
 
-[![CI](https://github.com/abiosoft/incus-apply/actions/workflows/go.yml/badge.svg)](https://github.com/abiosoft/incus-apply/actions/workflows/go.yml)
+[![Go](https://github.com/abiosoft/incus-apply/actions/workflows/go.yml/badge.svg)](https://github.com/abiosoft/incus-apply/actions/workflows/go.yml)
+[![Integration](https://github.com/abiosoft/incus-apply/actions/workflows/integration.yml/badge.svg)](https://github.com/abiosoft/incus-apply/actions/workflows/integration.yml)
 
 Declarative configuration management for [Incus](https://linuxcontainers.org/incus/).
 
