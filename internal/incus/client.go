@@ -98,7 +98,8 @@ func (c client) Ping() error {
 
 // Create creates a new resource in Incus.
 func (c client) Create(res *config.Resource) *Result {
-	prepared, _, err := desiredForApply(res)
+	var enc snapshotCodec = v1SnapshotCodec{}
+	prepared, _, err := desiredForApply(res, enc)
 	if err != nil {
 		return &Result{Error: err}
 	}

@@ -1,7 +1,6 @@
 package incus
 
 import (
-	"encoding/json"
 	"fmt"
 	"maps"
 	"strings"
@@ -11,8 +10,10 @@ import (
 )
 
 const (
-	createdByKey    = "user.incus-apply.created"
-	currentStateKey = "user.incus-apply.current"
+	createdByKey       = "user.incus-apply.created"
+	currentStateKey    = "user.incus-apply.current"
+	snapshotVersionKey = "user.incus-apply.snapshot_version"
+	snapshotVersion    = "1"
 
 	ManagementWarningUnmanaged = "unmanaged"
 	ManagementWarningRecreate  = "recreate required"
@@ -104,7 +105,7 @@ func managedSnapshot(res *config.Resource) (string, error) {
 	if res.Config != nil {
 		configState := make(map[string]any)
 		for key, value := range res.Config {
-			if key == createdByKey || key == currentStateKey {
+			if key == createdByKey || key == currentStateKey || key == snapshotVersionKey {
 				continue
 			}
 			configState[key] = value
@@ -140,14 +141,15 @@ func managedSnapshot(res *config.Resource) (string, error) {
 		state["ports"] = res.Ports
 	}
 
-	data, err := json.Marshal(state)
+	yamlData, err := yaml.Marshal(state)
 	if err != nil {
 		return "", fmt.Errorf("encoding managed state: %w", err)
 	}
-	return string(data), nil
+
+	return string(yamlData), nil
 }
 
-func desiredForApply(res *config.Resource) (*config.Resource, string, error) {
+func desiredForApply(res *config.Resource, enc snapshotEncoder) (*config.Resource, string, error) {
 	clone, err := cloneResource(res)
 	if err != nil {
 		return nil, "", err
@@ -161,8 +163,15 @@ func desiredForApply(res *config.Resource) (*config.Resource, string, error) {
 	if clone.Config == nil {
 		clone.Config = map[string]string{}
 	}
+
+	encoded, err := enc.Encode(snapshot)
+	if err != nil {
+		return nil, "", err
+	}
+
 	clone.Config[createdByKey] = "true"
-	clone.Config[currentStateKey] = snapshot
+	clone.Config[snapshotVersionKey] = enc.version()
+	clone.Config[currentStateKey] = encoded
 
 	return clone, snapshot, nil
 }
@@ -206,11 +215,21 @@ func managementStatus(currentYAML string) (ManagementStatus, error) {
 		return ManagementStatus{Warning: ManagementWarningUnmanaged}, nil
 	}
 
-	if _, err := parseYAMLToMap(snapshot, "stored incus-apply state"); err != nil {
+	version, _ := configMap[snapshotVersionKey].(string)
+	codec, ok := codecForVersion(version)
+	if !ok {
+		return ManagementStatus{Warning: ManagementWarningUnmanaged}, nil
+	}
+	snapshotYAML, err := codec.Decode(snapshot)
+	if err != nil {
 		return ManagementStatus{Warning: ManagementWarningUnmanaged}, nil
 	}
 
-	return ManagementStatus{Managed: true, Snapshot: snapshot}, nil
+	if _, err := parseYAMLToMap(snapshotYAML, "stored incus-apply state"); err != nil {
+		return ManagementStatus{Warning: ManagementWarningUnmanaged}, nil
+	}
+
+	return ManagementStatus{Managed: true, Snapshot: snapshotYAML}, nil
 }
 
 func mergedConfigWithStatus(currentYAML string, desired *config.Resource) ([]byte, ManagementStatus, error) {
@@ -219,7 +238,8 @@ func mergedConfigWithStatus(currentYAML string, desired *config.Resource) ([]byt
 		return nil, ManagementStatus{}, err
 	}
 
-	prepared, snapshot, err := desiredForApply(desired)
+	var enc snapshotCodec = v1SnapshotCodec{}
+	prepared, snapshot, err := desiredForApply(desired, enc)
 	if err != nil {
 		return nil, status, err
 	}
@@ -245,7 +265,7 @@ func mergedConfigWithStatus(currentYAML string, desired *config.Resource) ([]byt
 
 	removeManagedState(current, previousState)
 	applyManagedState(current, newState)
-	applyTrackingState(current, snapshot)
+	applyTrackingState(current, snapshot, enc)
 	cleanMap(current)
 
 	merged, err := yaml.Marshal(current)
@@ -320,13 +340,21 @@ func applyManagedState(current, desired map[string]any) {
 	}
 }
 
-func applyTrackingState(current map[string]any, snapshot string) {
+func applyTrackingState(current map[string]any, snapshotYAML string, enc snapshotEncoder) {
 	currentConfig, _ := current["config"].(map[string]any)
 	if currentConfig == nil {
 		currentConfig = make(map[string]any)
 	}
+	encoded, err := enc.Encode(snapshotYAML)
+	if err != nil {
+		// Fall back to plain YAML if encoding fails (should not happen).
+		currentConfig[currentStateKey] = snapshotYAML
+		delete(currentConfig, snapshotVersionKey)
+	} else {
+		currentConfig[snapshotVersionKey] = enc.version()
+		currentConfig[currentStateKey] = encoded
+	}
 	currentConfig[createdByKey] = "true"
-	currentConfig[currentStateKey] = snapshot
 	current["config"] = currentConfig
 }
 
