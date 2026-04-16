@@ -2,15 +2,13 @@ package apply
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
 	"github.com/abiosoft/incus-apply/internal/resource"
 )
 
 // formatResourceID creates a scope-aware display identifier for a resource.
-// The format is: [remote:][project:]type[/scope]/name
-// where the remote and project segments are only shown when set.
+// The format is: [remote:]type[/scope]/name
 func formatResourceID(res *config.Resource) string {
 	resourcePath := res.Type
 	if usesNetworkScope(resource.Type(res.Type)) && res.Network != "" {
@@ -21,9 +19,6 @@ func formatResourceID(res *config.Resource) string {
 	}
 	resourcePath += "/" + resourceIdentifier(res)
 
-	if project := displayProject(res); project != "" {
-		resourcePath = project + ":" + resourcePath
-	}
 	if res.Remote != "" {
 		resourcePath = res.Remote + ":" + resourcePath
 	}
@@ -35,25 +30,6 @@ func resourceIdentifier(res *config.Resource) string {
 		return res.ListenAddress
 	}
 	return res.Name
-}
-
-func displayProject(res *config.Resource) string {
-	if !usesProjectScope(resource.Type(res.Type)) {
-		return ""
-	}
-	if strings.TrimSpace(res.Project) == "" {
-		return "default"
-	}
-	return res.Project
-}
-
-func usesProjectScope(resourceType resource.Type) bool {
-	switch resourceType {
-	case resource.TypeProject, resource.TypeStoragePool, resource.TypeClusterGroup:
-		return false
-	default:
-		return true
-	}
 }
 
 func usesPoolScope(resourceType resource.Type) bool {

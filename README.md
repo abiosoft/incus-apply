@@ -262,7 +262,7 @@ By default, `incus-apply` shows a preview and asks for confirmation before makin
 
 Preview output identifies resources by effective scope:
 
-- Project-scoped resources use `project:type/name`, for example `default:instance/web`.
+- Resources use `type/name`, for example `instance/web`.
 - Pool-scoped storage resources use `project:type/pool/name`, for example `default:storage-volume/pool1/data`.
 - Global resources omit the project prefix and use `type/name`.
 

@@ -143,11 +143,11 @@ func TestExecutorUpsertCreatesAndStartsInstance(t *testing.T) {
 	if err := executor.Upsert(); err != nil {
 		t.Fatalf("Upsert() error = %v", err)
 	}
-	if len(client.createCalls) != 1 || client.createCalls[0] != "default:instance/web" {
-		t.Fatalf("create calls = %v, want [default:instance/web]", client.createCalls)
+	if len(client.createCalls) != 1 || client.createCalls[0] != "instance/web" {
+		t.Fatalf("create calls = %v, want [instance/web]", client.createCalls)
 	}
-	if len(client.startCalls) != 1 || client.startCalls[0] != "default:instance/web" {
-		t.Fatalf("start calls = %v, want [default:instance/web]", client.startCalls)
+	if len(client.startCalls) != 1 || client.startCalls[0] != "instance/web" {
+		t.Fatalf("start calls = %v, want [instance/web]", client.startCalls)
 	}
 	if len(renderer.outputs) != 1 {
 		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
@@ -165,7 +165,7 @@ func TestExecutorUpsertPlanningErrorPreventsApply(t *testing.T) {
 	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
-	client.existsErr["default:instance/web"] = errors.New("boom")
+	client.existsErr["instance/web"] = errors.New("boom")
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
 
@@ -189,15 +189,15 @@ func TestExecutorDeleteRemovesExistingResource(t *testing.T) {
 	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.19\n")
 
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
+	client.exists["instance/web"] = true
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Delete: true, Yes: true, Quiet: true}, client, renderer)
 
 	if err := executor.Delete(); err != nil {
 		t.Fatalf("Delete() error = %v", err)
 	}
-	if len(client.deleteCalls) != 1 || client.deleteCalls[0] != "default:instance/web" {
-		t.Fatalf("delete calls = %v, want [default:instance/web]", client.deleteCalls)
+	if len(client.deleteCalls) != 1 || client.deleteCalls[0] != "instance/web" {
+		t.Fatalf("delete calls = %v, want [instance/web]", client.deleteCalls)
 	}
 	if len(renderer.outputs) != 1 {
 		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
@@ -209,8 +209,8 @@ func TestExecutorDeleteRemovesExistingResource(t *testing.T) {
 
 func TestComputeUpsertDiff_UnmanagedResourceIsMarked(t *testing.T) {
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  user.key: value\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  user.key: value\n"
 
 	res := &config.Resource{
 		Base: config.Base{
@@ -239,8 +239,8 @@ func TestComputeUpsertDiff_UnmanagedResourceIsMarked(t *testing.T) {
 
 func TestComputeUpsertDiff_RedactsInstanceEnvironmentPreviewValues(t *testing.T) {
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  environment.DB_PASSWORD: old-secret\n  user.key: value\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  environment.DB_PASSWORD: old-secret\n  user.key: value\n"
 
 	res := &config.Resource{
 		Base: config.Base{
@@ -283,8 +283,8 @@ func TestComputeUpsertDiff_RedactsInstanceEnvironmentPreviewValues(t *testing.T)
 
 func TestComputeUpsertDiff_ShowEnvSkipsPreviewRedaction(t *testing.T) {
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  environment.DB_PASSWORD: old-secret\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  environment.DB_PASSWORD: old-secret\n"
 
 	res := &config.Resource{
 		Base: config.Base{
@@ -315,8 +315,8 @@ func TestComputeUpsertDiff_ShowEnvSkipsPreviewRedaction(t *testing.T) {
 
 func TestComputeUpsertDiff_DoesNotRedactNonMatchingPaths(t *testing.T) {
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  user.key: value\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  user.key: value\n"
 
 	res := &config.Resource{
 		Base: config.Base{
@@ -351,8 +351,8 @@ func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T
 	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
 
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: |\n    image: images:alpine/3.19\n    config:\n      user.key: value\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: |\n    image: images:alpine/3.19\n    config:\n      user.key: value\n"
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
 
@@ -381,8 +381,8 @@ func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
 
 	client := newFakeClient()
-	client.exists["default:instance/web"] = true
-	client.current["default:instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: |\n    image: images:alpine/3.19\n    config:\n      user.key: value\n"
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: |\n    image: images:alpine/3.19\n    config:\n      user.key: value\n"
 	renderer := &captureRenderer{}
 	executor := NewExecutor(Options{Files: []string{path}, Replace: true, Yes: true, Launch: true, Quiet: true}, client, renderer)
 
@@ -392,14 +392,14 @@ func TestExecutorUpsert_ReplaceRecreatesManagedResource(t *testing.T) {
 	if len(client.updateCalls) != 0 {
 		t.Fatalf("update calls = %v, want none", client.updateCalls)
 	}
-	if len(client.deleteCalls) != 1 || client.deleteCalls[0] != "default:instance/web" {
-		t.Fatalf("delete calls = %v, want [default:instance/web]", client.deleteCalls)
+	if len(client.deleteCalls) != 1 || client.deleteCalls[0] != "instance/web" {
+		t.Fatalf("delete calls = %v, want [instance/web]", client.deleteCalls)
 	}
-	if len(client.createCalls) != 1 || client.createCalls[0] != "default:instance/web" {
-		t.Fatalf("create calls = %v, want [default:instance/web]", client.createCalls)
+	if len(client.createCalls) != 1 || client.createCalls[0] != "instance/web" {
+		t.Fatalf("create calls = %v, want [instance/web]", client.createCalls)
 	}
-	if len(client.startCalls) != 1 || client.startCalls[0] != "default:instance/web" {
-		t.Fatalf("start calls = %v, want [default:instance/web]", client.startCalls)
+	if len(client.startCalls) != 1 || client.startCalls[0] != "instance/web" {
+		t.Fatalf("start calls = %v, want [instance/web]", client.startCalls)
 	}
 	if len(renderer.outputs) != 1 {
 		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
@@ -425,7 +425,7 @@ func TestExecutorUpsert_DuplicateResourcesSameProjectFails(t *testing.T) {
 	if err == nil {
 		t.Fatal("Upsert() error = nil, want non-nil")
 	}
-	if !strings.Contains(err.Error(), "default:instance/web") {
+	if !strings.Contains(err.Error(), "instance/web") {
 		t.Fatalf("Upsert() error = %q, want duplicate scoped id", err.Error())
 	}
 	if len(renderer.outputs) != 0 {
