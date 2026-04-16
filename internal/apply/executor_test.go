@@ -119,10 +119,10 @@ func TestConfirmApplyNonInteractiveRequiresYes(t *testing.T) {
 	}
 }
 
-func TestFormatResourceID_ProjectScopedUsesDefaultProject(t *testing.T) {
+func TestFormatResourceID_TypeAndName(t *testing.T) {
 	res := &config.Resource{Base: config.Base{Type: "instance", Name: "web"}}
-	if got := formatResourceID(res); got != "default:instance/web" {
-		t.Fatalf("formatResourceID() = %q, want %q", got, "default:instance/web")
+	if got := formatResourceID(res); got != "instance/web" {
+		t.Fatalf("formatResourceID() = %q, want %q", got, "instance/web")
 	}
 }
 
@@ -133,21 +133,21 @@ func TestFormatResourceID_GlobalResourceOmitsProject(t *testing.T) {
 	}
 }
 
-func TestFormatResourceID_StorageVolumeIncludesProjectAndPool(t *testing.T) {
+func TestFormatResourceID_StorageVolumeIncludesPool(t *testing.T) {
 	res := &config.Resource{Base: config.Base{Type: "storage-volume", Name: "data"}, StorageResourceFields: config.StorageResourceFields{Pool: "pool1"}}
-	if got := formatResourceID(res); got != "default:storage-volume/pool1/data" {
-		t.Fatalf("formatResourceID() = %q, want %q", got, "default:storage-volume/pool1/data")
+	if got := formatResourceID(res); got != "storage-volume/pool1/data" {
+		t.Fatalf("formatResourceID() = %q, want %q", got, "storage-volume/pool1/data")
 	}
 }
 
-func TestFormatResourceID_NetworkForwardIncludesProjectAndNetwork(t *testing.T) {
+func TestFormatResourceID_NetworkForwardIncludesNetwork(t *testing.T) {
 	res := &config.Resource{Base: config.Base{Type: "network-forward"}, InstanceFields: config.InstanceFields{Network: "uplink"}, NetworkForwardFields: config.NetworkForwardFields{ListenAddress: "198.51.100.10"}}
-	if got := formatResourceID(res); got != "default:network-forward/uplink/198.51.100.10" {
-		t.Fatalf("formatResourceID() = %q, want %q", got, "default:network-forward/uplink/198.51.100.10")
+	if got := formatResourceID(res); got != "network-forward/uplink/198.51.100.10" {
+		t.Fatalf("formatResourceID() = %q, want %q", got, "network-forward/uplink/198.51.100.10")
 	}
 }
 
-func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
+func TestValidateUniqueResources_DuplicateFails(t *testing.T) {
 	resources := []*config.Resource{
 		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "one.yaml"}},
 		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "two.yaml"}},
@@ -157,7 +157,7 @@ func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
 	if err == nil {
 		t.Fatal("validateUniqueResources() error = nil, want non-nil")
 	}
-	if !strings.Contains(err.Error(), "default:instance/web") {
+	if !strings.Contains(err.Error(), "instance/web") {
 		t.Fatalf("validateUniqueResources() error = %q, want duplicate resource id", err.Error())
 	}
 	if !strings.Contains(err.Error(), "one.yaml") || !strings.Contains(err.Error(), "two.yaml") {
@@ -165,10 +165,10 @@ func TestValidateUniqueResources_DuplicateSameProjectFails(t *testing.T) {
 	}
 }
 
-func TestValidateUniqueResources_DifferentProjectsAllowed(t *testing.T) {
+func TestValidateUniqueResources_SameNameDifferentTypeAllowed(t *testing.T) {
 	resources := []*config.Resource{
-		{Base: config.Base{Type: "instance", Name: "web", Project: "app1", SourceFile: "one.yaml"}},
-		{Base: config.Base{Type: "instance", Name: "web", Project: "app2", SourceFile: "two.yaml"}},
+		{Base: config.Base{Type: "instance", Name: "web", SourceFile: "one.yaml"}},
+		{Base: config.Base{Type: "profile", Name: "web", SourceFile: "two.yaml"}},
 	}
 
 	if err := validateUniqueResources(resources); err != nil {

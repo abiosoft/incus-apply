@@ -87,11 +87,11 @@ Instance `config.environment.*` values are hidden in preview output by default s
 
 Preview output uses the resource's effective scope in the identifier.
 
-- Project-scoped resources use `project:type/name`.
-- Pool-scoped storage resources use `project:type/pool/name`.
-- Global resources use `type/name`.
+- Pool-scoped storage resources use `type/pool/name`.
+- Network-scoped resources use `type/network/name`.
+- All other resources use `type/name`.
 
-Examples: `default:instance/web`, `default:storage-volume/pool1/data`, and `storage-pool/fast`.
+Examples: `instance/web`, `storage-volume/pool1/data`, and `storage-pool/fast`.
 
 ## Can I define multiple resources in one file?
 
