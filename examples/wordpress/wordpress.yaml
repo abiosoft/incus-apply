@@ -26,7 +26,7 @@ devices:
     source: mariadb-data
     path: /var/lib/mysql
 config:
-  limits.cpu: "2"
+  limits.cpu: "3"
   limits.memory: 2GiB
   cloud-init.user-data:
     #cloud-config

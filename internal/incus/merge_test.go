@@ -47,7 +47,7 @@ func TestDesiredForApply_PreservesRemote(t *testing.T) {
 		},
 	}
 
-	prepared, _, err := desiredForApply(res)
+	prepared, _, err := desiredForApply(res, v1SnapshotCodec{})
 	if err != nil {
 		t.Fatalf("desiredForApply() error = %v", err)
 	}
@@ -70,28 +70,36 @@ func TestDesiredForApply_AddsTrackingState(t *testing.T) {
 		},
 	}
 
-	prepared, snapshot, err := desiredForApply(res)
+	prepared, snapshot, err := desiredForApply(res, v1SnapshotCodec{})
 	if err != nil {
 		t.Fatalf("desiredForApply() error = %v", err)
 	}
 	if prepared.Config[createdByKey] != "true" {
 		t.Fatalf("created marker = %q, want %q", prepared.Config[createdByKey], "true")
 	}
-	if prepared.Config[currentStateKey] != snapshot {
-		t.Fatalf("current state marker mismatch")
+	if prepared.Config[snapshotVersionKey] != snapshotVersion {
+		t.Fatalf("snapshot version = %q, want %q", prepared.Config[snapshotVersionKey], snapshotVersion)
 	}
-	if strings.Contains(snapshot, createdByKey) || strings.Contains(snapshot, currentStateKey) {
+	// The stored value should be the encoded (base64+gzip) form, not the raw YAML snapshot.
+	if prepared.Config[currentStateKey] == snapshot {
+		t.Fatalf("stored snapshot should be encoded, not plain YAML")
+	}
+	// Decoding the stored value should yield back the raw YAML snapshot.
+	decoded, err := v1SnapshotCodec{}.Decode(prepared.Config[currentStateKey])
+	if err != nil {
+		t.Fatalf("v1SnapshotCodec.Decode() error = %v", err)
+	}
+	if decoded != snapshot {
+		t.Fatalf("decoded snapshot mismatch: got %q, want %q", decoded, snapshot)
+	}
+	// The raw YAML snapshot should not include tracking keys.
+	if strings.Contains(snapshot, createdByKey) || strings.Contains(snapshot, currentStateKey) || strings.Contains(snapshot, snapshotVersionKey) {
 		t.Fatalf("snapshot should not include tracking keys, got %q", snapshot)
 	}
-	if strings.Contains(snapshot, "\n") {
-		t.Fatalf("snapshot should be compact, got %q", snapshot)
-	}
-	if !strings.HasPrefix(snapshot, "{") {
-		t.Fatalf("snapshot = %q, want compact json", snapshot)
-	}
+	// The raw snapshot should be valid YAML.
 	var parsed map[string]any
 	if err := yaml.Unmarshal([]byte(snapshot), &parsed); err != nil {
-		t.Fatalf("snapshot should remain parseable as yaml/json, got error %v", err)
+		t.Fatalf("snapshot should be parseable as yaml, got error %v", err)
 	}
 }
 
