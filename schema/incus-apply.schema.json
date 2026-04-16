@@ -157,10 +157,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -310,10 +306,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -451,10 +443,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -591,10 +579,6 @@
                 "items": {
                   "type": "string"
                 }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
               },
               "source": {
                 "description": "Source path or device for a storage pool",
@@ -734,10 +718,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -874,10 +854,6 @@
                 "items": {
                   "type": "string"
                 }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
               },
               "source": {
                 "description": "Source path or device for a storage pool",
@@ -1016,10 +992,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -1156,10 +1128,6 @@
                 "items": {
                   "type": "string"
                 }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
               },
               "source": {
                 "description": "Source path or device for a storage pool",
@@ -1306,10 +1274,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -1455,10 +1419,6 @@
                   "type": "string"
                 }
               },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
-              },
               "source": {
                 "description": "Source path or device for a storage pool",
                 "type": "string"
@@ -1595,10 +1555,6 @@
                 "items": {
                   "type": "string"
                 }
-              },
-              "project": {
-                "description": "Incus project (can be overridden by --project flag)",
-                "type": "string"
               },
               "source": {
                 "description": "Source path or device for a storage pool",

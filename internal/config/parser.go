@@ -147,6 +147,10 @@ func (p Parser) parseYAML(data []byte) (*FileResult, error) {
 			continue
 		}
 
+		if _, hasProject := raw["project"]; hasProject {
+			return nil, fmt.Errorf("resource %q: the `project` field is no longer supported in resource definitions; use the --project flag instead", raw["name"])
+		}
+
 		if deprecated {
 			fmt.Fprintf(os.Stderr, terminal.ColorYellow+"warning: use `kind: %s` instead of `type: %s` — `type` is deprecated for resource identification and will be removed in a future version"+terminal.ColorReset+"\n", kind, kind)
 			// Remove type from raw so it doesn't populate ContentType

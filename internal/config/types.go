@@ -7,7 +7,7 @@ type Base struct {
 	Type        string                    `yaml:"-" json:"-"`                                         // Resolved kind (set by parser); not read from YAML
 	Name        string                    `yaml:"name" json:"name"`                                   // Resource name (unique within type)
 	Remote      string                    `yaml:"-" json:"-"`                                         // Incus remote name (set by executor; not read from YAML directly)
-	Project     string                    `yaml:"project,omitempty" json:"project,omitempty"`         // --project flag (can be overridden by CLI)
+	Project     string                    `yaml:"-" json:"-"`                                         // Incus project (set by --project flag only; not read from YAML)
 	Config      map[string]string         `yaml:"config,omitempty" json:"config,omitempty"`           // Key-value config options
 	Devices     map[string]map[string]any `yaml:"devices,omitempty" json:"devices,omitempty"`         // Device configurations. Kept here for simplicity, only instances and profiles support devices.
 	Description string                    `yaml:"description,omitempty" json:"description,omitempty"` // Resource description
