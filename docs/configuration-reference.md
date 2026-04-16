@@ -8,7 +8,6 @@ This page contains the full field reference for `incus-apply` resource documents
 | ------------- | ------ | ---------------------------------------------------------------------------------- |
 | `kind`        | string | **Required.** Resource kind                                                        |
 | `name`        | string | **Required.** Resource name. May include a remote prefix (see [Remotes](#remotes)) |
-| `project`     | string | Incus project (overridden by `--project` flag)                                     |
 | `config`      | map    | Resource configuration options                                                     |
 | `devices`     | map    | Device configurations                                                              |
 | `description` | string | Resource description                                                               |
@@ -43,6 +42,16 @@ image: images:ubuntu/24.04
 
 This applies only to that resource and takes precedence over a CLI-level remote.
 This syntax is supported for all resource types.
+
+## Project
+
+All resources are applied to an Incus project. By default, the project configured
+for the `incus` CLI is used. Use the `--project` flag to override this for all
+resources in a run:
+
+```sh
+incus-apply . --project myproject
+```
 
 ## Instance Fields
 

@@ -183,14 +183,13 @@ For deletion, the order is reversed.
 
 ## Common Configuration Fields
 
-| Field         | Type   | Description                                    |
-| ------------- | ------ | ---------------------------------------------- |
-| `type`        | string | **Required.** Resource type                    |
-| `name`        | string | **Required.** Resource name                    |
-| `project`     | string | Incus project (overridden by `--project` flag) |
-| `config`      | map    | Resource configuration options                 |
-| `devices`     | map    | Device configurations                          |
-| `description` | string | Resource description                           |
+| Field         | Type   | Description                    |
+| ------------- | ------ | ------------------------------ |
+| `type`        | string | **Required.** Resource type    |
+| `name`        | string | **Required.** Resource name    |
+| `config`      | map    | Resource configuration options |
+| `devices`     | map    | Device configurations          |
+| `description` | string | Resource description           |
 
 For the full per-resource field reference, see [docs/configuration-reference.md](./docs/configuration-reference.md).
 

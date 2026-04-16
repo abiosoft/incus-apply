@@ -317,7 +317,6 @@ func fieldDescription(f reflect.StructField) string {
 		"Type":          "Resource type",
 		"Name":          "Resource name (unique within type)",
 		"ListenAddress": "External listen address for a network forward",
-		"Project":       "Incus project (can be overridden by --project flag)",
 		"Config":        "Key-value configuration options",
 		"Devices":       "Device configurations",
 		"Description":   "Resource description",
