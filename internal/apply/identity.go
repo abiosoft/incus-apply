@@ -17,6 +17,9 @@ func formatResourceID(res *config.Resource) string {
 	if usesPoolScope(resource.Type(res.Type)) && res.Pool != "" {
 		resourcePath += "/" + res.Pool
 	}
+	if usesBucketScope(resource.Type(res.Type)) && res.Bucket != "" {
+		resourcePath += "/" + res.Bucket
+	}
 	resourcePath += "/" + resourceIdentifier(res)
 
 	if res.Remote != "" {
@@ -34,11 +37,15 @@ func resourceIdentifier(res *config.Resource) string {
 
 func usesPoolScope(resourceType resource.Type) bool {
 	switch resourceType {
-	case resource.TypeStorageVolume, resource.TypeStorageBucket:
+	case resource.TypeStorageVolume, resource.TypeStorageBucket, resource.TypeStorageBucketKey:
 		return true
 	default:
 		return false
 	}
+}
+
+func usesBucketScope(resourceType resource.Type) bool {
+	return resourceType == resource.TypeStorageBucketKey
 }
 
 func usesNetworkScope(resourceType resource.Type) bool {

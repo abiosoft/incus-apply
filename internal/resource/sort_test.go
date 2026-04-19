@@ -52,7 +52,7 @@ func TestSortForDelete(t *testing.T) {
 func TestIsValidType(t *testing.T) {
 	validTypes := []string{
 		"instance", "profile", "network", "network-forward", "network-acl", "network-zone",
-		"storage-pool", "storage-volume", "storage-bucket", "project", "cluster-group",
+		"storage-pool", "storage-volume", "storage-bucket", "storage-bucket-key", "project", "cluster-group",
 	}
 	for _, typ := range validTypes {
 		if !IsValidType(typ) {
@@ -73,7 +73,7 @@ func TestGetTypeMeta(t *testing.T) {
 	if !ok {
 		t.Fatal("expected to find instance type")
 	}
-	if meta.Priority != 11 {
+	if meta.Priority != 12 {
 		t.Errorf("expected priority 11, got %d", meta.Priority)
 	}
 

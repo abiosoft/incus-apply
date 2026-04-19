@@ -109,8 +109,11 @@ func (c client) Create(res *config.Resource) *Result {
 		return &Result{Error: err}
 	}
 	args, stdin := c.buildCreateCommand(meta, prepared)
-	// Network forwards are created first, then updated with full YAML state.
-	if resource.Type(prepared.Type) == resource.TypeNetworkForward {
+	// Network forwards and storage buckets are created first (no config stdin),
+	// then updated with full YAML state. Incus rejects config keys such as
+	// "size" on storage bucket create but accepts them on edit.
+	switch resource.Type(prepared.Type) {
+	case resource.TypeNetworkForward:
 		result := c.runQuiet(args, nil)
 		if result.Error != nil {
 			return result
@@ -119,6 +122,17 @@ func (c client) Create(res *config.Resource) *Result {
 		updateResult := c.Update(prepared)
 		if updateResult.Error != nil {
 			return &Result{Error: fmt.Errorf("updating network forward after create: %w", updateResult.Error)}
+		}
+		return result
+	case resource.TypeStorageBucket:
+		result := c.runQuiet(args, nil)
+		if result.Error != nil {
+			return result
+		}
+		// Reuse Update to apply config and managed-state markers.
+		updateResult := c.Update(prepared)
+		if updateResult.Error != nil {
+			return &Result{Error: fmt.Errorf("updating storage bucket after create: %w", updateResult.Error)}
 		}
 		return result
 	}

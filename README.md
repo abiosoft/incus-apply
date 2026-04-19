@@ -149,19 +149,20 @@ For full variable usage, scoping rules, and syntax, see [docs/configuration-refe
 
 ## Supported Resource Types
 
-| Type              | Description                           |
-| ----------------- | ------------------------------------- |
-| `instance`        | Containers and virtual machines       |
-| `profile`         | Configuration profiles                |
-| `network`         | Networks (bridge, ovn, macvlan, etc.) |
-| `network-forward` | Forward external addresses and ports  |
-| `network-acl`     | Network access control lists          |
-| `network-zone`    | DNS zones                             |
-| `storage-pool`    | Storage pools                         |
-| `storage-volume`  | Custom storage volumes                |
-| `storage-bucket`  | S3-compatible storage buckets         |
-| `project`         | Projects for resource isolation       |
-| `cluster-group`   | Cluster member groups                 |
+| Type                 | Description                           |
+| -------------------- | ------------------------------------- |
+| `instance`           | Containers and virtual machines       |
+| `profile`            | Configuration profiles                |
+| `network`            | Networks (bridge, ovn, macvlan, etc.) |
+| `network-forward`    | Forward external addresses and ports  |
+| `network-acl`        | Network access control lists          |
+| `network-zone`       | DNS zones                             |
+| `storage-pool`       | Storage pools                         |
+| `storage-volume`     | Custom storage volumes                |
+| `storage-bucket`     | S3-compatible storage buckets         |
+| `storage-bucket-key` | S3 credentials for a storage bucket   |
+| `project`            | Projects for resource isolation       |
+| `cluster-group`      | Cluster member groups                 |
 
 ## Resource Dependency Ordering
 
@@ -175,9 +176,10 @@ Resources are automatically created in dependency order:
 6. Network zones
 7. Storage volumes
 8. Storage buckets
-9. Cluster groups
-10. Profiles
-11. Instances
+9. Storage bucket keys
+10. Cluster groups
+11. Profiles
+12. Instances
 
 For deletion, the order is reversed.
 

@@ -138,12 +138,47 @@ config:
 | `driver` | string | Storage driver (dir, zfs, btrfs, lvm, ceph) |
 | `source` | string | Source path or device                       |
 
-## Storage Volume And Bucket Fields
+## Storage Volume and Bucket Fields
 
 | Field  | Type   | Description                                                     |
 | ------ | ------ | --------------------------------------------------------------- |
 | `pool` | string | **Required.** Storage pool name                                 |
 | `type` | string | Storage content type passed as `--type` (`block`, `filesystem`) |
+
+## Storage Bucket Key Fields
+
+Storage bucket keys are S3 credentials that grant access to a storage bucket.
+Each key has a role controlling what operations the credentials may perform.
+
+| Field    | Type   | Description                                                             |
+| -------- | ------ | ----------------------------------------------------------------------- |
+| `pool`   | string | **Required.** Storage pool name                                         |
+| `bucket` | string | **Required.** Parent bucket name                                        |
+| `role`   | string | Key role: `admin` (full access) or `read-only` (list/get only, default) |
+
+### Example
+
+```yaml
+---
+kind: storage-bucket
+name: assets
+pool: default
+config:
+  size: 10GiB
+description: S3-compatible object storage bucket
+---
+kind: storage-bucket-key
+name: app-key
+bucket: assets
+pool: default
+role: read-only
+description: Read-only S3 credentials for the application
+```
+
+> **Note:** To use storage buckets on local storage pools (`dir`, `btrfs`, `lvm`, `zfs`), you must first configure the S3 listen address:
+> ```sh
+> incus config set core.storage_buckets_address :8555
+> ```
 
 ## Network Fields
 

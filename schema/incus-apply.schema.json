@@ -16,6 +16,7 @@
           "storage-pool",
           "storage-volume",
           "storage-bucket",
+          "storage-bucket-key",
           "project",
           "cluster-group",
           "vars"
@@ -40,6 +41,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "bucket": {
+                "type": "string"
               },
               "config": {
                 "description": "Key-value configuration options",
@@ -190,6 +194,9 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -339,6 +346,9 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -475,6 +485,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "bucket": {
+                "type": "string"
               },
               "config": {
                 "description": "Key-value configuration options",
@@ -614,6 +627,9 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -750,6 +766,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "bucket": {
+                "type": "string"
               },
               "config": {
                 "description": "Key-value configuration options",
@@ -888,6 +907,9 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -1024,6 +1046,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "bucket": {
+                "type": "string"
               },
               "config": {
                 "description": "Key-value configuration options",
@@ -1170,6 +1195,9 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -1315,6 +1343,158 @@
                   "type": "string"
                 }
               },
+              "bucket": {
+                "type": "string"
+              },
+              "config": {
+                "description": "Key-value configuration options",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "description": "Resource description",
+                "type": "string"
+              },
+              "devices": {
+                "description": "Device configurations",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "patternProperties": {
+                      ".*": {}
+                    }
+                  }
+                }
+              },
+              "driver": {
+                "description": "Storage driver (dir, zfs, btrfs, lvm, ceph)",
+                "type": "string"
+              },
+              "egress": {
+                "description": "Egress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "empty": {
+                "description": "Create an empty instance (no image)",
+                "type": "boolean"
+              },
+              "ephemeral": {
+                "type": "boolean"
+              },
+              "image": {
+                "description": "Image source for instances (e.g., images:debian/12, docker:caddy)",
+                "type": "string"
+              },
+              "ingress": {
+                "description": "Ingress firewall rules",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "kind": {
+                "description": "Resource kind",
+                "type": "string",
+                "enum": [
+                  "storage-bucket-key"
+                ]
+              },
+              "listen_address": {
+                "description": "External listen address for a network forward",
+                "type": "string"
+              },
+              "name": {
+                "description": "Resource name (unique within type)",
+                "type": "string"
+              },
+              "network": {
+                "description": "Network name (for instances or the parent network of a network forward)",
+                "type": "string"
+              },
+              "networkType": {
+                "description": "Network type (bridge, ovn, macvlan, sriov, physical)",
+                "type": "string"
+              },
+              "pool": {
+                "description": "Storage pool name (required for storage volumes/buckets)",
+                "type": "string"
+              },
+              "ports": {
+                "description": "Optional network forward port rules in the same shape as incus network forward edit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": {}
+                  }
+                }
+              },
+              "profiles": {
+                "description": "Profiles to apply to the instance",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "role": {
+                "description": "Bucket key role controlling access level.",
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "read-only"
+                ]
+              },
+              "source": {
+                "description": "Source path or device for a storage pool",
+                "type": "string"
+              },
+              "storage": {
+                "description": "Storage pool for the instance root disk",
+                "type": "string"
+              },
+              "target": {
+                "description": "Cluster member target",
+                "type": "string"
+              },
+              "vm": {
+                "description": "Create a virtual machine instead of a container",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "kind",
+              "name",
+              "bucket"
+            ]
+          },
+          {
+            "description": "An Incus resource definition.",
+            "type": "object",
+            "properties": {
+              "apply.after": {
+                "description": "List of instance names that must be applied before this one",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "bucket": {
+                "type": "string"
+              },
               "config": {
                 "description": "Key-value configuration options",
                 "type": "object",
@@ -1451,6 +1631,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "bucket": {
+                "type": "string"
               },
               "config": {
                 "description": "Key-value configuration options",

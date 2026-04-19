@@ -110,6 +110,7 @@ func collectResourceTypes() []string {
 		resource.TypeStoragePool,
 		resource.TypeStorageVolume,
 		resource.TypeStorageBucket,
+		resource.TypeStorageBucketKey,
 		resource.TypeProject,
 		resource.TypeClusterGroup,
 	} {
@@ -126,12 +127,17 @@ func generateResourceSchema(resourceTypes []string) Schema {
 	// Remove the ContentType field (yaml:"type") from the base properties;
 	// it is added only to storage-volume and storage-bucket variants below.
 	delete(properties, "type")
+	// Remove the Role field from the base properties;
+	// it is added only to storage-bucket-key with enum constraints below.
+	delete(properties, "role")
 
 	var variants []Schema
 	for _, resourceType := range resourceTypes {
 		required := []string{"kind", "name"}
 		if resourceType == string(resource.TypeNetworkForward) {
 			required = []string{"kind", "listen_address", "network"}
+		} else if resourceType == string(resource.TypeStorageBucketKey) {
+			required = []string{"kind", "name", "bucket"}
 		}
 
 		variantProperties := cloneProperties(properties)
@@ -149,6 +155,12 @@ func generateResourceSchema(resourceTypes []string) Schema {
 				Type:        "string",
 				Description: "Storage content type (passed as --type to incus storage volume/bucket create).",
 				Enum:        storageContentTypeEnum,
+			}
+		case resource.TypeStorageBucketKey:
+			variantProperties["role"] = &Schema{
+				Type:        "string",
+				Description: "Bucket key role controlling access level.",
+				Enum:        []string{"admin", "read-only"},
 			}
 		}
 
