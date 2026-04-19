@@ -41,6 +41,14 @@ func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *con
 		args = append(args, res.QualifiedPool())
 	}
 
+	// Storage bucket keys require pool name then bucket name before the key name
+	if meta.PrependPoolAndBucket && res.Pool != "" {
+		args = append(args, res.QualifiedPool())
+		if res.Bucket != "" {
+			args = append(args, res.Bucket)
+		}
+	}
+
 	args = append(args, resourceIdentifier(res))
 
 	if force {
@@ -70,6 +78,8 @@ func (c client) buildCreateCommand(meta resource.TypeMeta, res *config.Resource)
 		args = c.buildStoragePoolCreateArgs(args, res)
 	case resource.TypeStorageVolume, resource.TypeStorageBucket:
 		args = c.buildStorageResourceCreateArgs(args, res)
+	case resource.TypeStorageBucketKey:
+		args = c.buildStorageBucketKeyCreateArgs(args, res)
 	case resource.TypeNetworkForward:
 		args = c.buildNetworkForwardCreateArgs(args, res)
 	case resource.TypeNetwork:
@@ -140,6 +150,21 @@ func (c client) buildStorageResourceCreateArgs(args []string, res *config.Resour
 	return args
 }
 
+func (c client) buildStorageBucketKeyCreateArgs(args []string, res *config.Resource) []string {
+	if res.Pool != "" {
+		// The remote (if any) goes on the pool name.
+		args = append(args, res.QualifiedPool())
+	}
+	if res.Bucket != "" {
+		args = append(args, res.Bucket)
+	}
+	args = append(args, res.Name)
+	if res.Role != "" {
+		args = append(args, "--role="+res.Role)
+	}
+	return args
+}
+
 func (c client) buildNetworkCreateArgs(args []string, res *config.Resource) []string {
 	args = append(args, res.QualifiedName())
 	if res.NetworkType != "" {
@@ -164,7 +189,7 @@ func resourceIdentifier(res *config.Resource) string {
 		// Network-forward resources are identified by their listen address.
 		// The remote is carried on the preceding network name argument, not here.
 		return res.ListenAddress
-	case resource.TypeStorageVolume, resource.TypeStorageBucket:
+	case resource.TypeStorageVolume, resource.TypeStorageBucket, resource.TypeStorageBucketKey:
 		// Pool-scoped resources are identified by bare name.
 		// The remote is carried on the preceding pool name argument, not here.
 		return res.Name

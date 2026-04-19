@@ -18,13 +18,14 @@ type Base struct {
 // It embeds common fields plus the resource-specific field groups used
 // based on the resource Type.
 type Resource struct {
-	Base                  `yaml:",inline"`
-	InstanceFields        `yaml:",inline"`
-	StoragePoolFields     `yaml:",inline"`
-	StorageResourceFields `yaml:",inline"`
-	NetworkFields         `yaml:",inline"`
-	NetworkACLFields      `yaml:",inline"`
-	NetworkForwardFields  `yaml:",inline"`
+	Base                   `yaml:",inline"`
+	InstanceFields         `yaml:",inline"`
+	StoragePoolFields      `yaml:",inline"`
+	StorageResourceFields  `yaml:",inline"`
+	StorageBucketKeyFields `yaml:",inline"`
+	NetworkFields          `yaml:",inline"`
+	NetworkACLFields       `yaml:",inline"`
+	NetworkForwardFields   `yaml:",inline"`
 
 	PreviewRedactPrefixes []string `yaml:"-" json:"-"`
 }
@@ -52,6 +53,12 @@ type StoragePoolFields struct {
 type StorageResourceFields struct {
 	Pool        string `yaml:"pool,omitempty" json:"pool,omitempty"`
 	ContentType string `yaml:"type,omitempty" json:"type,omitempty"` // --type flag for storage volume create (block or filesystem)
+}
+
+// StorageBucketKeyFields captures the fields specific to storage bucket keys.
+type StorageBucketKeyFields struct {
+	Bucket string `yaml:"bucket,omitempty" json:"bucket,omitempty"` // Parent bucket name
+	Role   string `yaml:"role,omitempty" json:"role,omitempty"`     // Key role: "admin" or "read-only"
 }
 
 // NetworkFields captures the fields specific to networks.
@@ -116,17 +123,18 @@ type Stdin struct {
 // knownResourceTypes is the set of valid incus resource type strings.
 // "vars" is intentionally excluded — it is handled separately by the parser.
 var knownResourceTypes = map[string]struct{}{
-	"instance":        {},
-	"profile":         {},
-	"network":         {},
-	"network-forward": {},
-	"network-acl":     {},
-	"network-zone":    {},
-	"storage-pool":    {},
-	"storage-volume":  {},
-	"storage-bucket":  {},
-	"project":         {},
-	"cluster-group":   {},
+	"instance":           {},
+	"profile":            {},
+	"network":            {},
+	"network-forward":    {},
+	"network-acl":        {},
+	"network-zone":       {},
+	"storage-pool":       {},
+	"storage-volume":     {},
+	"storage-bucket":     {},
+	"storage-bucket-key": {},
+	"project":            {},
+	"cluster-group":      {},
 }
 
 // isKnownResourceType reports whether s is a supported incus resource type.
@@ -153,6 +161,9 @@ func (r Resource) Validate() error {
 		}
 	} else if r.Name == "" {
 		return &ValidationError{Field: "name", Message: "name is required"}
+	}
+	if r.Type == "storage-bucket-key" && r.Bucket == "" {
+		return &ValidationError{Field: "bucket", Message: "bucket is required"}
 	}
 	return nil
 }

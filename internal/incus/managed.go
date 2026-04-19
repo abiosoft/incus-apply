@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
+	"github.com/abiosoft/incus-apply/internal/resource"
 	"gopkg.in/yaml.v3"
 )
 
@@ -92,6 +93,12 @@ func managedSnapshot(res *config.Resource) (string, error) {
 	if res.Pool != "" {
 		state["pool"] = res.Pool
 	}
+	if res.Bucket != "" {
+		state["bucket"] = res.Bucket
+	}
+	if res.Role != "" {
+		state["role"] = res.Role
+	}
 	if res.NetworkType != "" {
 		state["networkType"] = res.NetworkType
 	}
@@ -160,6 +167,10 @@ func desiredForApply(res *config.Resource, enc snapshotEncoder) (*config.Resourc
 		return nil, "", err
 	}
 
+	if !supportsTrackingState(resource.Type(res.Type)) {
+		return clone, snapshot, nil
+	}
+
 	if clone.Config == nil {
 		clone.Config = map[string]string{}
 	}
@@ -174,6 +185,19 @@ func desiredForApply(res *config.Resource, enc snapshotEncoder) (*config.Resourc
 	clone.Config[currentStateKey] = encoded
 
 	return clone, snapshot, nil
+}
+
+// supportsTrackingState reports whether a resource type can store the
+// user.incus-apply.* tracking markers in its config map. Types that have no
+// user-accessible config map in Incus (e.g. storage-bucket-key) must return
+// false; they fall back to live-state diffing (the unmanaged path).
+func supportsTrackingState(t resource.Type) bool {
+	switch t {
+	case resource.TypeStorageBucketKey:
+		return false
+	default:
+		return true
+	}
 }
 
 func cloneResource(res *config.Resource) (*config.Resource, error) {
@@ -413,6 +437,12 @@ func createOnlyFields(resourceType string) map[string]bool {
 	case "storage-volume", "storage-bucket":
 		return map[string]bool{
 			"pool": true,
+		}
+	case "storage-bucket-key":
+		return map[string]bool{
+			"pool":   true,
+			"bucket": true,
+			"role":   true,
 		}
 	case "network":
 		return map[string]bool{

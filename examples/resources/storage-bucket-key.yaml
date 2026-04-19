@@ -1,0 +1,7 @@
+# S3 credentials for a storage bucket
+kind: storage-bucket-key
+name: app-key
+bucket: my-bucket
+pool: default
+role: read-only
+description: Read-only S3 credentials for application access

@@ -165,3 +165,31 @@ jobs:
 
       - name: "[oci] Verify absent"
         run: "! sudo incus info alpine-oci 2>/dev/null"
+
+      # --- storage-bucket ---
+      - name: Setup - enable S3 endpoint for local storage buckets
+        run: sudo incus config set core.storage_buckets_address :8555
+
+      - name: "[storage-bucket] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/storage-bucket.yaml
+
+      - name: "[storage-bucket] Verify exists"
+        run: sudo incus storage bucket show default my-bucket
+
+      - name: "[storage-bucket-key] Apply"
+        run: sudo ./incus-apply -y -q examples/resources/storage-bucket-key.yaml
+
+      - name: "[storage-bucket-key] Verify exists"
+        run: sudo incus storage bucket key show default my-bucket app-key
+
+      - name: "[storage-bucket-key] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/storage-bucket-key.yaml
+
+      - name: "[storage-bucket-key] Verify absent"
+        run: "! sudo incus storage bucket key show default my-bucket app-key 2>/dev/null"
+
+      - name: "[storage-bucket] Delete"
+        run: sudo ./incus-apply -y -q -d examples/resources/storage-bucket.yaml
+
+      - name: "[storage-bucket] Verify absent"
+        run: "! sudo incus storage bucket show default my-bucket 2>/dev/null"

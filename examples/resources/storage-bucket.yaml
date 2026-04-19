@@ -1,0 +1,7 @@
+# S3-compatible storage bucket
+kind: storage-bucket
+name: my-bucket
+pool: default
+config:
+  size: 5GiB
+description: S3-compatible object storage bucket

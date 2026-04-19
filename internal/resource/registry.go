@@ -10,17 +10,18 @@ type Type string
 
 // Built-in resource types supported by Incus.
 const (
-	TypeInstance       Type = "instance"
-	TypeProfile        Type = "profile"
-	TypeNetwork        Type = "network"
-	TypeNetworkACL     Type = "network-acl"
-	TypeNetworkForward Type = "network-forward"
-	TypeNetworkZone    Type = "network-zone"
-	TypeStoragePool    Type = "storage-pool"
-	TypeStorageVolume  Type = "storage-volume"
-	TypeStorageBucket  Type = "storage-bucket"
-	TypeProject        Type = "project"
-	TypeClusterGroup   Type = "cluster-group"
+	TypeInstance         Type = "instance"
+	TypeProfile          Type = "profile"
+	TypeNetwork          Type = "network"
+	TypeNetworkACL       Type = "network-acl"
+	TypeNetworkForward   Type = "network-forward"
+	TypeNetworkZone      Type = "network-zone"
+	TypeStoragePool      Type = "storage-pool"
+	TypeStorageVolume    Type = "storage-volume"
+	TypeStorageBucket    Type = "storage-bucket"
+	TypeStorageBucketKey Type = "storage-bucket-key"
+	TypeProject          Type = "project"
+	TypeClusterGroup     Type = "cluster-group"
 
 	// CLI command constants to avoid repetition and typos.
 	cmdProject = "project"
@@ -39,6 +40,7 @@ const (
 	cmdZone    = "zone"
 	cmdVolume  = "volume"
 	cmdBucket  = "bucket"
+	cmdKey     = "key"
 	cmdGroup   = "group"
 )
 
@@ -55,6 +57,10 @@ type TypeMeta struct {
 	// PrependPool indicates that pool name should be prepended before the
 	// resource name in show/edit/delete commands (storage volumes and buckets).
 	PrependPool bool
+
+	// PrependPoolAndBucket indicates that both pool name and bucket name should
+	// be prepended before the resource name in commands (storage bucket keys).
+	PrependPoolAndBucket bool
 
 	// PrependNetwork indicates that network name should be prepended before the
 	// resource name in show/edit/delete commands (network forwards).
@@ -146,9 +152,18 @@ var builtinTypes = map[Type]TypeMeta{
 		Delete:      []string{cmdStorage, cmdBucket, cmdDelete},
 		PrependPool: true,
 	},
+	TypeStorageBucketKey: {
+		Type:                 TypeStorageBucketKey,
+		Priority:             9,
+		Create:               []string{cmdStorage, cmdBucket, cmdKey, cmdCreate},
+		Show:                 []string{cmdStorage, cmdBucket, cmdKey, cmdShow},
+		Edit:                 []string{cmdStorage, cmdBucket, cmdKey, cmdEdit},
+		Delete:               []string{cmdStorage, cmdBucket, cmdKey, cmdDelete},
+		PrependPoolAndBucket: true,
+	},
 	TypeClusterGroup: {
 		Type:     TypeClusterGroup,
-		Priority: 9,
+		Priority: 10,
 		Create:   []string{cmdCluster, cmdGroup, cmdCreate},
 		Show:     []string{cmdCluster, cmdGroup, cmdShow},
 		Edit:     []string{cmdCluster, cmdGroup, cmdEdit},
@@ -156,7 +171,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeProfile: {
 		Type:     TypeProfile,
-		Priority: 10,
+		Priority: 11,
 		Create:   []string{cmdProfile, cmdCreate},
 		Show:     []string{cmdProfile, cmdShow},
 		Edit:     []string{cmdProfile, cmdEdit},
@@ -164,7 +179,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeInstance: {
 		Type:        TypeInstance,
-		Priority:    11,
+		Priority:    12,
 		Create:      []string{cmdInit}, // Special: uses "init" not "instance create"
 		Show:        []string{cmdConfig, cmdShow},
 		Edit:        []string{cmdConfig, cmdEdit},
