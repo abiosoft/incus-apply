@@ -34,11 +34,14 @@ jobs:
       - name: Build incus-apply
         run: make build
 
+      - name: Install ZFS utilities
+        run: sudo apt-get install -y zfsutils-linux
+
       - name: Install Incus
         run: curl https://pkgs.zabbly.com/get/incus-stable | sudo sh
 
       - name: Initialize Incus
-        run: sudo incus admin init --auto
+        run: sudo incus admin init --auto --storage-backend=zfs
 
       # --- profile ---
       - name: "[profile] Apply"
