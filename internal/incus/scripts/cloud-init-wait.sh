@@ -4,14 +4,22 @@
 # command itself runs silently.  tail is cleaned up on exit regardless of
 # how cloud-init exits.
 #
-# tail -f is best-effort for progress output: the log file may not exist yet
-# on some images (e.g. Alpine), so failure to open it is intentionally ignored.
-if [ -e /var/log/cloud-init-output.log ]; then
-  tail -f /var/log/cloud-init-output.log &
-  TAIL_PID=$!
-else
-  TAIL_PID=
-fi
+# The log file may not exist yet when the script starts (e.g. on slow or
+# minimal images).  A background watcher polls for up to 30 s for the file
+# to appear before starting tail, so output is captured even when the file
+# is created after the script begins.
+
+LOG=/var/log/cloud-init-output.log
+
+(
+  retries=30
+  while [ "$retries" -gt 0 ] && [ ! -e "$LOG" ]; do
+    sleep 1
+    retries=$((retries - 1))
+  done
+  [ -e "$LOG" ] && exec tail -f "$LOG"
+) &
+TAIL_PID=$!
 
 cloud-init status --wait >/dev/null 2>&1
 CI_RC=$?
@@ -19,7 +27,7 @@ CI_RC=$?
 # Exit code 2 is not a failure, rather a soft success.
 [ "$CI_RC" -eq 2 ] && CI_RC=0
 
-[ -n "$TAIL_PID" ] && kill $TAIL_PID 2>/dev/null
-[ -n "$TAIL_PID" ] && wait $TAIL_PID 2>/dev/null
+kill $TAIL_PID 2>/dev/null
+wait $TAIL_PID 2>/dev/null
 
 exit $CI_RC
