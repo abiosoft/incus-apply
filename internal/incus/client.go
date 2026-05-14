@@ -11,7 +11,7 @@ import (
 	"github.com/abiosoft/incus-apply/internal/resource"
 )
 
-const DefaultCommandTimeout = 5 * time.Minute
+const DefaultCommandTimeout = 30 * time.Minute
 
 // Client is the interface for performing operations on Incus.
 type Client interface {
