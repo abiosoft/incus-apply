@@ -52,7 +52,7 @@ Usage:
   incus-apply [flags] [file...] [remote:]
 
 Flags:
-      --command-timeout duration   Timeout for individual incus commands (0 disables the timeout) (default 5m0s)
+  --command-timeout duration   Timeout for individual incus commands (0 disables the timeout) (default 30m0s)
   -d, --delete                     Delete resources instead of creating/updating
       --diff string[="text"]       Show preview only without applying (values: text, json)
       --fail-fast                  Stop on first error instead of continuing
