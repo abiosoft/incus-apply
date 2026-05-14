@@ -16,7 +16,7 @@ test:
 clean:
 	rm -f incus-apply
 
-install: build
+install:
 	install -m 0755 incus-apply $(BINDIR)/incus-apply
 
 gopath-install:
