@@ -109,7 +109,7 @@ Examples:
 		"Show preview only without applying (values: text, json)")
 	rootCmd.Flags().Lookup("diff").NoOptDefVal = "text"
 	rootCmd.Flags().BoolVar(&opts.Replace, "replace", false,
-		"Delete and recreate managed resources when create-only fields change. Without this flag, resources with create-only field changes are skipped with a warning.")
+		"Delete and recreate managed resources when create-only fields change. Without this flag, create-only field changes are ignored with a warning and other changes proceed normally.")
 	rootCmd.Flags().BoolVar(&opts.ShowEnv, "show-env", false,
 		"Show actual environment config values in preview output instead of redacting them")
 	rootCmd.Flags().BoolVar(&opts.Stop, "stop", false,
