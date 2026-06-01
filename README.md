@@ -64,7 +64,7 @@ Flags:
       --project string             Incus project to use
   -q, --quiet                      Suppress progress output
   -r, --recursive                  Recursively find .yaml/.json files in directories
-      --replace                    Delete and recreate managed resources when create-only fields change. Without this flag, resources with create-only field changes are skipped with a warning.
+      --replace                    Delete and recreate managed resources when create-only fields change. Without this flag, create-only field changes are ignored with a warning and other changes proceed normally.
       --reset                      Delete all resources then recreate them from configs
       --select                     Interactively select which resources to include before applying
       --show-env                   Show actual environment config values in preview output instead of redacting them
@@ -274,9 +274,9 @@ Preview output identifies resources by effective scope:
 
 Some fields are create-only, such as an instance image, storage pool driver, or network type.
 
-When those fields change on a managed resource, the preview is marked `recreate required` and apply stops before making changes.
+When those fields change on a managed resource, `incus-apply` prints a warning, silently ignores the create-only fields, and applies any other changes on the resource normally.
 
-Use `--replace` to delete and recreate the resource in one run.
+Use `--replace` to delete and recreate the resource so the create-only change is also applied.
 
 </details>
 
