@@ -154,6 +154,9 @@ jobs:
         run: "! sudo incus info cloud-init-test 2>/dev/null"
 
       # --- oci ---
+      - name: Setup - workaround registry v1 error
+        run: sudo mkdir -p /etc/containers && echo -e "[registries]\nregistries = ['ghcr.io']" | sudo tee /etc/containers/registries.conf
+
       - name: Setup - add ghcr.io OCI remote
         run: sudo incus remote add ghcr https://ghcr.io --protocol=oci
 
