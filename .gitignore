@@ -5,6 +5,11 @@
 /incus-apply
 # Schema log files
 schema.log
+/doc/.sphinx/venv/
+/doc/.sphinx/.doctrees/
+/doc/.sphinx/warnings.txt
+/doc/html/
+site.tar.gz
 
 # Binaries for programs and plugins
 *.exe

@@ -1,4 +1,4 @@
-# Editor Schema
+# Editor schema
 
 `incus-apply` ships a JSON Schema for editor validation and autocomplete.
 
@@ -8,7 +8,7 @@
 https://raw.githubusercontent.com/abiosoft/incus-apply/refs/heads/main/schema/incus-apply.schema.json
 ```
 
-## VS Code Setup
+## VS Code setup
 
 To enable the schema with the Red Hat YAML extension, add this to `.vscode/settings.json`:
 
@@ -29,4 +29,4 @@ To enable the schema with the Red Hat YAML extension, add this to `.vscode/setti
 }
 ```
 
-The generated schema file lives at [../schema/incus-apply.schema.json](../schema/incus-apply.schema.json).
+The generated schema file is stored in the repository at `schema/incus-apply.schema.json`.
