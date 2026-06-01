@@ -347,7 +347,7 @@ func TestComputeUpsertDiff_DoesNotRedactNonMatchingPaths(t *testing.T) {
 
 func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T) {
 	dir := t.TempDir()
-	// Image changed (create-only) + config changed (normal) — entire resource skipped.
+	// Image changed (create-only) + config changed (normal) — image is filtered out, config is updated.
 	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: updated\n")
 
 	client := newFakeClient()
@@ -359,20 +359,57 @@ func TestExecutorUpsert_CreateOnlyFieldsSkipsResourceWithoutReplace(t *testing.T
 	if err := executor.Upsert(); err != nil {
 		t.Fatalf("Upsert() error = %v", err)
 	}
-	// No update — entire resource skipped because of create-only field change.
+	// The config change is applied; the create-only image change is silently filtered.
+	if len(client.updateCalls) != 1 || client.updateCalls[0] != "instance/web" {
+		t.Fatalf("update calls = %v, want [instance/web]", client.updateCalls)
+	}
+	if len(renderer.outputs) != 1 {
+		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
+	}
+	// Resource appears in the update group.
+	items := renderer.outputs[0].Groups[0].Items
+	if len(items) != 1 {
+		t.Fatalf("output items = %d, want 1", len(items))
+	}
+	// Only the non-create-only change (user.key) appears in the diff.
+	for _, ch := range items[0].Changes {
+		if ch.Path == "image" {
+			t.Fatal("create-only field 'image' should not appear in diff")
+		}
+	}
+	if len(items[0].Changes) == 0 {
+		t.Fatal("expected at least one change in the diff")
+	}
+}
+
+func TestExecutorUpsert_CreateOnlyFieldsOnlySkipsWithoutReplace(t *testing.T) {
+	dir := t.TempDir()
+	// Only the image changed (create-only) — no other changes — resource stays unchanged.
+	path := writeConfigFile(t, dir, "instance.yaml", "kind: instance\nname: web\nimage: images:alpine/3.20\nconfig:\n  user.key: value\n")
+
+	client := newFakeClient()
+	client.exists["instance/web"] = true
+	client.current["instance/web"] = "config:\n  user.incus-apply.created: \"true\"\n  user.incus-apply.current: |\n    image: images:alpine/3.19\n    config:\n      user.key: value\n"
+	renderer := &captureRenderer{}
+	executor := NewExecutor(Options{Files: []string{path}, Yes: true, Quiet: true}, client, renderer)
+
+	if err := executor.Upsert(); err != nil {
+		t.Fatalf("Upsert() error = %v", err)
+	}
+	// No update — all changes are create-only (filtered), nothing else to apply.
 	if len(client.updateCalls) != 0 {
 		t.Fatalf("update calls = %v, want none", client.updateCalls)
 	}
 	if len(renderer.outputs) != 1 {
 		t.Fatalf("renderer outputs = %d, want 1", len(renderer.outputs))
 	}
-	// Diff changes are still shown (so user sees what changed).
+	// Resource appears in the unchanged group with no diff entries shown.
 	items := renderer.outputs[0].Groups[0].Items
 	if len(items) != 1 {
 		t.Fatalf("output items = %d, want 1", len(items))
 	}
-	if len(items[0].Changes) == 0 {
-		t.Fatal("expected diff changes to be shown even when skipping")
+	if len(items[0].Changes) != 0 {
+		t.Fatalf("expected no changes in diff, got %#v", items[0].Changes)
 	}
 }
 

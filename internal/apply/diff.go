@@ -88,27 +88,27 @@ func computeUpsertDiff(opts *Options, client incus.Client, resources []*config.R
 				item.Note = appendNote(item.Note, status.Warning)
 			}
 			if len(status.UnsupportedChanges) > 0 {
-				item.Note = appendNote(item.Note, status.Warning)
 				if opts.Replace {
+					item.Note = appendNote(item.Note, status.Warning)
 					replaces = append(replaces, item)
 					preview.replaced++
 					plans = append(plans, upsertPlan{res: res, action: upsertReplace})
 					continue
 				}
-
-				// Without --replace, skip the entire resource and warn. The diff is
-				// still shown so the user can see what changed and decide to rerun
-				// with --replace.
-				printWarning(opts.Quiet, "Warning: %s has create-only field changes (%s); skipping (rerun with --replace to recreate).",
+				printWarning(opts.Quiet, "Warning: %s has create-only field changes (%s); those fields will be ignored (rerun with --replace to recreate).",
 					resourceID, unsupportedChangePaths(status.UnsupportedChanges))
-				unchanged = append(unchanged, item)
+				diff = filterUnsupportedChanges(diff, status.UnsupportedChanges)
+			}
+			if len(diff) > 0 {
+				item.Changes = diff
+				updates = append(updates, item)
+				preview.updated++
+				plans = append(plans, upsertPlan{res: res, action: upsertUpdate})
+			} else {
+				unchanged = append(unchanged, OutputItem{ResourceID: resourceID})
 				preview.unchanged++
 				plans = append(plans, upsertPlan{res: res, action: upsertSkip})
-				continue
 			}
-			updates = append(updates, item)
-			preview.updated++
-			plans = append(plans, upsertPlan{res: res, action: upsertUpdate})
 		} else {
 			unchanged = append(unchanged, OutputItem{ResourceID: resourceID})
 			preview.unchanged++
@@ -131,6 +131,20 @@ func unsupportedChangePaths(changes []incus.DiffChange) string {
 	}
 	sort.Strings(paths)
 	return strings.Join(paths, ", ")
+}
+
+func filterUnsupportedChanges(diff []incus.DiffChange, unsupported []incus.DiffChange) []incus.DiffChange {
+	paths := make(map[string]bool, len(unsupported))
+	for _, u := range unsupported {
+		paths[u.Path] = true
+	}
+	result := diff[:0:0]
+	for _, d := range diff {
+		if !paths[d.Path] {
+			result = append(result, d)
+		}
+	}
+	return result
 }
 
 // computeDeleteDiff computes which resources exist and which don't.
