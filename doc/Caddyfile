@@ -1,0 +1,44 @@
+:80
+
+# Serve files from /srv
+root * /srv
+
+# Enable file server
+file_server
+
+# Enable gzip compression
+encode gzip
+
+# Handle 404 errors
+handle_errors {
+	rewrite * /404.html
+	file_server
+}
+
+# Security headers
+header {
+	# Prevent clickjacking
+	X-Frame-Options "DENY"
+	# Prevent XSS
+	X-Content-Type-Options "nosniff"
+	# Referrer policy
+	Referrer-Policy "strict-origin-when-cross-origin"
+}
+
+# Cache static assets
+@static {
+	path *.css *.js *.ico *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2
+}
+header @static Cache-Control "public, max-age=31536000, immutable"
+
+# Cache HTML with shorter duration
+@html {
+	path *.html
+}
+header @html Cache-Control "public, max-age=3600"
+
+# Log requests
+log {
+	output stdout
+	format console
+}

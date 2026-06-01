@@ -145,7 +145,7 @@ config:
   environment.MYSQL_DATABASE: $MYSQL_DATABASE
 ```
 
-For full variable usage, scoping rules, and syntax, see [docs/configuration-reference.md](./docs/configuration-reference.md).
+For full variable usage, scoping rules, and syntax, see [configuration reference](https://incus-apply.abiosoft.com/reference/configuration/).
 
 ## Supported Resource Types
 
@@ -193,7 +193,7 @@ For deletion, the order is reversed.
 | `devices`     | map    | Device configurations          |
 | `description` | string | Resource description           |
 
-For the full per-resource field reference, see [docs/configuration-reference.md](./docs/configuration-reference.md).
+For the full per-resource field reference, see [configuration reference](https://incus-apply.abiosoft.com/reference/configuration/).
 
 
 ## Examples
@@ -247,7 +247,6 @@ incus-apply instance.yaml --project myproject server-a:
 ```
 
 
-
 ## Advanced Notes
 
 <details>
@@ -283,11 +282,11 @@ Use `--replace` to delete and recreate the resource in one run.
 
 ## Schema And Editor Setup
 
-For schema URL and editor setup, see [docs/editor-schema.md](./docs/editor-schema.md).
+For schema URL and editor setup, see [editor schema](https://incus-apply.abiosoft.com/reference/editor-schema/).
 
 ## FAQ
 
-See [docs/faq.md](./docs/faq.md) for common questions and operational notes.
+See [faq](https://incus-apply.abiosoft.com/faq/) for common questions and operational notes.
 
 ## License
 

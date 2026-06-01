@@ -1,0 +1,40 @@
+kind: vars
+computed:
+  CADDYFILE: { file: ./Caddyfile, format: base64 }
+---
+kind: instance
+name: incus-apply
+image: images:debian/13/cloud
+config:
+  limits.cpu: "1"
+  limits.memory: 1GB
+  cloud-init.user-data:
+    #cloud-config
+    package_update: true
+    packages:
+      - tar
+      - ca-certificates
+    write_files:
+      - path: /etc/caddy/Caddyfile
+        content: "{$CADDYFILE}"
+        encoding: b64
+      - path: /bin/deploy
+        content: |
+          #!/usr/bin/env bash
+          set -e
+          rm -rf /srv && mkdir -p /srv
+          tar xzf /tmp/site.tar.gz -C /srv --strip-components=1
+          rm /tmp/site.tar.gz
+          systemctl restart caddy
+        permissions: "0755"
+    runcmd:
+      # Install Caddy
+      - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      - apt-get update
+      - apt-get install -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" -y caddy
+      # Enable and (re)start Caddy
+      - systemctl enable caddy
+      - systemctl restart caddy
+
+description: "Static website instance"

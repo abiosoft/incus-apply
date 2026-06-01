@@ -1,0 +1,12 @@
+docutils<0.22
+codespell
+furo
+linkify-it-py
+myst-parser
+sphinx
+sphinx-autobuild
+sphinx-copybutton
+sphinx-design
+sphinx-reredirects
+sphinx-tabs
+sphinxext-opengraph
