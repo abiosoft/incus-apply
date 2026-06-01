@@ -92,7 +92,7 @@ incus-apply . --reset
 
 `--reset` is mutually exclusive with `--delete` and `--diff`.
 
-Some fields are create-only, such as an instance image, storage pool driver, or network type. When one of those fields changes on a managed resource, the preview is marked `recreate required` and apply stops before making changes. Use `--replace` to delete and recreate the resource in one run.
+Some fields are create-only, such as an instance image, storage pool driver, or network type. When one of those fields changes on a managed resource, `incus-apply` prints a warning, silently ignores the create-only fields, and applies any other changes on the resource normally. Use `--replace` to delete and recreate the resource so the create-only change is also applied.
 
 ## Interactive resource selection
 

@@ -38,9 +38,9 @@ It means the resource exists in Incus but does not have valid `incus-apply` trac
 
 ## What if a change requires recreating the resource?
 
-Some fields are create-only and cannot be changed on an existing resource. When such a change is detected, the resource is shown in the diff with a `recreate required` note and then skipped while the rest of the apply continues.
+Some fields are create-only and cannot be changed on an existing resource. When such a change is detected, `incus-apply` prints a warning and silently ignores the create-only fields, applying any other changes on the resource normally.
 
-To apply the change, rerun with `--replace`. This deletes and recreates the resource in one run.
+To apply the create-only change itself, rerun with `--replace`. This deletes and recreates the resource in one run.
 
 ## What does `--stop` do?
 
