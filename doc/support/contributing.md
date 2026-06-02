@@ -2,13 +2,13 @@
 
 Contributions are welcomed for the project.
 
-## Contributing Code
+## Contributing code
 
 To contribute, you will need Go installed (see the [Go installation guide](https://golang.org/doc/install)).
 
 ### 1. Fork the Repository
 
-First, fork the repository on GitHub. Then, clone your fork locally:
+First, fork the [repository](https://github.com/abiosoft/incus-apply) on GitHub. Then, clone your fork locally:
 
 ```sh
 git clone https://github.com/<your-username>/incus-apply.git
