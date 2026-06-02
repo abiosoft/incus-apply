@@ -1,0 +1,87 @@
+kind: vars
+vars:
+  ISO_FILE: "/tmp/incus-iso/IncusOS.iso"
+computed:
+  CERT: { incus: remote get-client-certificate, format: base64 }
+---
+kind: instance
+name: incus-os-flasher
+image: images:alpine/edge/cloud
+ephemeral: true
+devices:
+  host-tmp:
+    type: disk
+    source: /tmp
+    path: /host-tmp
+    shift: "true"
+config:
+  limits.cpu: "2"
+  limits.memory: 2GiB
+  cloud-init.user-data:
+    #cloud-config
+    packages:
+      - go
+      - tar
+      - yq
+      - ca-certificates
+      - openssl
+    write_files:
+      - path: /root/cert/cert.pem
+        encoding: b64
+        content: ${CERT}
+    runcmd:
+      - |
+        # Generate the seed.tar file containing the incus.yaml and install.yaml files
+        mkdir -p /seed && cd /seed
+        touch install.yaml
+        CERT="$(cat /root/cert/cert.pem)" yq -n '
+          .apply_defaults = true |
+          .preseed.certificates[0] = {
+            "name": "primary-client",
+            "type": "client",
+            "certificate": strenv(CERT)
+          }
+        ' > incus.yaml
+        tar cvf seed.tar incus.yaml install.yaml
+      - |
+        export HOME=/root
+        export GOPATH=/root/go
+        export GOCACHE=/root/.cache/go-build
+        export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
+        go install github.com/lxc/incus-os/incus-osd/cmd/flasher-tool@latest
+      - |
+        # Generate the ISO file using the flasher tool and rename it for consistency
+        cd /host-tmp
+        DIR=$(basename $(dirname $ISO_FILE))
+        mkdir -p $DIR && cd $DIR
+        /root/go/bin/flasher-tool --format iso --seed /seed/seed.tar
+        mv "$(ls -t IncusOS_*.iso | head -n 1)" "IncusOS.iso"
+    power_state:
+      mode: poweroff
+      message: "Stopping after ISO generation"
+description: Flasher Tool
+---
+kind: instance
+name: incus-os
+vm: true
+empty: true
+apply.after:
+  - incus-os-flasher
+config:
+  limits.cpu: "4"
+  limits.memory: 4GiB
+  security.secureboot: "false"
+devices:
+  root:
+    path: /
+    pool: default
+    type: disk
+    size: 60GiB
+  tpm:
+    type: tpm
+  install:
+    type: disk
+    source: $ISO_FILE
+    boot.priority: "10"
+description: IncusOS

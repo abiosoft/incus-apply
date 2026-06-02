@@ -1,30 +1,197 @@
-# Reusable resources
+# Resources
 
 The `examples/resources` directory contains standalone resource definitions you can apply individually or combine into larger stacks.
 
-## Included files
+## Virtual machines
 
-| File | Purpose |
-| --- | --- |
-| [`instance.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/instance.yaml) | Basic system container example. |
-| [`vm.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/vm.yaml) | Basic virtual machine example. |
-| [`oci.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/oci.yaml) | OCI-based instance example. |
-| [`profile.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/profile.yaml) | Reusable profile definition. |
-| [`project.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/project.yaml) | Project definition for isolating resources. |
-| [`network.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/network.yaml) | Network definition. |
-| [`network-forward.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/network-forward.yaml) | Network forward example with external-to-internal address mapping. |
-| [`storage-pool.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/storage-pool.yaml) | Storage pool definition. |
-| [`storage-volume.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/storage-volume.yaml) | Custom storage volume definition. |
-| [`storage-bucket.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/storage-bucket.yaml) | Object storage bucket definition. |
-| [`storage-bucket-key.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/storage-bucket-key.yaml) | S3 credentials for a bucket. |
-| [`cloud-init.yaml`](https://github.com/abiosoft/incus-apply/blob/main/examples/resources/cloud-init.yaml) | Cloud-init example suitable for instance config. |
+Alpine virtual machine:
 
-## How to use them
+```yaml
+# Alpine virtual machine
+kind: instance
+name: gateway
+image: images:alpine/edge
+vm: true
+config:
+  limits.cpu: "1"
+  limits.memory: 512MiB
+  security.secureboot: "false"
+description: Alpine virtual machine
+```
 
-1. Choose a file that matches the resource you want to create.
-2. Copy it into your own configuration directory or apply it directly.
-3. Adjust names, pools, images, and networks to match your environment.
+## System containers
 
-Canonical source files:
+Basic Debian container:
 
-- <https://github.com/abiosoft/incus-apply/tree/main/examples/resources>
+```yaml
+# Basic Debian container
+kind: instance
+name: app
+image: images:debian/13
+config:
+  limits.cpu: "2"
+  limits.memory: 1GiB
+description: Application backend container
+```
+
+## OCI containers
+
+The OCI registry must be added as a remote as a prior step.
+
+For docker:
+
+```bash
+incus remote add docker https://docker.io --protocol=oci
+```
+
+Alpine Linux as an OCI container from ghcr.io:
+
+```yaml
+# Alpine Linux as an OCI container
+kind: instance
+name: alpine-oci
+image: docker:alpine
+description: Alpine Linux OCI container
+```
+
+## Profiles
+
+Shared profile with resource limits:
+
+```yaml
+# Shared profile with resource limits
+kind: profile
+name: web
+config:
+  limits.cpu: "2"
+  limits.memory: 512MiB
+description: Web server resource limits profile
+```
+
+## Projects
+
+Project for isolating example resources:
+
+```yaml
+# Project for isolating example resources
+kind: project
+name: example
+config:
+  features.images: "true"
+  features.networks: "false"
+  features.profiles: "true"
+  features.storage.volumes: "true"
+description: Example project
+```
+
+## Networks
+
+Bridge network:
+
+```yaml
+# Bridge network
+kind: network
+name: webnet
+networkType: bridge
+config:
+  ipv4.address: 10.10.10.1/24
+  ipv4.dhcp: "true"
+  ipv4.nat: "true"
+  ipv6.address: none
+description: Internal bridge network for web services
+```
+
+Network forward with external-to-internal address mapping:
+
+```yaml
+kind: network-forward
+listen_address: 198.51.100.10
+network: public
+description: Shared external IP for web services
+config:
+  target_address: 10.42.0.10
+ports:
+  - protocol: tcp
+    listen_port: "80"
+    target_address: 10.42.0.11
+    target_port: "8080"
+    description: Web app HTTP
+  - protocol: tcp
+    listen_port: "443"
+    target_address: 10.42.0.12
+    target_port: "8443"
+    description: Web app HTTPS
+```
+
+## Storage
+
+Storage pool:
+
+```yaml
+# Storage pool
+# Note: storage pools are global (not project-scoped)
+kind: storage-pool
+name: data
+driver: dir
+description: Data storage pool
+```
+
+Custom storage volume:
+
+```yaml
+# Custom storage volume
+kind: storage-volume
+name: data
+pool: default
+config:
+  size: 20GiB
+description: Persistent custom storage volume
+```
+
+S3-compatible storage bucket:
+
+```yaml
+# S3-compatible storage bucket
+kind: storage-bucket
+name: my-bucket
+pool: default
+config:
+  size: 5GiB
+description: S3-compatible object storage bucket
+```
+
+S3 credentials for a storage bucket:
+
+```yaml
+# S3 credentials for a storage bucket
+kind: storage-bucket-key
+name: app-key
+bucket: my-bucket
+pool: default
+role: read-only
+description: Read-only S3 credentials for application access
+```
+
+## Cloud-init
+
+Alpine container with cloud-init:
+
+```yaml
+# Alpine container with cloud-init
+# Writes files and runs a command to confirm cloud-init ran.
+kind: instance
+name: cloud-init-test
+image: images:alpine/edge/cloud
+config:
+  limits.cpu: "1"
+  limits.memory: 512MiB
+  cloud-init.user-data:
+    #cloud-config
+    write_files:
+      - path: /etc/motd
+        content: "Provisioned by incus-apply\n"
+    runcmd:
+      - echo "cloud-init completed" > /run/cloud-init-done
+description: Alpine container with cloud-init validation
+```
+
