@@ -5,6 +5,7 @@
 :maxdepth: 2
 
 incus-apply <self>
+installation
 getting-started
 tutorials/index
 reference
@@ -44,6 +45,7 @@ Supported resource kinds include:
 
 ## Next steps
 
-- Start with the [getting started](getting-started/) guide.
+- Install `incus-apply` using the [installation](installation/) guide.
+- Proceed to the [getting started](getting-started/) guide for your first resource.
 - Use the [workflows](tutorials/workflows/) section for common command patterns.
 - Jump to the [configuration reference](reference/configuration/) for full field details.
