@@ -11,6 +11,17 @@ curl -LO https://github.com/abiosoft/incus-apply/releases/latest/download/incus-
 sudo install incus-apply-$(uname)-$(uname -m) /usr/local/bin/incus-apply
 ```
 
+## Build from source
+
+Clone the repository and build:
+
+```bash
+git clone https://github.com/abiosoft/incus-apply
+cd incus-apply
+make
+sudo make install
+```
+
 ## Nix / NixOS
 
 ### Try it directly
@@ -54,14 +65,3 @@ Then import the module in your `nixosConfigurations` and enable it:
 ```
 
 This installs the `incus-apply` binary system-wide.
-
-## Build from source
-
-Clone the repository and build:
-
-```bash
-git clone https://github.com/abiosoft/incus-apply
-cd incus-apply
-make
-sudo make install
-```
