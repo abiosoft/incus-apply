@@ -86,7 +86,9 @@ Yes. Use `apply.after` to list instance names that should be applied before the 
 
 The preview is still shown, but apply or delete stops before making changes.
 
-## Where can I find example configs?\n\nSee the [examples section](examples/index) for guided examples and the repository `examples/` directory for the source files.
+## Where can I find example configs?
+
+See the [examples section](examples/index) for guided examples and the repository `examples/` directory for the source files.
 
 ## Can I apply configs to a remote Incus server?
 
