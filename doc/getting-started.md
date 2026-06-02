@@ -99,4 +99,4 @@ config:
   environment.MYSQL_DATABASE: $MYSQL_DATABASE
 ```
 
-For more detail, continue with the [workflows](workflows/) section or jump to the [configuration reference](reference/configuration/).
+For more detail, continue with the [workflows](../tutorials/workflows/) section or jump to the [configuration reference](reference/configuration/).

@@ -2,22 +2,28 @@
 
 ## Common inputs
 
-`incus-apply` accepts local files, directories, standard input, and remote URLs.
-
+Apply all configs in the current directory:
 ```bash
-# Apply all configs in the current directory
 incus-apply .
+```
 
-# Apply specific files
+Apply specific files:
+```bash
 incus-apply instance.yaml network.yaml
+```
 
-# Apply recursively from a directory
+Apply recursively from a directory:
+```bash
 incus-apply ./configs/ -r
+```
 
-# Apply from stdin
+Apply from stdin:
+```bash
 cat instance.yaml | incus-apply -
+```
 
-# Apply from URL
+Apply from URL:
+```bash
 incus-apply https://example.com/instance.yaml
 ```
 
@@ -25,11 +31,13 @@ incus-apply https://example.com/instance.yaml
 
 By default, `incus-apply` previews the changes and asks for confirmation.
 
+Show diff only without applying:
 ```bash
-# Show diff only without applying
 incus-apply . --diff
+```
 
-# Show machine-readable diff output
+Show machine-readable diff output:
+```bash
 incus-apply . --diff=json
 ```
 
@@ -47,30 +55,29 @@ Preview output identifies resources by effective scope:
 
 Use these options in automation or CI:
 
+Auto-accept changes:
 ```bash
-# Auto-accept changes
 incus-apply . -y
+```
 
-# Non-interactive with quiet output
+Non-interactive with quiet output:
+```bash
 incus-apply . -yq
 ```
 
 ## Remote and project targeting
 
 Apply everything to a specific project:
-
 ```bash
 incus-apply . --project myproject
 ```
 
 Apply everything to a remote server by appending the remote name with a trailing colon:
-
 ```bash
 incus-apply instance.yaml server-a:
 ```
 
 For per-resource remote overrides, prefix the resource `name`:
-
 ```yaml
 kind: instance
 name: server-a:ubuntu
@@ -79,14 +86,18 @@ image: images:ubuntu/24.04
 
 ## Delete, replace, and reset
 
+Delete resources described in the configuration:
 ```bash
-# Delete resources described in the configuration
 incus-apply . -d -y
+```
 
-# Recreate resources when create-only fields change
+Recreate resources when create-only fields change:
+```bash
 incus-apply . --replace
+```
 
-# Delete then recreate everything from scratch
+Delete then recreate everything from scratch:
+```bash
 incus-apply . --reset
 ```
 

@@ -6,13 +6,10 @@
 
 incus-apply <self>
 getting-started
-workflows
+tutorials/index
 reference
-examples
-demo
-contributing
 faq
-support
+support/index
 ```
 
 <div class="hero">
@@ -48,5 +45,5 @@ Supported resource kinds include:
 ## Next steps
 
 - Start with the [getting started](getting-started/) guide.
-- Use the [workflows](workflows/) section for common command patterns.
+- Use the [workflows](tutorials/workflows/) section for common command patterns.
 - Jump to the [configuration reference](reference/configuration/) for full field details.
