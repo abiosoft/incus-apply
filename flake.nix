@@ -36,5 +36,24 @@
           };
         };
       }
-    );
+    )
+    // {
+      nixosModules.default =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        let
+          cfg = config.programs.incus-apply;
+        in
+        {
+          options.programs.incus-apply.enable = lib.mkEnableOption "incus-apply, declarative configuration management for Incus";
+
+          config = lib.mkIf cfg.enable {
+            environment.systemPackages = [ self.packages.${pkgs.system}.default ];
+          };
+        };
+    };
 }
