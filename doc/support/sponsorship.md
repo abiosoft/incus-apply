@@ -1,6 +1,6 @@
 # Sponsorship
 
-`incus-apply` is a voluntary project by a sole maintainer. Your support would go a long way in sustaining the development of the project.
+`incus-apply` is being developed and maintained by a sole maintainer. Your support would go a long way in sustaining the development of the project.
 
 You can sponsor through:
 
