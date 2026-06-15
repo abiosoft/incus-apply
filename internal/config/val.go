@@ -59,10 +59,19 @@ func (b BoolVal) String() string { return string(b) }
 
 // ValidateBoolVal validates a BoolVal after interpolation.
 // Returns an error if the value is not a valid boolean string.
+// Skips validation if the value is a template variable (starts with $ or ${).
 func (b BoolVal) Validate() error {
 	if b == "" {
 		return nil // empty is acceptable (omitted field)
 	}
-	_, err := strconv.ParseBool(string(b))
+
+	s := string(b)
+
+	// Skip validation for template variables - they will be validated after interpolation
+	if strings.HasPrefix(s, "$") {
+		return nil
+	}
+
+	_, err := strconv.ParseBool(s)
 	return err
 }
