@@ -30,6 +30,7 @@ type Schema struct {
 	Required          []string           `json:"required,omitempty"`
 	Items             *Schema            `json:"items,omitempty"`
 	Enum              []string           `json:"enum,omitempty"`
+	Pattern           string             `json:"pattern,omitempty"`
 	PatternProperties map[string]*Schema `json:"patternProperties,omitempty"`
 
 	AdditionalProperties *bool `json:"additionalProperties,omitempty"`
@@ -292,6 +293,18 @@ func structProperties(t reflect.Type) map[string]*Schema {
 func goTypeToSchema(t reflect.Type, description string) *Schema {
 	if t.Kind() == reflect.Pointer {
 		return goTypeToSchema(t.Elem(), description)
+	}
+
+	// Special handling for BoolVal type (accepts boolean, literal true/false strings, or template variables)
+	if t.Kind() == reflect.String && t.Name() == "BoolVal" && t.PkgPath() == "github.com/abiosoft/incus-apply/internal/config" {
+		return &Schema{
+			Description: description,
+			OneOf: []Schema{
+				{Type: "boolean"},
+				{Type: "string", Enum: []string{"true", "false"}},
+				{Type: "string", Pattern: `^\$`},
+			},
+		}
 	}
 
 	switch t.Kind() {

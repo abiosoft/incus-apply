@@ -175,7 +175,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -327,7 +342,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -467,7 +497,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -607,7 +652,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -748,7 +808,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -888,7 +963,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1028,7 +1118,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1176,7 +1281,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1324,7 +1444,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1472,7 +1607,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1613,7 +1763,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
@@ -1753,7 +1918,22 @@
               },
               "vm": {
                 "description": "Create a virtual machine instead of a container",
-                "type": "boolean"
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
               }
             },
             "required": [
