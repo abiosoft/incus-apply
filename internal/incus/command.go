@@ -105,7 +105,7 @@ func (c client) buildInstanceCreateArgs(args []string, res *config.Resource) []s
 		args = append(args, res.Image)
 	}
 	args = append(args, res.QualifiedName())
-	if res.VM {
+	if res.VM.Bool() {
 		args = append(args, "--vm")
 	}
 	if res.Empty {

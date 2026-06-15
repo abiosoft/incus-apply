@@ -60,7 +60,7 @@ func (c client) waitCloudInitAfterReboot(res *config.Resource) *Result {
 	}
 
 	// VMs additionally need the instance agent to be ready.
-	if res.VM {
+	if res.VM.Bool() {
 		if r := c.WaitInstanceAgent(res); r.Error != nil {
 			return r
 		}

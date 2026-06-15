@@ -131,6 +131,9 @@ func resolveAndInterpolate(results []*config.FileResult) ([]*config.Resource, er
 			if err != nil {
 				return nil, fmt.Errorf("interpolating %s %q in %s: %w", res.Type, res.Name, res.SourceFile, err)
 			}
+			if err := interpolated.Validate(); err != nil {
+				return nil, fmt.Errorf("validating %s %q in %s: %w", res.Type, res.Name, res.SourceFile, err)
+			}
 			setPreviewRedaction(interpolated)
 			allResources = append(allResources, interpolated)
 		}

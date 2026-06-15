@@ -101,7 +101,7 @@ func TestWaitInstanceAgentUsesTimeoutAndProject(t *testing.T) {
 	}
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 
-	res := &config.Resource{Base: config.Base{Type: "instance", Name: "vm1", Project: "prod"}, InstanceFields: config.InstanceFields{VM: true}}
+	res := &config.Resource{Base: config.Base{Type: "instance", Name: "vm1", Project: "prod"}, InstanceFields: config.InstanceFields{VM: config.BoolVal("true")}}
 	result := client{timeout: 6 * time.Second}.WaitInstanceAgent(res)
 	if result.Error != nil {
 		t.Fatalf("WaitInstanceAgent() error = %v", result.Error)

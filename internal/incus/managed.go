@@ -72,8 +72,8 @@ func managedSnapshot(res *config.Resource) (string, error) {
 	if res.Image != "" {
 		state["image"] = res.Image
 	}
-	if res.VM {
-		state["vm"] = res.VM
+	if res.VM.Bool() {
+		state["vm"] = res.VM.Bool()
 	}
 	if res.Empty {
 		state["empty"] = res.Empty
