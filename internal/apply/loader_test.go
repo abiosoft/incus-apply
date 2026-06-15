@@ -174,3 +174,49 @@ func TestResolveAndInterpolate_AllowsJSONContentInSingleLineScalar(t *testing.T)
 		t.Fatalf("user.data = %q, want %q", got, seed)
 	}
 }
+
+func TestResolveAndInterpolate_ValidatesBoolValAfterInterpolation(t *testing.T) {
+	tests := []struct {
+		name      string
+		vmValue   string
+		varValue  string
+		wantError bool
+	}{
+		{"valid bool true", "${VM_VAL}", "true", false},
+		{"valid bool false", "${VM_VAL}", "false", false},
+		{"invalid bool", "${VM_VAL}", "invalid", true},
+		{"invalid bool yes", "${VM_VAL}", "yes", true}, // strconv.ParseBool only accepts true/false
+		{"literal true", "true", "", false},
+		{"literal false", "false", "", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			results := []*config.FileResult{
+				{
+					SourceFile: "test.yaml",
+					Vars: []*config.Vars{
+						{
+							Vars:       map[string]string{"VM_VAL": tt.varValue},
+							SourceFile: "test.yaml",
+						},
+					},
+					Resources: []*config.Resource{
+						{
+							Base:           config.Base{Type: "instance", Name: "test", SourceFile: "test.yaml"},
+							InstanceFields: config.InstanceFields{VM: config.BoolVal(tt.vmValue)},
+						},
+					},
+				},
+			}
+
+			_, err := resolveAndInterpolate(results)
+			if tt.wantError && err == nil {
+				t.Errorf("expected error, got nil")
+			}
+			if !tt.wantError && err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+		})
+	}
+}

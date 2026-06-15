@@ -112,7 +112,7 @@ func (r *runner) finishCreatedInstance(res *config.Resource, resourceID string, 
 	}
 
 	if hasCloudInit(res) && !r.opts.NoWaitCloudInit {
-		if res.VM {
+		if res.VM.Bool() {
 			waitResult := r.client.WaitInstanceAgent(res)
 			if waitResult.Error != nil {
 				return r.result.recordError(r.opts.FailFast, resourceID, "waiting for VM agent failed", waitResult.Error)

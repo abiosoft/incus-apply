@@ -1,6 +1,8 @@
 // Package config handles parsing and validation of incus-apply configuration files.
 package config
 
+import "fmt"
+
 // Base contains fields common to all Incus resource types.
 type Base struct {
 	Kind        string                    `yaml:"kind,omitempty" json:"kind,omitempty"`               // Resource kind: instance, profile, network, etc.
@@ -33,7 +35,7 @@ type Resource struct {
 // InstanceFields captures the fields specific to Incus instances.
 type InstanceFields struct {
 	Image     string   `yaml:"image,omitempty" json:"image,omitempty"`
-	VM        bool     `yaml:"vm,omitempty" json:"vm,omitempty"`
+	VM        BoolVal  `yaml:"vm,omitempty" json:"vm,omitempty"`
 	Empty     bool     `yaml:"empty,omitempty" json:"empty,omitempty"`
 	Ephemeral bool     `yaml:"ephemeral,omitempty" json:"ephemeral,omitempty"`
 	Profiles  []string `yaml:"profiles,omitempty" json:"profiles,omitempty"`
@@ -165,6 +167,12 @@ func (r Resource) Validate() error {
 	if r.Type == "storage-bucket-key" && r.Bucket == "" {
 		return &ValidationError{Field: "bucket", Message: "bucket is required"}
 	}
+	if r.Type == "instance" {
+		if err := r.VM.Validate(); err != nil {
+			return &ValidationError{Field: "vm", Message: fmt.Sprintf("invalid value: %v", err)}
+		}
+	}
+
 	return nil
 }
 
