@@ -66,6 +66,18 @@ func (a *defaultExecutor) loadAndValidate() ([]*config.Resource, error) {
 	return resources, nil
 }
 
+// resolveDiskSources resolves relative disk device sources for all resources.
+// Must be called after applyRemoteOverride so that res.Remote reflects the
+// effective target server.
+func resolveDiskSources(resources []*config.Resource) error {
+	for _, res := range resources {
+		if err := resolveRelativeDiskSources(res); err != nil {
+			return fmt.Errorf("resolving relative disk sources for %s %q in %s: %w", res.Type, res.Name, res.SourceFile, err)
+		}
+	}
+	return nil
+}
+
 // Upsert creates or updates resources based on config.
 func (a *defaultExecutor) Upsert() error {
 	resources, err := a.loadAndValidate()
@@ -74,6 +86,9 @@ func (a *defaultExecutor) Upsert() error {
 	}
 	if resources == nil {
 		return nil
+	}
+	if err := resolveDiskSources(resources); err != nil {
+		return err
 	}
 	if a.opts.Select {
 		resources, err = a.doMultiSelect(resources)
@@ -190,6 +205,9 @@ func (a *defaultExecutor) Reset() error {
 	}
 	if resources == nil {
 		return nil
+	}
+	if err := resolveDiskSources(resources); err != nil {
+		return err
 	}
 	if a.opts.Select {
 		resources, err = a.doMultiSelect(resources)
