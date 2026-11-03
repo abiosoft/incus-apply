@@ -12,6 +12,27 @@ This page contains the field reference for `incus-apply` resource documents.
 | `devices` | map | Device configurations. |
 | `description` | string | Resource description. |
 
+### Devices
+
+Devices follow the Incus device schema (`type: disk`, `type: nic`, etc.).
+
+For `disk` devices without a `pool` key, a `source` path containing a path separator (e.g. `./volumes/volume1`) is resolved against the directory of the config file. Plain names such as `vol1` or `agent:config` reference a storage volume or a special Incus value and are left untouched. Use a `pool` key to reference a storage volume instead.
+
+When the resource targets a remote server, a relative `source` cannot be resolved against the local config file and is rejected with an error; use an absolute path valid on the target server.
+
+```yaml
+kind: instance
+name: test3
+image: images:fedora/44
+profiles:
+  - default
+devices:
+  volume1:
+    type: disk
+    source: ./volumes/volume1
+    path: /mnt/volume1
+```
+
 ## Remotes
 
 Incus supports named remote servers. By default, `incus-apply` targets whichever remote is configured as the default in the `incus` CLI.

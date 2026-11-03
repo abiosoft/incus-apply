@@ -3,6 +3,7 @@ package apply
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/abiosoft/incus-apply/internal/config"
@@ -218,4 +219,59 @@ func setPreviewRedaction(res *config.Resource) {
 		return
 	}
 	res.PreviewRedactPrefixes = nil
+}
+
+// sourceFileDir returns the absolute directory of the config file a resource
+// came from. Sources without a resolvable filesystem location (stdin, URLs)
+// return an error since relative paths cannot be resolved against them.
+func sourceFileDir(sourceFile string) (string, error) {
+	switch {
+	case sourceFile == "" || sourceFile == "stdin":
+		return "", fmt.Errorf("cannot resolve relative disk source: configuration comes from stdin")
+	case isURL(sourceFile):
+		return "", fmt.Errorf("cannot resolve relative disk source: configuration comes from URL %s", sourceFile)
+	default:
+		abs, err := filepath.Abs(sourceFile)
+		if err != nil {
+			return "", err
+		}
+		return filepath.Dir(abs), nil
+	}
+}
+
+// resolveRelativeDiskSources rewrites relative `source` paths of disk devices
+// to absolute paths relative to the directory of the config file. Only sources
+// containing a path separator (e.g. `./volumes/volume1`) are resolved; plain
+// names (`vol1`, `agent:config`) and devices with a `pool` key reference
+// storage volumes or special Incus values and are left untouched.
+//
+// When the resource targets a remote server (res.Remote != ""), a relative
+// source is rejected with an error since the path would be interpreted by the
+// target server rather than the local config file location.
+func resolveRelativeDiskSources(res *config.Resource) error {
+	baseDir := ""
+	for _, device := range res.Devices {
+		if deviceType, _ := device["type"].(string); deviceType != "disk" {
+			continue
+		}
+		if _, hasPool := device["pool"]; hasPool {
+			continue
+		}
+		source, ok := device["source"].(string)
+		if !ok || source == "" || filepath.IsAbs(source) || !strings.Contains(source, "/") {
+			continue
+		}
+		if res.Remote != "" {
+			return fmt.Errorf("relative disk source %q is not supported with remote %q; use an absolute path valid on the target server", source, res.Remote)
+		}
+		if baseDir == "" {
+			dir, err := sourceFileDir(res.SourceFile)
+			if err != nil {
+				return err
+			}
+			baseDir = dir
+		}
+		device["source"] = filepath.Join(baseDir, source)
+	}
+	return nil
 }
