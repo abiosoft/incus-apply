@@ -12,7 +12,7 @@ First, fork the [repository](https://github.com/abiosoft/incus-apply) on GitHub.
 
 ```sh
 git clone https://github.com/<your-username>/incus-apply.git
-cd colima
+cd incus-apply
 ```
 
 ### 2. Create a New Branch
