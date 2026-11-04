@@ -14,6 +14,7 @@ func TestCloneResource_PreservesYAMLDashFields(t *testing.T) {
 			Type:       "instance",
 			Name:       "myinstance",
 			Remote:     "server-a",
+			Project:    "prod",
 			SourceFile: "/some/path.yaml",
 		},
 		InstanceFields: config.InstanceFields{Image: "images:debian/13"},
@@ -26,6 +27,9 @@ func TestCloneResource_PreservesYAMLDashFields(t *testing.T) {
 	}
 	if clone.Remote != "server-a" {
 		t.Errorf("Remote = %q, want %q", clone.Remote, "server-a")
+	}
+	if clone.Project != "prod" {
+		t.Errorf("Project = %q, want %q", clone.Project, "prod")
 	}
 	if clone.Type != "instance" {
 		t.Errorf("Type = %q, want %q", clone.Type, "instance")
