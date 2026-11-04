@@ -214,6 +214,7 @@ func cloneResource(res *config.Resource) (*config.Resource, error) {
 	clone.SourceFile = res.SourceFile
 	clone.Type = res.Type
 	clone.Remote = res.Remote
+	clone.Project = res.Project
 	clone.PreviewRedactPrefixes = res.PreviewRedactPrefixes
 	return &clone, nil
 }

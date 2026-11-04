@@ -92,6 +92,46 @@ func TestWaitForAgentProgressLabel(t *testing.T) {
 	}
 }
 
+func TestCreatePreservesProject(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell script based test is not supported on Windows")
+	}
+	dir := t.TempDir()
+	// Validate every invocation, including the show/edit calls made after
+	// creating a network forward or storage bucket.
+	script := `#!/bin/sh
+found_project=false
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "--project" ] && [ "$2" = "prod" ]; then
+    found_project=true
+  fi
+  shift
+done
+if [ "$found_project" != true ]; then
+  echo 'missing --project prod' >&2
+  exit 1
+fi
+cat >/dev/null
+printf 'config: {}\n'
+`
+	if err := os.WriteFile(filepath.Join(dir, "incus"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	for _, kind := range []string{"instance", "profile", "network", "network-acl", "network-zone", "network-forward", "storage-volume", "storage-bucket", "storage-bucket-key"} {
+		t.Run(kind, func(t *testing.T) {
+			res := &config.Resource{Base: config.Base{Type: kind, Name: "example", Project: "prod"}}
+			res.Pool = "pool"
+			res.Bucket = "bucket"
+			res.Network = "network"
+			res.ListenAddress = "192.0.2.1"
+			if result := (client{}).Create(res); result.Error != nil {
+				t.Fatalf("Create() error = %v", result.Error)
+			}
+		})
+	}
+}
+
 func TestWaitInstanceAgentUsesTimeoutAndProject(t *testing.T) {
 	dir := t.TempDir()
 	scriptPath := filepath.Join(dir, "incus")
