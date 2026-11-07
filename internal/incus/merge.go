@@ -73,6 +73,11 @@ func legacyMergeConfigs(currentYAML string, desired *config.Resource) ([]byte, e
 		merged["ports"] = desired.Ports
 	}
 
+	// Network zone record entries are replaced as a whole when provided.
+	if resource.Type(desired.Type) == resource.TypeNetworkZoneRecord && desired.Entries != nil {
+		merged["entries"] = desired.Entries
+	}
+
 	cleanMap(merged)
 	return yaml.Marshal(merged)
 }

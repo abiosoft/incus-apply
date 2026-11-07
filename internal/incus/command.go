@@ -34,6 +34,12 @@ func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *con
 		args = append(args, res.QualifiedNetwork())
 	}
 
+	// Zone-scoped resources (e.g. network-zone-record) use the zone name as the
+	// primary scope locator. The remote (if any) travels on the zone name.
+	if meta.PrependZone && res.Zone != "" {
+		args = append(args, res.QualifiedZone())
+	}
+
 	// Storage resources require pool name before the resource name
 	if meta.PrependPool && res.Pool != "" {
 		// For pool-scoped resources (storage volumes / buckets) the remote
@@ -70,6 +76,12 @@ func (c client) buildCommand(meta resource.TypeMeta, cmdParts []string, res *con
 func (c client) buildCreateCommand(meta resource.TypeMeta, res *config.Resource) ([]string, []byte) {
 	args := make([]string, len(meta.Create))
 	copy(args, meta.Create)
+
+	// Zone-scoped resources (network zone records) take the zone name before the
+	// record name: incus network zone record create <zone> <name>
+	if meta.PrependZone && res.Zone != "" {
+		args = append(args, res.QualifiedZone())
+	}
 
 	switch resource.Type(res.Type) {
 	case resource.TypeInstance:
@@ -193,6 +205,10 @@ func resourceIdentifier(res *config.Resource) string {
 		// Pool-scoped resources are identified by bare name.
 		// The remote is carried on the preceding pool name argument, not here.
 		return res.Name
+	case resource.TypeNetworkZoneRecord:
+		// Zone-scoped resources are identified by bare name.
+		// The remote is carried on the preceding zone name argument, not here.
+		return res.Name
 	default:
 		// For all other resource types the remote prefix travels on the resource
 		// name itself: incus accepts "[remote:]name" throughout its CLI.
@@ -240,6 +256,8 @@ func (c client) buildStdinConfig(meta resource.TypeMeta, res *config.Resource) [
 			stdin.Egress = res.Egress
 		case "ports":
 			stdin.Ports = res.Ports
+		case "entries":
+			stdin.Entries = res.Entries
 		}
 	}
 

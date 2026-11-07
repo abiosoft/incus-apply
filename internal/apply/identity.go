@@ -14,6 +14,9 @@ func formatResourceID(res *config.Resource) string {
 	if usesNetworkScope(resource.Type(res.Type)) && res.Network != "" {
 		resourcePath += "/" + res.Network
 	}
+	if usesZoneScope(resource.Type(res.Type)) && res.Zone != "" {
+		resourcePath += "/" + res.Zone
+	}
 	if usesPoolScope(resource.Type(res.Type)) && res.Pool != "" {
 		resourcePath += "/" + res.Pool
 	}
@@ -55,6 +58,10 @@ func usesNetworkScope(resourceType resource.Type) bool {
 	default:
 		return false
 	}
+}
+
+func usesZoneScope(resourceType resource.Type) bool {
+	return resourceType == resource.TypeNetworkZoneRecord
 }
 
 func validateUniqueResources(resources []*config.Resource) error {

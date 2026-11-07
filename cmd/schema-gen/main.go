@@ -108,6 +108,7 @@ func collectResourceTypes() []string {
 		resource.TypeNetworkForward,
 		resource.TypeNetworkACL,
 		resource.TypeNetworkZone,
+		resource.TypeNetworkZoneRecord,
 		resource.TypeStoragePool,
 		resource.TypeStorageVolume,
 		resource.TypeStorageBucket,
@@ -139,6 +140,8 @@ func generateResourceSchema(resourceTypes []string) Schema {
 			required = []string{"kind", "listen_address", "network"}
 		} else if resourceType == string(resource.TypeStorageBucketKey) {
 			required = []string{"kind", "name", "bucket"}
+		} else if resourceType == string(resource.TypeNetworkZoneRecord) {
+			required = []string{"kind", "name", "zone"}
 		}
 
 		variantProperties := cloneProperties(properties)

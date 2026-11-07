@@ -36,6 +36,7 @@ Supported resource kinds include:
 - `network-forward`
 - `network-acl`
 - `network-zone`
+- `network-zone-record`
 - `storage-pool`
 - `storage-volume`
 - `storage-bucket`

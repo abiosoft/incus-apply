@@ -10,18 +10,19 @@ type Type string
 
 // Built-in resource types supported by Incus.
 const (
-	TypeInstance         Type = "instance"
-	TypeProfile          Type = "profile"
-	TypeNetwork          Type = "network"
-	TypeNetworkACL       Type = "network-acl"
-	TypeNetworkForward   Type = "network-forward"
-	TypeNetworkZone      Type = "network-zone"
-	TypeStoragePool      Type = "storage-pool"
-	TypeStorageVolume    Type = "storage-volume"
-	TypeStorageBucket    Type = "storage-bucket"
-	TypeStorageBucketKey Type = "storage-bucket-key"
-	TypeProject          Type = "project"
-	TypeClusterGroup     Type = "cluster-group"
+	TypeInstance          Type = "instance"
+	TypeProfile           Type = "profile"
+	TypeNetwork           Type = "network"
+	TypeNetworkACL        Type = "network-acl"
+	TypeNetworkForward    Type = "network-forward"
+	TypeNetworkZone       Type = "network-zone"
+	TypeNetworkZoneRecord Type = "network-zone-record"
+	TypeStoragePool       Type = "storage-pool"
+	TypeStorageVolume     Type = "storage-volume"
+	TypeStorageBucket     Type = "storage-bucket"
+	TypeStorageBucketKey  Type = "storage-bucket-key"
+	TypeProject           Type = "project"
+	TypeClusterGroup      Type = "cluster-group"
 
 	// CLI command constants to avoid repetition and typos.
 	cmdProject = "project"
@@ -38,6 +39,7 @@ const (
 	cmdACL     = "acl"
 	cmdForward = "forward"
 	cmdZone    = "zone"
+	cmdRecord  = "record"
 	cmdVolume  = "volume"
 	cmdBucket  = "bucket"
 	cmdKey     = "key"
@@ -66,9 +68,13 @@ type TypeMeta struct {
 	// resource name in show/edit/delete commands (network forwards).
 	PrependNetwork bool
 
+	// PrependZone indicates that network zone name should be prepended before the
+	// resource name in show/edit/delete commands (network zone records).
+	PrependZone bool
+
 	// StdinFields declares which extra fields (beyond config/devices/description)
 	// should be included in the stdin YAML for create/edit commands.
-	// Supported values: "profiles", "ingress", "egress".
+	// Supported values: "profiles", "ingress", "egress", "ports", "entries".
 	StdinFields []string
 }
 
@@ -134,9 +140,19 @@ var builtinTypes = map[Type]TypeMeta{
 		Edit:     []string{cmdNetwork, cmdZone, cmdEdit},
 		Delete:   []string{cmdNetwork, cmdZone, cmdDelete},
 	},
+	TypeNetworkZoneRecord: {
+		Type:        TypeNetworkZoneRecord,
+		Priority:    7,
+		Create:      []string{cmdNetwork, cmdZone, cmdRecord, cmdCreate},
+		Show:        []string{cmdNetwork, cmdZone, cmdRecord, cmdShow},
+		Edit:        []string{cmdNetwork, cmdZone, cmdRecord, cmdEdit},
+		Delete:      []string{cmdNetwork, cmdZone, cmdRecord, cmdDelete},
+		PrependZone: true,
+		StdinFields: []string{"entries"},
+	},
 	TypeStorageVolume: {
 		Type:        TypeStorageVolume,
-		Priority:    7,
+		Priority:    8,
 		Create:      []string{cmdStorage, cmdVolume, cmdCreate},
 		Show:        []string{cmdStorage, cmdVolume, cmdShow},
 		Edit:        []string{cmdStorage, cmdVolume, cmdEdit},
@@ -145,7 +161,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeStorageBucket: {
 		Type:        TypeStorageBucket,
-		Priority:    8,
+		Priority:    9,
 		Create:      []string{cmdStorage, cmdBucket, cmdCreate},
 		Show:        []string{cmdStorage, cmdBucket, cmdShow},
 		Edit:        []string{cmdStorage, cmdBucket, cmdEdit},
@@ -154,7 +170,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeStorageBucketKey: {
 		Type:                 TypeStorageBucketKey,
-		Priority:             9,
+		Priority:             10,
 		Create:               []string{cmdStorage, cmdBucket, cmdKey, cmdCreate},
 		Show:                 []string{cmdStorage, cmdBucket, cmdKey, cmdShow},
 		Edit:                 []string{cmdStorage, cmdBucket, cmdKey, cmdEdit},
@@ -163,7 +179,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeClusterGroup: {
 		Type:     TypeClusterGroup,
-		Priority: 10,
+		Priority: 11,
 		Create:   []string{cmdCluster, cmdGroup, cmdCreate},
 		Show:     []string{cmdCluster, cmdGroup, cmdShow},
 		Edit:     []string{cmdCluster, cmdGroup, cmdEdit},
@@ -171,7 +187,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeProfile: {
 		Type:     TypeProfile,
-		Priority: 11,
+		Priority: 12,
 		Create:   []string{cmdProfile, cmdCreate},
 		Show:     []string{cmdProfile, cmdShow},
 		Edit:     []string{cmdProfile, cmdEdit},
@@ -179,7 +195,7 @@ var builtinTypes = map[Type]TypeMeta{
 	},
 	TypeInstance: {
 		Type:        TypeInstance,
-		Priority:    12,
+		Priority:    13,
 		Create:      []string{cmdInit}, // Special: uses "init" not "instance create"
 		Show:        []string{cmdConfig, cmdShow},
 		Edit:        []string{cmdConfig, cmdEdit},

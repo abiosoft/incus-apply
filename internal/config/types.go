@@ -20,14 +20,15 @@ type Base struct {
 // It embeds common fields plus the resource-specific field groups used
 // based on the resource Type.
 type Resource struct {
-	Base                   `yaml:",inline"`
-	InstanceFields         `yaml:",inline"`
-	StoragePoolFields      `yaml:",inline"`
-	StorageResourceFields  `yaml:",inline"`
-	StorageBucketKeyFields `yaml:",inline"`
-	NetworkFields          `yaml:",inline"`
-	NetworkACLFields       `yaml:",inline"`
-	NetworkForwardFields   `yaml:",inline"`
+	Base                    `yaml:",inline"`
+	InstanceFields          `yaml:",inline"`
+	StoragePoolFields       `yaml:",inline"`
+	StorageResourceFields   `yaml:",inline"`
+	StorageBucketKeyFields  `yaml:",inline"`
+	NetworkFields           `yaml:",inline"`
+	NetworkACLFields        `yaml:",inline"`
+	NetworkForwardFields    `yaml:",inline"`
+	NetworkZoneRecordFields `yaml:",inline"`
 
 	PreviewRedactPrefixes []string `yaml:"-" json:"-"`
 }
@@ -80,6 +81,12 @@ type NetworkForwardFields struct {
 	Ports         []map[string]any `yaml:"ports,omitempty" json:"ports,omitempty"`
 }
 
+// NetworkZoneRecordFields captures the fields specific to network zone records.
+type NetworkZoneRecordFields struct {
+	Zone    string           `yaml:"zone,omitempty" json:"zone,omitempty"`       // Parent zone name
+	Entries []map[string]any `yaml:"entries,omitempty" json:"entries,omitempty"` // Record entries (type, value, optional ttl)
+}
+
 // qualifyWithRemote prepends "remote:" to s when remote is non-empty.
 // If either argument is empty the original s is returned unchanged.
 func qualifyWithRemote(remote, s string) string {
@@ -110,6 +117,13 @@ func (r *Resource) QualifiedNetwork() string {
 	return qualifyWithRemote(r.Remote, r.Network)
 }
 
+// QualifiedZone returns the remote-qualified network zone name ("remote:zone"
+// or just "zone"). Use this for network zone record commands where the remote
+// travels on the zone argument rather than the record name.
+func (r *Resource) QualifiedZone() string {
+	return qualifyWithRemote(r.Remote, r.Zone)
+}
+
 // Stdin represents configuration data passed to incus commands via stdin.
 // Incus edit commands accept YAML on stdin to modify resource configuration.
 type Stdin struct {
@@ -120,23 +134,25 @@ type Stdin struct {
 	Ingress     []map[string]any          `yaml:"ingress,omitempty"` // Network ACL ingress rules
 	Egress      []map[string]any          `yaml:"egress,omitempty"`  // Network ACL egress rules
 	Ports       []map[string]any          `yaml:"ports,omitempty"`   // Network forward port rules
+	Entries     []map[string]any          `yaml:"entries,omitempty"` // Network zone record entries
 }
 
 // knownResourceTypes is the set of valid incus resource type strings.
 // "vars" is intentionally excluded — it is handled separately by the parser.
 var knownResourceTypes = map[string]struct{}{
-	"instance":           {},
-	"profile":            {},
-	"network":            {},
-	"network-forward":    {},
-	"network-acl":        {},
-	"network-zone":       {},
-	"storage-pool":       {},
-	"storage-volume":     {},
-	"storage-bucket":     {},
-	"storage-bucket-key": {},
-	"project":            {},
-	"cluster-group":      {},
+	"instance":            {},
+	"profile":             {},
+	"network":             {},
+	"network-forward":     {},
+	"network-acl":         {},
+	"network-zone":        {},
+	"network-zone-record": {},
+	"storage-pool":        {},
+	"storage-volume":      {},
+	"storage-bucket":      {},
+	"storage-bucket-key":  {},
+	"project":             {},
+	"cluster-group":       {},
 }
 
 // isKnownResourceType reports whether s is a supported incus resource type.
@@ -166,6 +182,9 @@ func (r Resource) Validate() error {
 	}
 	if r.Type == "storage-bucket-key" && r.Bucket == "" {
 		return &ValidationError{Field: "bucket", Message: "bucket is required"}
+	}
+	if r.Type == "network-zone-record" && r.Zone == "" {
+		return &ValidationError{Field: "zone", Message: "zone is required"}
 	}
 	if r.Type == "instance" {
 		if err := r.VM.Validate(); err != nil {

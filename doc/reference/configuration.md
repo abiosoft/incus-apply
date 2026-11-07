@@ -217,6 +217,37 @@ ports:
 | `ingress` | list | Ingress firewall rules. |
 | `egress` | list | Egress firewall rules. |
 
+## Network zone record fields
+
+For `kind: network-zone-record`, `zone` selects the parent network zone and `name` is the record
+name **relative to the zone** — `ns` becomes `ns.example.net`, exactly as the Incus API expects.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `zone` | string | Required parent network zone name. |
+| `name` | string | Required record name, relative to the zone. |
+| `entries` | list | Record entries in the same shape as `incus network zone record edit` (`type`, `value`, optional `ttl`). |
+
+A single file can declare as many records as you like by separating them with `---`:
+
+```yaml
+kind: network-zone-record
+zone: example.net
+name: ns
+entries:
+  - type: A
+    value: 192.0.2.53
+  - type: AAAA
+    value: 2001:db8::53
+---
+kind: network-zone-record
+zone: example.net
+name: www
+entries:
+  - type: A
+    value: 192.0.2.10
+```
+
 ## Variables
 
 Variables are declared with a `kind: vars` document and referenced from resource documents with `$VAR` or `${VAR}`.
